@@ -1,0 +1,38 @@
+<div class="form-group mb-3">
+  @if (label) {
+    <label [for]="name" class="form-label">
+      {{ label }}
+      @if (required) {
+        <span class="text-danger">*</span>
+      }
+    </label>
+  }
+
+  <input
+    [id]="name"
+    [name]="name"
+    [type]="type"
+    [class]="inputClasses"
+    [value]="value"
+    [placeholder]="placeholder"
+    [disabled]="disabled"
+    [attr.aria-label]="label || placeholder"
+    [attr.aria-invalid]="hasError"
+    [attr.aria-describedby]="hasError ? name + '-error' : hint ? name + '-hint' : null"
+    (input)="onInput($event)"
+    (focus)="onFocus()"
+    (blur)="onBlur()"
+  />
+
+  @if (hasError) {
+    <div [id]="name + '-error'" class="invalid-feedback d-block">
+      {{ error }}
+    </div>
+  }
+
+  @if (hint && !hasError) {
+    <small [id]="name + '-hint'" class="form-text text-muted d-block mt-1">
+      {{ hint }}
+    </small>
+  }
+</div>
