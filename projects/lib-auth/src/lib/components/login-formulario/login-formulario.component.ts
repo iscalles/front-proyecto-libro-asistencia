@@ -119,7 +119,9 @@ export class ComponenteFormularioAcceso implements OnInit {
 
     this.isLoading = true;
     const credenciales = {
-      rutUsuario: this.loginForm.get('rutUsuario')?.value,  // ← CAMBIO
+      // formatRut normaliza a xx.xxx.xxx-x antes de enviar al backend,
+      // independiente de si el usuario escribió con o sin puntos
+      rutUsuario: this.validadorRut.formatRut(this.loginForm.get('rutUsuario')?.value),
       password: this.loginForm.get('password')?.value
     };
 

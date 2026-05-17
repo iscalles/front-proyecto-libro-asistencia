@@ -1,0 +1,215 @@
+<!-- NAVBAR -->
+<nav class="navbar navbar-dark navbar-colegio shadow-sm">
+  <div class="container-fluid px-4">
+
+    <!-- Nombre del colegio -->
+    <span class="navbar-brand fw-bold mb-0">
+      Colegio Bernardo O'Higgins
+    </span>
+
+    <!-- Zona derecha: avatar + selector de rol + logout -->
+    <div class="d-flex align-items-center gap-3">
+
+      @if (usuario(); as u) {
+        <!-- Avatar e info -->
+        <div class="d-flex align-items-center gap-2">
+          <div class="avatar-circulo">
+            {{ u.nombre.charAt(0).toUpperCase() }}
+          </div>
+          <span class="texto-usuario d-none d-sm-inline">{{ u.nombre }}</span>
+        </div>
+
+        <!-- Dropdown selector de rol (solo visible si tiene más de un rol) -->
+        @if (rolesFormateados().length > 1) {
+          <div class="dropdown">
+            <button
+              class="btn btn-outline-light btn-sm dropdown-toggle-custom d-flex align-items-center gap-2"
+              (click)="toggleDropdown($event)"
+              type="button"
+            >
+              <span class="badge {{ rolActivo().clase }}">{{ rolActivo().etiqueta }}</span>
+              <svg class="icono-chevron" [class.rotado]="estaAbiertoDropdown()"
+                   xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z"/>
+              </svg>
+            </button>
+
+            <ul class="dropdown-menu dropdown-menu-end" [class.show]="estaAbiertoDropdown()">
+              <li class="dropdown-header text-muted small px-3 py-1">Cambiar vista</li>
+              @for (rol of rolesFormateados(); track rol.etiqueta) {
+                <li>
+                  <button
+                    class="dropdown-item d-flex align-items-center gap-2"
+                    [class.activo]="rol.etiqueta === rolActivo().etiqueta"
+                    (click)="cambiarRol(rol, $event)"
+                    type="button"
+                  >
+                    <span class="badge {{ rol.clase }}">{{ rol.etiqueta }}</span>
+                    {{ rol.etiqueta }}
+                  </button>
+                </li>
+              }
+            </ul>
+          </div>
+        } @else {
+          <!-- Si solo tiene un rol, lo muestra como badge estático -->
+          <span class="badge {{ rolActivo().clase }}">{{ rolActivo().etiqueta }}</span>
+        }
+      }
+
+      <!-- Botón cerrar sesión -->
+      <button class="btn btn-outline-light btn-sm" (click)="cerrarSesion()" type="button">
+        Cerrar sesión
+      </button>
+    </div>
+
+  </div>
+</nav>
+
+<!-- CONTENIDO PRINCIPAL -->
+<main class="container py-5">
+
+  @if (usuario(); as u) {
+
+    <!-- Tarjeta de bienvenida -->
+    <div class="card tarjeta-bienvenida mb-4">
+      <div class="card-body p-4">
+        <h2 class="card-title fw-bold mb-1">
+          {{ saludo() }}, {{ u.nombre.split(' ')[0] }}
+        </h2>
+        <p class="card-text text-muted mb-0">
+          Estás viendo el panel de <strong>{{ rolActivo().etiqueta }}</strong>.
+          @if (rolesFormateados().length > 1) {
+            Puedes cambiar de rol desde el menú de la barra superior.
+          }
+        </p>
+      </div>
+    </div>
+
+    <!-- Módulos según rol activo -->
+    <div class="row g-3">
+
+      @if (rolActivo().etiqueta === 'Docente') {
+        <div class="col-12 col-md-4">
+          <div class="card tarjeta-modulo h-100">
+            <div class="card-body">
+              <div class="icono-modulo bg-success-subtle text-success mb-3">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
+                  <path d="M1 2.5A1.5 1.5 0 0 1 2.5 1h11A1.5 1.5 0 0 1 15 2.5v11a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 1 13.5v-11zm13 0a.5.5 0 0 0-.5-.5h-11a.5.5 0 0 0-.5.5v6h12v-6zm-12 7v3.5a.5.5 0 0 0 .5.5h11a.5.5 0 0 0 .5-.5V9.5h-12z"/>
+                </svg>
+              </div>
+              <h5 class="card-title">Libro de Clases</h5>
+              <p class="card-text text-muted small">Registra asistencia y calificaciones de tus cursos.</p>
+              <button class="btn btn-success btn-sm" disabled>Próximamente</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-12 col-md-4">
+          <div class="card tarjeta-modulo h-100">
+            <div class="card-body">
+              <div class="icono-modulo bg-success-subtle text-success mb-3">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
+                  <path d="M0 0h1v15h15v1H0V0zm14.817 3.113a.5.5 0 0 1 .07.704l-4.5 5.5a.5.5 0 0 1-.74.037L7.06 6.767l-3.656 5.027a.5.5 0 0 1-.808-.588l4-5.5a.5.5 0 0 1 .758-.06l2.609 2.61 4.15-5.073a.5.5 0 0 1 .704-.07z"/>
+                </svg>
+              </div>
+              <h5 class="card-title">Calificaciones</h5>
+              <p class="card-text text-muted small">Ingresa y gestiona las notas de tus alumnos.</p>
+              <button class="btn btn-success btn-sm" disabled>Próximamente</button>
+            </div>
+          </div>
+        </div>
+      }
+
+      @if (rolActivo().etiqueta === 'Apoderado') {
+        <div class="col-12 col-md-4">
+          <div class="card tarjeta-modulo h-100">
+            <div class="card-body">
+              <div class="icono-modulo bg-primary-subtle text-primary mb-3">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
+                  <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4zm-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.029 10 8 10c-2.029 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10z"/>
+                </svg>
+              </div>
+              <h5 class="card-title">Seguimiento del Alumno</h5>
+              <p class="card-text text-muted small">Consulta la asistencia y notas de tu pupilo.</p>
+              <button class="btn btn-primary btn-sm" disabled>Próximamente</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-12 col-md-4">
+          <div class="card tarjeta-modulo h-100">
+            <div class="card-body">
+              <div class="icono-modulo bg-primary-subtle text-primary mb-3">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
+                  <path d="M1.5 1a.5.5 0 0 0-.5.5v3a.5.5 0 0 1-1 0v-3A1.5 1.5 0 0 1 1.5 0h3a.5.5 0 0 1 0 1h-3zM11 .5a.5.5 0 0 1 .5-.5h3A1.5 1.5 0 0 1 16 1.5v3a.5.5 0 0 1-1 0v-3a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 1-.5-.5zM.5 11a.5.5 0 0 1 .5.5v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 1 0 1h-3A1.5 1.5 0 0 1 0 14.5v-3a.5.5 0 0 1 .5-.5zm15 0a.5.5 0 0 1 .5.5v3a1.5 1.5 0 0 1-1.5 1.5h-3a.5.5 0 0 1 0-1h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 1 .5-.5z"/>
+                </svg>
+              </div>
+              <h5 class="card-title">Comunicaciones</h5>
+              <p class="card-text text-muted small">Revisa circulares y comunicados del colegio.</p>
+              <button class="btn btn-primary btn-sm" disabled>Próximamente</button>
+            </div>
+          </div>
+        </div>
+      }
+
+      @if (rolActivo().etiqueta === 'Administrador') {
+        <div class="col-12 col-md-4">
+          <div class="card tarjeta-modulo h-100">
+            <div class="card-body">
+              <div class="icono-modulo bg-danger-subtle text-danger mb-3">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
+                  <path d="M9.405 1.05c-.413-1.4-2.397-1.4-2.81 0l-.1.34a1.464 1.464 0 0 1-2.105.872l-.31-.17c-1.283-.698-2.686.705-1.987 1.987l.169.311c.446.82.023 1.841-.872 2.105l-.34.1c-1.4.413-1.4 2.397 0 2.81l.34.1a1.464 1.464 0 0 1 .872 2.105l-.17.31c-.698 1.283.705 2.686 1.987 1.987l.311-.169a1.464 1.464 0 0 1 2.105.872l.1.34c.413 1.4 2.397 1.4 2.81 0l.1-.34a1.464 1.464 0 0 1 2.105-.872l.31.17c1.283.698 2.686-.705 1.987-1.987l-.169-.311a1.464 1.464 0 0 1 .872-2.105l.34-.1c1.4-.413 1.4-2.397 0-2.81l-.34-.1a1.464 1.464 0 0 1-.872-2.105l.17-.31c.698-1.283-.705-2.686-1.987-1.987l-.311.169a1.464 1.464 0 0 1-2.105-.872l-.1-.34zM8 10.93a2.929 2.929 0 1 1 0-5.86 2.929 2.929 0 0 1 0 5.858z"/>
+                </svg>
+              </div>
+              <h5 class="card-title">Gestión de Usuarios</h5>
+              <p class="card-text text-muted small">Administra docentes, apoderados y estudiantes.</p>
+              <button class="btn btn-danger btn-sm" disabled>Próximamente</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-12 col-md-4">
+          <div class="card tarjeta-modulo h-100">
+            <div class="card-body">
+              <div class="icono-modulo bg-danger-subtle text-danger mb-3">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
+                  <path d="M4 11H2v3h2v-3zm5-4H7v7h2V7zm5-5v12h-2V2h2zm-2-1a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1h-2zM6 7a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v7a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V7zm-5 4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1v-3z"/>
+                </svg>
+              </div>
+              <h5 class="card-title">Reportes</h5>
+              <p class="card-text text-muted small">Genera informes de asistencia y rendimiento.</p>
+              <button class="btn btn-danger btn-sm" disabled>Próximamente</button>
+            </div>
+          </div>
+        </div>
+      }
+
+    </div>
+
+    <!-- Info de cuenta -->
+    <div class="card mt-4">
+      <div class="card-body">
+        <h6 class="card-title text-muted fw-semibold mb-3">Información de cuenta</h6>
+        <dl class="row mb-0">
+          <dt class="col-sm-3 text-muted fw-normal">RUT</dt>
+          <dd class="col-sm-9">{{ u.rutUsuario }}</dd>
+
+          <dt class="col-sm-3 text-muted fw-normal">Correo</dt>
+          <dd class="col-sm-9">{{ u.correo }}</dd>
+
+          <dt class="col-sm-3 text-muted fw-normal mb-0">Perfiles</dt>
+          <dd class="col-sm-9 mb-0">
+            @for (rol of rolesFormateados(); track rol.etiqueta) {
+              <span class="badge {{ rol.clase }} me-1">{{ rol.etiqueta }}</span>
+            }
+          </dd>
+        </dl>
+      </div>
+    </div>
+
+  } @else {
+    <p class="text-muted">Cargando información del usuario...</p>
+  }
+
+</main>
