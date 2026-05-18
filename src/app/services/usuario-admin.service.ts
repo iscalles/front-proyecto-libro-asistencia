@@ -102,8 +102,8 @@ export class ServicioUsuarioAdmin {
       case 'APODERADO':
         return this.http.post(`${this.api}/apoderado`, {
           idUsuario,
-          direccionApoderado: '',
-          telefonoApoderado: '',
+          direccionApoderado: 'Por definir',
+          telefonoApoderado: 'Por definir',
         });
       case 'ADMINISTRATIVO':
         return this.http.post(`${this.api}/administrativo`, {

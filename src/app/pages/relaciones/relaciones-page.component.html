@@ -118,7 +118,7 @@
 
               <button class="btn btn-sm btn-asignar"
                       (click)="abrirAsignar(apo)"
-                      [disabled]="estudiantesDisponibles().length === 0 && apoderadoModal()?.idApoderado !== apo.idApoderado"
+                      [disabled]="!hayEstudiantesDisponibles(apo)"
                       type="button">
                 + Asignar estudiante
               </button>
