@@ -1,0 +1,67 @@
+// ── Header ────────────────────────────────────────────────────────────────────
+.admin-header {
+  background-color: #1a3a5c;
+  min-height: 56px;
+  display: flex;
+  align-items: center;
+}
+
+.btn-volver {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.875rem;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  text-decoration: none;
+
+  &:hover { color: #fff; }
+}
+
+.separador-vertical {
+  width: 1px;
+  height: 20px;
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.admin-titulo {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #fff;
+}
+
+.texto-sesion {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.875rem;
+}
+
+// ── Barra de pestañas ─────────────────────────────────────────────────────────
+.tab-bar {
+  background: #fff;
+  border-bottom: 1px solid #dee2e6;
+
+  .container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+}
+
+.tab-boton {
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  padding: 12px 18px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #6c757d;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+
+  &:hover { color: #1a3a5c; }
+
+  &.activo {
+    color: #1a3a5c;
+    border-bottom-color: #1a3a5c;
+    font-weight: 600;
+  }
+}

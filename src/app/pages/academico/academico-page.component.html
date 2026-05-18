@@ -1,0 +1,48 @@
+<!-- ═══ HEADER ══════════════════════════════════════════════════════════════ -->
+<header class="admin-header shadow-sm">
+  <div class="container-fluid px-4 d-flex align-items-center gap-3">
+    <button class="btn btn-link btn-volver p-0" (click)="irAlDashboard()" type="button">
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16">
+        <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8z"/>
+      </svg>
+      Dashboard
+    </button>
+    <div class="separador-vertical"></div>
+    <h1 class="admin-titulo mb-0">Mantenedor Académico</h1>
+
+    <div class="ms-auto d-flex align-items-center gap-2">
+      @if (usuarioSesion(); as u) {
+        <span class="texto-sesion d-none d-sm-inline">{{ u.nombre }}</span>
+      }
+      <span class="badge bg-danger">Administrativo</span>
+    </div>
+  </div>
+</header>
+
+<!-- ═══ BARRA DE PESTAÑAS ════════════════════════════════════════════════════ -->
+<nav class="tab-bar">
+  <div class="container">
+    @for (tab of tabs; track tab.id) {
+      <button class="tab-boton"
+              [class.activo]="tabActiva() === tab.id"
+              (click)="tabActiva.set(tab.id)"
+              type="button">
+        {{ tab.etiqueta }}
+      </button>
+    }
+  </div>
+</nav>
+
+<!-- ═══ CONTENIDO DE LA PESTAÑA ══════════════════════════════════════════════ -->
+<main class="container py-4">
+  @switch (tabActiva()) {
+    @case ('cursos') {
+      <app-cursos-tab />
+    }
+    @default {
+      <div class="text-center text-muted py-5">
+        <p class="mb-0">Esta sección estará disponible próximamente.</p>
+      </div>
+    }
+  }
+</main>
