@@ -21,6 +21,11 @@ export class ServicioUsuarioAdmin {
     return this.http.get<UsuarioDTOInternal[]>(`${this.api}/usuario/interno`);
   }
 
+  // Lista todos los usuarios (endpoint base, sin RUT)
+  listarUsuarios(): Observable<UsuarioDTOResponse[]> {
+    return this.http.get<UsuarioDTOResponse[]>(`${this.api}/usuario`);
+  }
+
   obtenerUsuarioInterno(id: number): Observable<UsuarioDTOInternal> {
     return this.http.get<UsuarioDTOInternal>(`${this.api}/usuario/interno/${id}`);
   }

@@ -1,0 +1,176 @@
+<!-- Barra de herramientas -->
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+  <div>
+    <h2 class="h5 fw-semibold mb-0">Listado de asignaturas</h2>
+    <p class="text-muted small mb-0">
+      {{ asignaturasFiltradas().length }} de {{ asignaturas().length }} asignatura(s)
+    </p>
+  </div>
+  <div class="d-flex gap-2 flex-wrap">
+    <div class="input-busqueda">
+      <svg class="icono-busqueda" xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
+        <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.099zm-5.242 1.656a5.5 5.5 0 1 1 0-11 5.5 5.5 0 0 1 0 11z"/>
+      </svg>
+      <input class="form-control form-control-sm input-busqueda__campo"
+             type="text"
+             placeholder="Buscar por nombre..."
+             [value]="busqueda()"
+             (input)="busqueda.set($any($event.target).value)">
+    </div>
+    <button class="btn btn-outline-secondary btn-sm" (click)="cargar()" type="button">
+      Actualizar
+    </button>
+    <button class="btn btn-primary btn-sm" (click)="abrirCrear()" type="button">
+      + Nueva asignatura
+    </button>
+  </div>
+</div>
+
+<!-- Error general -->
+@if (errorTabla()) {
+  <div class="alert alert-danger d-flex align-items-center gap-2 mb-4">
+    {{ errorTabla() }}
+  </div>
+}
+
+<!-- Tabla -->
+<div class="card">
+  <div class="card-body p-0">
+    @if (cargando()) {
+      <div class="text-center py-5 text-muted">
+        <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+        Cargando asignaturas...
+      </div>
+    } @else {
+      <div class="table-responsive">
+        <table class="table tabla-mantenedor mb-0">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Nombre</th>
+              <th class="text-end">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (a of asignaturasFiltradas(); track a.id_asignatura) {
+              <tr>
+                <td class="text-muted small">{{ a.id_asignatura }}</td>
+                <td class="fw-medium">{{ a.nombreAsignatura }}</td>
+                <td class="text-end">
+                  <div class="d-flex gap-1 justify-content-end">
+                    <button class="btn btn-outline-secondary btn-xs"
+                            (click)="abrirEditar(a)" type="button">Editar</button>
+                    <button class="btn btn-outline-danger btn-xs"
+                            (click)="abrirEliminar(a)" type="button">Eliminar</button>
+                  </div>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="3" class="text-center text-muted py-4">
+                  @if (busqueda()) {
+                    No se encontraron asignaturas para "<strong>{{ busqueda() }}</strong>".
+                  } @else {
+                    No hay asignaturas registradas.
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+</div>
+
+<!-- ═══ MODAL: CREAR ASIGNATURA ═══════════════════════════════════════════════ -->
+@if (modalCrear()) {
+  <div class="modal-overlay" (click)="cerrarCrear()">
+    <div class="modal-caja modal-caja--sm" (click)="$event.stopPropagation()">
+      <div class="modal-encabezado">
+        <h3 class="modal-titulo">Nueva asignatura</h3>
+        <button class="btn-cerrar" (click)="cerrarCrear()" type="button">✕</button>
+      </div>
+
+      <form [formGroup]="form" class="modal-cuerpo">
+        <div class="col-12">
+          <label class="form-label">Nombre <span class="text-danger">*</span></label>
+          <input class="form-control" [class.is-invalid]="error('nombreAsignatura','required')"
+                 formControlName="nombreAsignatura" placeholder="Matemáticas">
+          @if (error('nombreAsignatura','required')) { <div class="invalid-feedback">Campo obligatorio.</div> }
+        </div>
+      </form>
+
+      @if (errorModal()) {
+        <div class="alert alert-danger mx-4 mb-0 py-2 small">{{ errorModal() }}</div>
+      }
+
+      <div class="modal-pie">
+        <button class="btn btn-outline-secondary" (click)="cerrarCrear()" type="button">Cancelar</button>
+        <button class="btn btn-primary" (click)="guardarCrear()" [disabled]="guardando()" type="button">
+          @if (guardando()) { <span class="spinner-border spinner-border-sm me-1"></span> Creando... }
+          @else { Crear asignatura }
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- ═══ MODAL: EDITAR ASIGNATURA ══════════════════════════════════════════════ -->
+@if (asignaturaEditando(); as a) {
+  <div class="modal-overlay" (click)="cerrarEditar()">
+    <div class="modal-caja modal-caja--sm" (click)="$event.stopPropagation()">
+      <div class="modal-encabezado">
+        <h3 class="modal-titulo">Editar asignatura #{{ a.id_asignatura }}</h3>
+        <button class="btn-cerrar" (click)="cerrarEditar()" type="button">✕</button>
+      </div>
+
+      <form [formGroup]="form" class="modal-cuerpo">
+        <div class="col-12">
+          <label class="form-label">Nombre <span class="text-danger">*</span></label>
+          <input class="form-control" [class.is-invalid]="error('nombreAsignatura','required')"
+                 formControlName="nombreAsignatura">
+          @if (error('nombreAsignatura','required')) { <div class="invalid-feedback">Campo obligatorio.</div> }
+        </div>
+      </form>
+
+      @if (errorModal()) {
+        <div class="alert alert-danger mx-4 mb-0 py-2 small">{{ errorModal() }}</div>
+      }
+
+      <div class="modal-pie">
+        <button class="btn btn-outline-secondary" (click)="cerrarEditar()" type="button">Cancelar</button>
+        <button class="btn btn-primary" (click)="guardarEditar()" [disabled]="guardando()" type="button">
+          @if (guardando()) { <span class="spinner-border spinner-border-sm me-1"></span> Guardando... }
+          @else { Guardar cambios }
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- ═══ MODAL: CONFIRMAR ELIMINACIÓN ══════════════════════════════════════════ -->
+@if (asignaturaEliminar(); as a) {
+  <div class="modal-overlay" (click)="cerrarEliminar()">
+    <div class="modal-caja modal-caja--sm" (click)="$event.stopPropagation()">
+      <div class="modal-encabezado">
+        <h3 class="modal-titulo text-danger">Eliminar asignatura</h3>
+        <button class="btn-cerrar" (click)="cerrarEliminar()" type="button">✕</button>
+      </div>
+      <div class="modal-cuerpo">
+        <p>¿Deseas eliminar la asignatura <strong>{{ a.nombreAsignatura }}</strong>?</p>
+        <p class="text-muted small">Esta acción no se puede deshacer.</p>
+        @if (errorModal()) {
+          <div class="alert alert-danger py-2 small mb-0">{{ errorModal() }}</div>
+        }
+      </div>
+      <div class="modal-pie">
+        <button class="btn btn-outline-secondary" (click)="cerrarEliminar()" type="button">Cancelar</button>
+        <button class="btn btn-danger" (click)="confirmarEliminar()" [disabled]="guardando()" type="button">
+          @if (guardando()) { <span class="spinner-border spinner-border-sm me-1"></span> Eliminando... }
+          @else { Sí, eliminar }
+        </button>
+      </div>
+    </div>
+  </div>
+}
