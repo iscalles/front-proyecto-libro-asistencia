@@ -58,7 +58,7 @@
               <tr>
                 <td class="text-muted small">{{ m.idMatricula }}</td>
                 <td class="fw-medium">{{ m.nombreEstudiante }}</td>
-                <td>{{ m.gradoCurso }} {{ m.seccionCurso }} <span class="text-muted small">({{ m.anioCurso }})</span></td>
+                <td>{{ m.gradoCurso }} {{ m.seccionCurso }}</td>
                 <td>{{ m.anioAcademicoMatricula }}</td>
                 <td class="text-end">
                   <div class="d-flex gap-1 justify-content-end">
@@ -112,19 +112,16 @@
           <div class="col-12">
             <label class="form-label">Curso <span class="text-danger">*</span></label>
             <select class="form-select" [class.is-invalid]="error('idCurso','required')"
-                    formControlName="idCurso">
+                    formControlName="idCurso" (change)="onCursoChange()">
               <option value="">Seleccione...</option>
               @for (c of cursos(); track c.id) {
-                <option [value]="c.id">{{ c.gradoCurso }} {{ c.seccionCurso }} ({{ c.anioCurso }})</option>
+                <option [value]="c.id">{{ c.gradoCurso }} {{ c.seccionCurso }}</option>
               }
             </select>
+            @if (anioDelCurso() !== null) {
+              <div class="form-text">Año académico: {{ anioDelCurso() }} (heredado del curso)</div>
+            }
             @if (error('idCurso','required')) { <div class="invalid-feedback">Campo obligatorio.</div> }
-          </div>
-          <div class="col-12">
-            <label class="form-label">Año académico <span class="text-danger">*</span></label>
-            <input class="form-control" type="number" [class.is-invalid]="error('anioAcademicoMatricula','required')"
-                   formControlName="anioAcademicoMatricula" placeholder="2026">
-            @if (error('anioAcademicoMatricula','required')) { <div class="invalid-feedback">Campo obligatorio.</div> }
           </div>
         </div>
       </form>
@@ -169,19 +166,16 @@
           <div class="col-12">
             <label class="form-label">Curso <span class="text-danger">*</span></label>
             <select class="form-select" [class.is-invalid]="error('idCurso','required')"
-                    formControlName="idCurso">
+                    formControlName="idCurso" (change)="onCursoChange()">
               <option value="">Seleccione...</option>
               @for (c of cursos(); track c.id) {
-                <option [value]="c.id">{{ c.gradoCurso }} {{ c.seccionCurso }} ({{ c.anioCurso }})</option>
+                <option [value]="c.id">{{ c.gradoCurso }} {{ c.seccionCurso }}</option>
               }
             </select>
+            @if (anioDelCurso() !== null) {
+              <div class="form-text">Año académico: {{ anioDelCurso() }} (heredado del curso)</div>
+            }
             @if (error('idCurso','required')) { <div class="invalid-feedback">Campo obligatorio.</div> }
-          </div>
-          <div class="col-12">
-            <label class="form-label">Año académico <span class="text-danger">*</span></label>
-            <input class="form-control" type="number" [class.is-invalid]="error('anioAcademicoMatricula','required')"
-                   formControlName="anioAcademicoMatricula">
-            @if (error('anioAcademicoMatricula','required')) { <div class="invalid-feedback">Campo obligatorio.</div> }
           </div>
         </div>
       </form>

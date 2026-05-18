@@ -28,6 +28,9 @@ export class MatriculasTab implements OnInit {
   readonly cursos      = signal<Curso[]>([]);
   readonly estudiantes = signal<UsuarioDTOResponse[]>([]);
 
+  // Año del curso seleccionado; el año de la matrícula se deriva de este
+  readonly anioDelCurso = signal<number | null>(null);
+
   readonly matriculasFiltradas = computed(() => {
     const q = this.busqueda().toLowerCase().trim();
     if (!q) return this.matriculas();
@@ -49,9 +52,8 @@ export class MatriculasTab implements OnInit {
 
   ngOnInit(): void {
     this.form = this.fb.group({
-      idCurso:                ['', [Validators.required]],
-      estudianteIdUsuario:    ['', [Validators.required]],
-      anioAcademicoMatricula: ['', [Validators.required]],
+      estudianteIdUsuario: ['', [Validators.required]],
+      idCurso:             ['', [Validators.required]],
     });
     this.cargar();
   }
@@ -87,18 +89,25 @@ export class MatriculasTab implements OnInit {
       .filter(Boolean).join(' ');
   }
 
-  // Los <select> devuelven strings, por eso se convierten con Number()
+  // Al cambiar el curso: muestra su año (el año de la matrícula se deriva de él)
+  onCursoChange(): void {
+    const idCurso = Number(this.form.value.idCurso);
+    const curso = this.cursos().find(c => c.id === idCurso);
+    this.anioDelCurso.set(curso ? curso.anioCurso : null);
+  }
+
+  // El año académico ya no se envía: el backend lo deriva del curso
   private construirDto(): MatriculaRequest {
     return {
-      idCurso:                Number(this.form.value.idCurso),
-      estudianteIdUsuario:    Number(this.form.value.estudianteIdUsuario),
-      anioAcademicoMatricula: Number(this.form.value.anioAcademicoMatricula),
+      idCurso:             Number(this.form.value.idCurso),
+      estudianteIdUsuario: Number(this.form.value.estudianteIdUsuario),
     };
   }
 
   // ── Modal CREAR ────────────────────────────────────────────────────────────
   abrirCrear(): void {
     this.form.reset();
+    this.anioDelCurso.set(null);
     this.errorModal.set(null);
     this.modalCrear.set(true);
   }
@@ -122,10 +131,10 @@ export class MatriculasTab implements OnInit {
   abrirEditar(m: Matricula): void {
     this.matriculaEditando.set(m);
     this.errorModal.set(null);
+    this.anioDelCurso.set(m.anioCurso);
     this.form.patchValue({
-      idCurso:                m.idCurso,
-      estudianteIdUsuario:    m.estudianteIdUsuario,
-      anioAcademicoMatricula: m.anioAcademicoMatricula,
+      estudianteIdUsuario: m.estudianteIdUsuario,
+      idCurso:             m.idCurso,
     });
   }
 
