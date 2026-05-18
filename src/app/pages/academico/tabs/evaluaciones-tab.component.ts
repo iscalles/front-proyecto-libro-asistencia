@@ -1,8 +1,9 @@
 import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
+import { forkJoin } from 'rxjs';
 import { ServicioAcademico } from '../../../services/academico.service';
-import { Evaluacion, EvaluacionRequest } from '../../../models/academico.models';
+import { Evaluacion, EvaluacionRequest, CursoAsignatura } from '../../../models/academico.models';
 
 @Component({
   selector: 'app-evaluaciones-tab',
@@ -16,6 +17,8 @@ export class EvaluacionesTab implements OnInit {
   private fb       = inject(FormBuilder);
 
   readonly evaluaciones = signal<Evaluacion[]>([]);
+  // Curso-asignaturas para el desplegable
+  readonly cursoAsignaturas = signal<CursoAsignatura[]>([]);
   readonly busqueda     = signal('');
   readonly cargando     = signal(false);
   readonly errorTabla   = signal<string | null>(null);
@@ -25,7 +28,8 @@ export class EvaluacionesTab implements OnInit {
     if (!q) return this.evaluaciones();
     return this.evaluaciones().filter(e =>
       e.nombreEvaluacion.toLowerCase().includes(q) ||
-      e.fechaEvaluacion.includes(q)
+      e.fechaEvaluacion.includes(q) ||
+      e.nombreAsignatura.toLowerCase().includes(q)
     );
   });
 
@@ -39,8 +43,9 @@ export class EvaluacionesTab implements OnInit {
 
   ngOnInit(): void {
     this.form = this.fb.group({
-      nombreEvaluacion: ['', [Validators.required, Validators.maxLength(60)]],
-      fechaEvaluacion:  ['', [Validators.required]],
+      nombreEvaluacion:  ['', [Validators.required, Validators.maxLength(60)]],
+      fechaEvaluacion:   ['', [Validators.required]],
+      idCursoAsignatura: ['', [Validators.required]],
     });
     this.cargar();
   }
@@ -62,8 +67,15 @@ export class EvaluacionesTab implements OnInit {
   cargar(): void {
     this.cargando.set(true);
     this.errorTabla.set(null);
-    this.servicio.listarEvaluaciones().subscribe({
-      next: lista => { this.evaluaciones.set(lista); this.cargando.set(false); },
+    forkJoin({
+      evaluaciones:     this.servicio.listarEvaluaciones(),
+      cursoAsignaturas: this.servicio.listarCursoAsignaturas(),
+    }).subscribe({
+      next: ({ evaluaciones, cursoAsignaturas }) => {
+        this.evaluaciones.set(evaluaciones);
+        this.cursoAsignaturas.set(cursoAsignaturas);
+        this.cargando.set(false);
+      },
       error: () => {
         this.errorTabla.set('No se pudo cargar la lista de evaluaciones.');
         this.cargando.set(false);
@@ -76,11 +88,16 @@ export class EvaluacionesTab implements OnInit {
     return !!(c?.hasError(tipo) && c.touched);
   }
 
+  etiquetaCursoAsignatura(ca: CursoAsignatura): string {
+    return `${ca.nombreAsignatura} — ${ca.gradoCurso} ${ca.seccionCurso}`;
+  }
+
   // Arma el DTO convirtiendo la fecha al formato del backend
   private construirDto(): EvaluacionRequest {
     return {
-      nombreEvaluacion: this.form.value.nombreEvaluacion,
-      fechaEvaluacion:  this.aBackend(this.form.value.fechaEvaluacion),
+      nombreEvaluacion:  this.form.value.nombreEvaluacion,
+      fechaEvaluacion:   this.aBackend(this.form.value.fechaEvaluacion),
+      idCursoAsignatura: Number(this.form.value.idCursoAsignatura),
     };
   }
 
@@ -109,8 +126,9 @@ export class EvaluacionesTab implements OnInit {
     this.evaluacionEditando.set(ev);
     this.errorModal.set(null);
     this.form.patchValue({
-      nombreEvaluacion: ev.nombreEvaluacion,
-      fechaEvaluacion:  this.aIso(ev.fechaEvaluacion),
+      nombreEvaluacion:  ev.nombreEvaluacion,
+      fechaEvaluacion:   this.aIso(ev.fechaEvaluacion),
+      idCursoAsignatura: ev.idCursoAsignatura,
     });
   }
 
@@ -121,7 +139,7 @@ export class EvaluacionesTab implements OnInit {
     if (!ev || this.form.invalid) { this.form.markAllAsTouched(); return; }
     this.guardando.set(true);
     this.errorModal.set(null);
-    this.servicio.actualizarEvaluacion(ev.id_evaluacion, this.construirDto()).subscribe({
+    this.servicio.actualizarEvaluacion(ev.idEvaluacion, this.construirDto()).subscribe({
       next: () => { this.guardando.set(false); this.cerrarEditar(); this.cargar(); },
       error: (e: HttpErrorResponse) => {
         this.guardando.set(false);
@@ -141,7 +159,7 @@ export class EvaluacionesTab implements OnInit {
     const ev = this.evaluacionEliminar();
     if (!ev) return;
     this.guardando.set(true);
-    this.servicio.eliminarEvaluacion(ev.id_evaluacion).subscribe({
+    this.servicio.eliminarEvaluacion(ev.idEvaluacion).subscribe({
       next: () => { this.guardando.set(false); this.cerrarEliminar(); this.cargar(); },
       error: () => {
         this.guardando.set(false);

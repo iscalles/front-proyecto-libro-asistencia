@@ -29,14 +29,22 @@ export interface AsignaturaRequest {
 
 // ── Evaluacion ────────────────────────────────────────────────────────────────
 export interface Evaluacion {
-  id_evaluacion: number;
+  idEvaluacion: number;
   nombreEvaluacion: string;
   fechaEvaluacion: string; // formato dd-MM-yyyy
+  // Curso-asignatura a la que pertenece (datos aplanados)
+  idCursoAsignatura: number;
+  idAsignatura: number;
+  nombreAsignatura: string;
+  idCurso: number;
+  gradoCurso: string;
+  seccionCurso: string;
 }
 
 export interface EvaluacionRequest {
   nombreEvaluacion: string;
   fechaEvaluacion: string;
+  idCursoAsignatura: number;
 }
 
 // ── Matricula ─────────────────────────────────────────────────────────────────
@@ -68,15 +76,11 @@ export interface CursoAsignatura {
   anioCurso: number;
   idAsignatura: number;
   nombreAsignatura: string;
-  idEvaluacion: number;
-  nombreEvaluacion: string;
-  fechaEvaluacion: string;
 }
 
 export interface CursoAsignaturaRequest {
   idCurso: number;
   idAsignatura: number;
-  idEvaluacion: number;
   docenteIdUsuario: number;
 }
 

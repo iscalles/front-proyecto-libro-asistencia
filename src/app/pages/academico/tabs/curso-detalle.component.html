@@ -43,7 +43,6 @@
             <tr>
               <th>Asignatura</th>
               <th>Docente</th>
-              <th>Evaluación</th>
               <th class="text-end">Acciones</th>
             </tr>
           </thead>
@@ -52,7 +51,6 @@
               <tr>
                 <td class="fw-medium">{{ r.nombreAsignatura }}</td>
                 <td>{{ r.nombreDocente }}</td>
-                <td>{{ r.nombreEvaluacion }} <span class="text-muted small">({{ r.fechaEvaluacion }})</span></td>
                 <td class="text-end">
                   <div class="d-flex gap-1 justify-content-end">
                     <button class="btn btn-outline-secondary btn-xs"
@@ -64,7 +62,7 @@
               </tr>
             } @empty {
               <tr>
-                <td colspan="4" class="text-center text-muted py-4">
+                <td colspan="3" class="text-center text-muted py-4">
                   Este curso no tiene asignaturas asignadas.
                 </td>
               </tr>
@@ -108,17 +106,6 @@
               }
             </select>
             @if (error('docenteIdUsuario','required')) { <div class="invalid-feedback">Campo obligatorio.</div> }
-          </div>
-          <div class="col-12">
-            <label class="form-label">Evaluación <span class="text-danger">*</span></label>
-            <select class="form-select" [class.is-invalid]="error('idEvaluacion','required')"
-                    formControlName="idEvaluacion">
-              <option value="">Seleccione...</option>
-              @for (e of evaluaciones(); track e.id_evaluacion) {
-                <option [value]="e.id_evaluacion">{{ e.nombreEvaluacion }} ({{ e.fechaEvaluacion }})</option>
-              }
-            </select>
-            @if (error('idEvaluacion','required')) { <div class="invalid-feedback">Campo obligatorio.</div> }
           </div>
         </div>
       </form>
@@ -170,17 +157,6 @@
               }
             </select>
             @if (error('docenteIdUsuario','required')) { <div class="invalid-feedback">Campo obligatorio.</div> }
-          </div>
-          <div class="col-12">
-            <label class="form-label">Evaluación <span class="text-danger">*</span></label>
-            <select class="form-select" [class.is-invalid]="error('idEvaluacion','required')"
-                    formControlName="idEvaluacion">
-              <option value="">Seleccione...</option>
-              @for (e of evaluaciones(); track e.id_evaluacion) {
-                <option [value]="e.id_evaluacion">{{ e.nombreEvaluacion }} ({{ e.fechaEvaluacion }})</option>
-              }
-            </select>
-            @if (error('idEvaluacion','required')) { <div class="invalid-feedback">Campo obligatorio.</div> }
           </div>
         </div>
       </form>

@@ -5,8 +5,7 @@ import { forkJoin } from 'rxjs';
 import { ServicioAcademico } from '../../../services/academico.service';
 import { ServicioUsuarioAdmin } from '../../../services/usuario-admin.service';
 import {
-  Curso, CursoAsignatura, CursoAsignaturaRequest,
-  Asignatura, Evaluacion,
+  Curso, CursoAsignatura, CursoAsignaturaRequest, Asignatura,
 } from '../../../models/academico.models';
 import { UsuarioDTOResponse } from '../../../models/usuario-admin.models';
 
@@ -31,9 +30,8 @@ export class CursoDetalle implements OnInit {
   readonly registros = signal<CursoAsignatura[]>([]);
 
   // Datos para los desplegables
-  readonly asignaturas  = signal<Asignatura[]>([]);
-  readonly evaluaciones = signal<Evaluacion[]>([]);
-  readonly docentes     = signal<UsuarioDTOResponse[]>([]);
+  readonly asignaturas = signal<Asignatura[]>([]);
+  readonly docentes    = signal<UsuarioDTOResponse[]>([]);
 
   readonly cargando   = signal(false);
   readonly errorTabla = signal<string | null>(null);
@@ -49,7 +47,6 @@ export class CursoDetalle implements OnInit {
   ngOnInit(): void {
     this.form = this.fb.group({
       idAsignatura:     ['', [Validators.required]],
-      idEvaluacion:     ['', [Validators.required]],
       docenteIdUsuario: ['', [Validators.required]],
     });
     this.cargar();
@@ -58,18 +55,16 @@ export class CursoDetalle implements OnInit {
   cargar(): void {
     this.cargando.set(true);
     this.errorTabla.set(null);
-    // forkJoin: ejecuta las 4 llamadas en paralelo y espera a que todas terminen
+    // forkJoin: ejecuta las 3 llamadas en paralelo y espera a que todas terminen
     forkJoin({
       cursoAsignaturas: this.servicio.listarCursoAsignaturas(),
       asignaturas:      this.servicio.listarAsignaturas(),
-      evaluaciones:     this.servicio.listarEvaluaciones(),
       usuarios:         this.servicioUsuarios.listarUsuarios(),
     }).subscribe({
-      next: ({ cursoAsignaturas, asignaturas, evaluaciones, usuarios }) => {
+      next: ({ cursoAsignaturas, asignaturas, usuarios }) => {
         // Filtra solo los registros que pertenecen a este curso
         this.registros.set(cursoAsignaturas.filter(ca => ca.idCurso === this.curso().id));
         this.asignaturas.set(asignaturas);
-        this.evaluaciones.set(evaluaciones);
         this.docentes.set(usuarios.filter(u => u.roles.includes('DOCENTE')));
         this.cargando.set(false);
       },
@@ -96,7 +91,6 @@ export class CursoDetalle implements OnInit {
     return {
       idCurso:          this.curso().id,
       idAsignatura:     Number(this.form.value.idAsignatura),
-      idEvaluacion:     Number(this.form.value.idEvaluacion),
       docenteIdUsuario: Number(this.form.value.docenteIdUsuario),
     };
   }
@@ -129,7 +123,6 @@ export class CursoDetalle implements OnInit {
     this.errorModal.set(null);
     this.form.patchValue({
       idAsignatura:     r.idAsignatura,
-      idEvaluacion:     r.idEvaluacion,
       docenteIdUsuario: r.docenteIdUsuario,
     });
   }

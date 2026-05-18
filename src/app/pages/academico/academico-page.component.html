@@ -45,10 +45,11 @@
     @case ('evaluaciones') {
       <app-evaluaciones-tab />
     }
-    @default {
-      <div class="text-center text-muted py-5">
-        <p class="mb-0">Esta sección estará disponible próximamente.</p>
-      </div>
+    @case ('matriculas') {
+      <app-matriculas-tab />
+    }
+    @case ('calificaciones') {
+      <app-calificaciones-tab />
     }
   }
 </main>
