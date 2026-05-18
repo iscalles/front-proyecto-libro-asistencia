@@ -2,6 +2,8 @@ import { Component, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { ServicioToken } from 'lib-auth';
 import { CursosTab } from './tabs/cursos-tab.component';
+import { AsignaturasTab } from './tabs/asignaturas-tab.component';
+import { EvaluacionesTab } from './tabs/evaluaciones-tab.component';
 
 // Identificador de cada pestaña del mantenedor
 type Tab = 'cursos' | 'asignaturas' | 'evaluaciones'
@@ -10,7 +12,7 @@ type Tab = 'cursos' | 'asignaturas' | 'evaluaciones'
 @Component({
   selector: 'app-academico',
   standalone: true,
-  imports: [CursosTab],
+  imports: [CursosTab, AsignaturasTab, EvaluacionesTab],
   templateUrl: './academico-page.component.html',
   styleUrl: './academico-page.component.scss'
 })
