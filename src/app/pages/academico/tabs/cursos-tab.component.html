@@ -1,3 +1,8 @@
+<!-- Si hay un curso seleccionado, muestra su detalle en lugar de la tabla -->
+@if (cursoSeleccionado(); as curso) {
+  <app-curso-detalle [curso]="curso" (volver)="cerrarDetalle()" />
+} @else {
+
 <!-- Barra de herramientas -->
 <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
   <div>
@@ -62,6 +67,8 @@
                 <td>{{ c.anioCurso }}</td>
                 <td class="text-end">
                   <div class="d-flex gap-1 justify-content-end">
+                    <button class="btn btn-outline-primary btn-xs"
+                            (click)="verDetalle(c)" type="button">Asignaturas</button>
                     <button class="btn btn-outline-secondary btn-xs"
                             (click)="abrirEditar(c)" type="button">Editar</button>
                     <button class="btn btn-outline-danger btn-xs"
@@ -86,6 +93,8 @@
     }
   </div>
 </div>
+
+}
 
 <!-- ═══ MODAL: CREAR CURSO ════════════════════════════════════════════════════ -->
 @if (modalCrear()) {

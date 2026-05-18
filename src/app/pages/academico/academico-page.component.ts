@@ -7,7 +7,7 @@ import { EvaluacionesTab } from './tabs/evaluaciones-tab.component';
 
 // Identificador de cada pestaña del mantenedor
 type Tab = 'cursos' | 'asignaturas' | 'evaluaciones'
-         | 'matriculas' | 'curso-asignatura' | 'calificaciones';
+         | 'matriculas' | 'calificaciones';
 
 @Component({
   selector: 'app-academico',
@@ -30,7 +30,6 @@ export class PáginaAcademico {
     { id: 'asignaturas',      etiqueta: 'Asignaturas' },
     { id: 'evaluaciones',     etiqueta: 'Evaluaciones' },
     { id: 'matriculas',       etiqueta: 'Matrículas' },
-    { id: 'curso-asignatura', etiqueta: 'Curso-Asignatura' },
     { id: 'calificaciones',   etiqueta: 'Calificaciones' },
   ];
 

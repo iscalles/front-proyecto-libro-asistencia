@@ -3,11 +3,12 @@ import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angula
 import { HttpErrorResponse } from '@angular/common/http';
 import { ServicioAcademico } from '../../../services/academico.service';
 import { Curso, CursoRequest } from '../../../models/academico.models';
+import { CursoDetalle } from './curso-detalle.component';
 
 @Component({
   selector: 'app-cursos-tab',
   standalone: true,
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, CursoDetalle],
   templateUrl: './cursos-tab.component.html',
   styleUrls: ['../academico-shared.scss']
 })
@@ -38,6 +39,9 @@ export class CursosTab implements OnInit {
   readonly cursoEditando = signal<Curso | null>(null);
   readonly cursoEliminar = signal<Curso | null>(null);
 
+  // Curso cuyo detalle (asignaturas) se está viendo; null = mostrar la tabla
+  readonly cursoSeleccionado = signal<Curso | null>(null);
+
   form!: FormGroup;
 
   ngOnInit(): void {
@@ -66,6 +70,10 @@ export class CursosTab implements OnInit {
     const c = this.form.get(campo);
     return !!(c?.hasError(tipo) && c.touched);
   }
+
+  // ── Detalle (asignaturas del curso) ────────────────────────────────────────
+  verDetalle(c: Curso): void { this.cursoSeleccionado.set(c); }
+  cerrarDetalle(): void { this.cursoSeleccionado.set(null); }
 
   // ── Modal CREAR ────────────────────────────────────────────────────────────
   abrirCrear(): void {
