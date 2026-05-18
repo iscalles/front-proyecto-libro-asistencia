@@ -44,14 +44,14 @@ front-proyecto-libro-asistencia/
 
 ```bash
 # 1. Clonar el repositorio
-git clone <url-repositorio-frontend>
+git clone https://github.com/iscalles/front-proyecto-libro-asistencia.git
 cd front-proyecto-libro-asistencia
 
 # 2. Instalar dependencias
 npm install
 
 # 3. Compilar la librería lib-auth (OBLIGATORIO antes de iniciar)
-npx ng build lib-auth
+ng build lib-auth
 ```
 
 > La librería debe compilarse cada vez que se modifique. Su output queda en `dist/lib-auth/` y es referenciado en `tsconfig.json`.
@@ -61,7 +61,7 @@ npx ng build lib-auth
 ## Ejecución
 
 ```bash
-# Modo desarrollo (con hot-reload)
+# Modo desarrollo
 npm start
 # → Disponible en http://localhost:4200
 ```
@@ -76,7 +76,7 @@ npm start
 |---|---|
 | `npm start` | Servidor de desarrollo en `http://localhost:4200` |
 | `npm run build` | Compilación de producción (output en `dist/`)
-| `npx ng build lib-auth` | Compila la librería de autenticación |
+| `ng build lib-auth` | Compila la librería de autenticación |
 
 ---
 
