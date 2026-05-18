@@ -60,7 +60,6 @@ export interface Matricula {
 }
 
 export interface MatriculaRequest {
-  anioAcademicoMatricula: number;
   idCurso: number;
   estudianteIdUsuario: number;
 }
