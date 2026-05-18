@@ -109,6 +109,12 @@ export class PáginaRelaciones implements OnInit {
     return this.cargandoRelPor().has(idApoderado);
   }
 
+  // True si al apoderado todavía le quedan estudiantes por asignar
+  hayEstudiantesDisponibles(apo: ApoderadoResponse): boolean {
+    const relaciones = this.relacionesPor().get(apo.idApoderado) ?? [];
+    return this.estudiantes().length > relaciones.length;
+  }
+
   // ── Modal asignar ─────────────────────────────────────────────────────────
 
   abrirAsignar(apoderado: ApoderadoResponse): void {
