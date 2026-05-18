@@ -153,7 +153,7 @@
         </div>
       }
 
-      @if (rolActivo().etiqueta === 'Administrador') {
+      @if (rolActivo().etiqueta === 'Administrativo') {
         <div class="col-12 col-md-4">
           <div class="card tarjeta-modulo h-100">
             <div class="card-body">
@@ -163,8 +163,8 @@
                 </svg>
               </div>
               <h5 class="card-title">Gestión de Usuarios</h5>
-              <p class="card-text text-muted small">Administra docentes, apoderados y estudiantes.</p>
-              <button class="btn btn-danger btn-sm" disabled>Próximamente</button>
+              <p class="card-text text-muted small">Crea, edita y asigna roles a los usuarios del sistema.</p>
+              <a routerLink="/admin" class="btn btn-danger btn-sm">Abrir mantenedor</a>
             </div>
           </div>
         </div>

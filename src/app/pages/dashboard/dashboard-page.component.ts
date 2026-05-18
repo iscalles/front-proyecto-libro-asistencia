@@ -1,16 +1,18 @@
 import { Component, HostListener, computed, inject, signal } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { ServicioToken, ServicioAutenticacion } from 'lib-auth';
 
 const CONFIG_ROLES: Record<string, { etiqueta: string; clase: string }> = {
-  DOCENTE:   { etiqueta: 'Docente',        clase: 'bg-success' },
-  APODERADO: { etiqueta: 'Apoderado',      clase: 'bg-primary' },
-  ADMIN:     { etiqueta: 'Administrador',  clase: 'bg-danger'  },
+  DOCENTE:        { etiqueta: 'Docente',        clase: 'bg-success' },
+  APODERADO:      { etiqueta: 'Apoderado',      clase: 'bg-primary' },
+  ADMINISTRATIVO: { etiqueta: 'Administrativo', clase: 'bg-danger'  },
+  ESTUDIANTE:     { etiqueta: 'Estudiante',     clase: 'bg-warning text-dark' },
 };
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
+  imports: [RouterLink],
   templateUrl: './dashboard-page.component.html',
   styleUrl: './dashboard-page.component.scss'
 })
