@@ -1,0 +1,130 @@
+// Estilos compartidos por todos los tabs del mantenedor (tabla + modales).
+
+// ── Tabla ─────────────────────────────────────────────────────────────────────
+.tabla-mantenedor {
+  thead th {
+    background-color: #f8f9fa;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #6c757d;
+    border-bottom: 2px solid #dee2e6;
+    padding: 12px 16px;
+  }
+
+  tbody td {
+    padding: 12px 16px;
+    vertical-align: middle;
+    border-color: #f1f3f5;
+  }
+
+  tbody tr:hover {
+    background-color: #f8f9fa;
+  }
+}
+
+.btn-xs {
+  font-size: 0.78rem;
+  padding: 3px 10px;
+  border-radius: 4px;
+}
+
+// ── Buscador ──────────────────────────────────────────────────────────────────
+.input-busqueda {
+  position: relative;
+  display: flex;
+  align-items: center;
+
+  &__campo {
+    padding-left: 30px;
+    min-width: 220px;
+  }
+}
+
+.icono-busqueda {
+  position: absolute;
+  left: 9px;
+  color: #adb5bd;
+  pointer-events: none;
+}
+
+// ── Modales ───────────────────────────────────────────────────────────────────
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 1050;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  animation: fadeIn 0.15s ease;
+}
+
+.modal-caja {
+  background: #fff;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 560px;
+  max-height: 90vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+  animation: slideUp 0.18s ease;
+
+  &--sm { max-width: 420px; }
+}
+
+.modal-encabezado {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.modal-titulo {
+  font-size: 1.05rem;
+  font-weight: 600;
+  margin: 0;
+  color: #1a1a2e;
+}
+
+.btn-cerrar {
+  background: none;
+  border: none;
+  font-size: 1.1rem;
+  color: #6c757d;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  line-height: 1;
+
+  &:hover { background: #f1f3f5; color: #333; }
+}
+
+.modal-cuerpo {
+  padding: 20px 24px;
+  flex: 1;
+}
+
+.modal-pie {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 16px 24px;
+  border-top: 1px solid #e9ecef;
+}
+
+// ── Animaciones ───────────────────────────────────────────────────────────────
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(16px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}

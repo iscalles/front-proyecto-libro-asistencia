@@ -47,7 +47,7 @@ export class ComponenteFormularioAcceso implements OnInit {
    */
   private inicializarFormulario(): void {
     this.loginForm = this.constructorFormulario.group({
-      rutUsuario: [  // ← CAMBIO: 'rut' a 'rutUsuario'
+      rutUsuario: [  
         '',
         [Validators.required, this.validadorRutFn.bind(this)]
       ],
@@ -77,7 +77,7 @@ export class ComponenteFormularioAcceso implements OnInit {
    * Obtiene errores del control RUT para mostrar
    */
   obtenerErrorRut(): string | null {
-    const rutControl = this.loginForm.get('rutUsuario');  // ← CAMBIO: 'rut' a 'rutUsuario'
+    const rutControl = this.loginForm.get('rutUsuario');
     if (!rutControl?.errors || !rutControl?.touched) {
       return null;
     }
@@ -86,7 +86,7 @@ export class ComponenteFormularioAcceso implements OnInit {
       return 'El RUT es requerido';
     }
     if (rutControl.errors['invalidRut']) {
-      return 'Por favor ingrese un RUT válido (ej: 12345678-9)';
+      return 'Por favor ingrese un RUT válido (ej: 12.345.678-9)';
     }
 
     return null;
@@ -119,11 +119,13 @@ export class ComponenteFormularioAcceso implements OnInit {
 
     this.isLoading = true;
     const credenciales = {
-      rutUsuario: this.loginForm.get('rutUsuario')?.value,  // ← CAMBIO
+      // formatRut normaliza a xx.xxx.xxx-x antes de enviar al backend,
+      // independiente de si el usuario escribió con o sin puntos
+      rutUsuario: this.validadorRut.formatRut(this.loginForm.get('rutUsuario')?.value),
       password: this.loginForm.get('password')?.value
     };
 
-    this.servicioAutenticacion.iniciarSesion(credenciales)  // ← CAMBIO: login a iniciarSesion
+    this.servicioAutenticacion.iniciarSesion(credenciales)
       .subscribe({
         next: () => {
           this.enrutador.navigate(['/dashboard']);
