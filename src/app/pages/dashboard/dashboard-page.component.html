@@ -7,43 +7,29 @@
       Colegio Bernardo O'Higgins
     </span>
 
-    <!-- Zona derecha: avatar + selector de rol + logout -->
+    <!-- Zona derecha: menú usuario + selector de rol -->
     <div class="d-flex align-items-center gap-3">
 
       @if (usuario(); as u) {
-        <!-- Avatar e info -->
-        <div class="d-flex align-items-center gap-2">
-          <div class="avatar-circulo">
-            {{ u.nombre.charAt(0).toUpperCase() }}
-          </div>
-          <span class="texto-usuario d-none d-sm-inline">{{ u.nombre }}</span>
-        </div>
 
-        <!-- Dropdown selector de rol (solo visible si tiene más de un rol) -->
+        <!-- Dropdown de ROL (solo si tiene más de uno) -->
         @if (rolesFormateados().length > 1) {
           <div class="dropdown">
-            <button
-              class="btn btn-outline-light btn-sm dropdown-toggle-custom d-flex align-items-center gap-2"
-              (click)="toggleDropdown($event)"
-              type="button"
-            >
+            <button class="btn btn-outline-light btn-sm dropdown-toggle-custom d-flex align-items-center gap-2"
+                    (click)="toggleDropdownRol($event)" type="button">
               <span class="badge {{ rolActivo().clase }}">{{ rolActivo().etiqueta }}</span>
-              <svg class="icono-chevron" [class.rotado]="estaAbiertoDropdown()"
+              <svg class="icono-chevron" [class.rotado]="estaAbiertoDropdownRol()"
                    xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 16 16">
                 <path d="M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z"/>
               </svg>
             </button>
-
-            <ul class="dropdown-menu dropdown-menu-end" [class.show]="estaAbiertoDropdown()">
+            <ul class="dropdown-menu dropdown-menu-end" [class.show]="estaAbiertoDropdownRol()">
               <li class="dropdown-header text-muted small px-3 py-1">Cambiar vista</li>
               @for (rol of rolesFormateados(); track rol.etiqueta) {
                 <li>
-                  <button
-                    class="dropdown-item d-flex align-items-center gap-2"
-                    [class.activo]="rol.etiqueta === rolActivo().etiqueta"
-                    (click)="cambiarRol(rol, $event)"
-                    type="button"
-                  >
+                  <button class="dropdown-item d-flex align-items-center gap-2"
+                          [class.activo]="rol.etiqueta === rolActivo().etiqueta"
+                          (click)="cambiarRol(rol, $event)" type="button">
                     <span class="badge {{ rol.clase }}">{{ rol.etiqueta }}</span>
                     {{ rol.etiqueta }}
                   </button>
@@ -52,15 +38,50 @@
             </ul>
           </div>
         } @else {
-          <!-- Si solo tiene un rol, lo muestra como badge estático -->
           <span class="badge {{ rolActivo().clase }}">{{ rolActivo().etiqueta }}</span>
         }
-      }
 
-      <!-- Botón cerrar sesión -->
-      <button class="btn btn-outline-light btn-sm" (click)="cerrarSesion()" type="button">
-        Cerrar sesión
-      </button>
+        <!-- Dropdown MENÚ DE USUARIO (avatar + nombre → contraseña + cerrar sesión) -->
+        <div class="dropdown">
+          <button class="menu-usuario-btn d-flex align-items-center gap-2"
+                  (click)="toggleMenuUsuario($event)" type="button">
+            <div class="avatar-circulo">{{ u.nombre.charAt(0).toUpperCase() }}</div>
+            <span class="texto-usuario d-none d-sm-inline">{{ u.nombre }}</span>
+            <svg class="icono-chevron" [class.rotado]="estaAbiertoMenuUsuario()"
+                 xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 16 16">
+              <path d="M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z"/>
+            </svg>
+          </button>
+          <ul class="dropdown-menu dropdown-menu-end" [class.show]="estaAbiertoMenuUsuario()">
+            <li class="dropdown-header px-3 py-2">
+              <div class="fw-semibold small">{{ u.nombre }}</div>
+              <div class="text-muted" style="font-size:.75rem">{{ u.correo }}</div>
+            </li>
+            <li><hr class="dropdown-divider my-1"></li>
+            <li>
+              <button class="dropdown-item d-flex align-items-center gap-2"
+                      (click)="abrirCambiarContrasena()" type="button">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
+                  <path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/>
+                </svg>
+                Cambiar contraseña
+              </button>
+            </li>
+            <li><hr class="dropdown-divider my-1"></li>
+            <li>
+              <button class="dropdown-item dropdown-item--danger d-flex align-items-center gap-2"
+                      (click)="cerrarSesion()" type="button">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
+                  <path fill-rule="evenodd" d="M6 12.5a.5.5 0 0 0 .5.5h8a.5.5 0 0 0 .5-.5v-9a.5.5 0 0 0-.5-.5h-8a.5.5 0 0 0-.5.5v2a.5.5 0 0 1-1 0v-2A1.5 1.5 0 0 1 6.5 2h8A1.5 1.5 0 0 1 16 3.5v9a1.5 1.5 0 0 1-1.5 1.5h-8A1.5 1.5 0 0 1 5 12.5v-2a.5.5 0 0 1 1 0v2z"/>
+                  <path fill-rule="evenodd" d="M.146 8.354a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L1.707 7.5H10.5a.5.5 0 0 1 0 1H1.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3z"/>
+                </svg>
+                Cerrar sesión
+              </button>
+            </li>
+          </ul>
+        </div>
+
+      }
     </div>
 
   </div>
@@ -198,6 +219,23 @@
             </div>
           </div>
         </div>
+
+        <div class="col-12 col-md-4">
+          <div class="card tarjeta-modulo h-100">
+            <div class="card-body">
+              <div class="icono-modulo bg-danger-subtle text-danger mb-3">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
+                  <path d="M7 14s-1 0-1-1 1-4 5-4 5 3 5 4-1 1-1 1H7zm4-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>
+                  <path fill-rule="evenodd" d="M5.216 14A2.238 2.238 0 0 1 5 13c0-1.355.68-2.75 1.936-3.72A6.325 6.325 0 0 0 5 9c-4 0-5 3-5 4s1 1 1 1h4.216z"/>
+                  <path d="M4.5 8a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z"/>
+                </svg>
+              </div>
+              <h5 class="card-title">Relaciones Apoderado-Alumno</h5>
+              <p class="card-text text-muted small">Asigna y gestiona los estudiantes de cada apoderado.</p>
+              <a routerLink="/relaciones" class="btn btn-danger btn-sm">Abrir módulo</a>
+            </div>
+          </div>
+        </div>
       }
 
     </div>
@@ -228,3 +266,87 @@
   }
 
 </main>
+
+<!-- ═══ MODAL: CAMBIAR CONTRASEÑA ════════════════════════════════════════════ -->
+@if (mostrarModalContrasena()) {
+  <div class="modal-contrasena-overlay" (click)="cerrarModalContrasena()">
+    <div class="modal-contrasena-caja" (click)="$event.stopPropagation()">
+
+      <div class="modal-contrasena-encabezado">
+        <h3 class="modal-contrasena-titulo">Cambiar contraseña</h3>
+        <button class="btn-cerrar-modal" (click)="cerrarModalContrasena()" type="button">✕</button>
+      </div>
+
+      @if (exitoContrasena()) {
+        <!-- Estado de éxito -->
+        <div class="modal-contrasena-cuerpo text-center py-4">
+          <div class="icono-exito mb-3">✓</div>
+          <h5 class="fw-semibold">Contraseña actualizada</h5>
+          <p class="text-muted small mb-0">Tu contraseña fue cambiada correctamente.</p>
+        </div>
+      } @else {
+        <!-- Formulario -->
+        <form [formGroup]="formContrasena" class="modal-contrasena-cuerpo"
+              (ngSubmit)="guardarContrasena()">
+          <div class="mb-3">
+            <label class="form-label">Contraseña actual <span class="text-danger">*</span></label>
+            <input class="form-control"
+                   [class.is-invalid]="errorCampoContrasena('passwordActual','required')"
+                   type="password"
+                   formControlName="passwordActual"
+                   placeholder="Ingresa tu contraseña actual">
+            @if (errorCampoContrasena('passwordActual','required')) {
+              <div class="invalid-feedback">Este campo es obligatorio.</div>
+            }
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Nueva contraseña <span class="text-danger">*</span></label>
+            <input class="form-control"
+                   [class.is-invalid]="errorCampoContrasena('passwordNuevo','required') || errorCampoContrasena('passwordNuevo','minlength')"
+                   type="password"
+                   formControlName="passwordNuevo"
+                   placeholder="Mínimo 6 caracteres">
+            @if (errorCampoContrasena('passwordNuevo','required')) {
+              <div class="invalid-feedback">Este campo es obligatorio.</div>
+            }
+            @if (errorCampoContrasena('passwordNuevo','minlength')) {
+              <div class="invalid-feedback">La contraseña debe tener al menos 6 caracteres.</div>
+            }
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Confirmar nueva contraseña <span class="text-danger">*</span></label>
+            <input class="form-control"
+                   [class.is-invalid]="formContrasena.hasError('noCoinciden') && formContrasena.get('confirmarPassword')?.touched"
+                   type="password"
+                   formControlName="confirmarPassword"
+                   placeholder="Repite la nueva contraseña">
+            @if (formContrasena.hasError('noCoinciden') && formContrasena.get('confirmarPassword')?.touched) {
+              <div class="invalid-feedback">Las contraseñas no coinciden.</div>
+            }
+          </div>
+
+          @if (errorContrasena()) {
+            <div class="alert alert-danger py-2 small">{{ errorContrasena() }}</div>
+          }
+        </form>
+
+        <div class="modal-contrasena-pie">
+          <button class="btn btn-outline-secondary" (click)="cerrarModalContrasena()" type="button">
+            Cancelar
+          </button>
+          <button class="btn btn-primary" (click)="guardarContrasena()"
+                  [disabled]="guardandoContrasena()" type="button">
+            @if (guardandoContrasena()) {
+              <span class="spinner-border spinner-border-sm me-1"></span> Guardando...
+            } @else {
+              Actualizar contraseña
+            }
+          </button>
+        </div>
+      }
+
+    </div>
+  </div>
+}

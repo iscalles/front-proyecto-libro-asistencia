@@ -1,0 +1,203 @@
+<!-- HEADER -->
+<header class="rel-header shadow-sm">
+  <div class="container-fluid px-4 d-flex align-items-center gap-3">
+    <button class="btn btn-link btn-volver p-0" (click)="irAlAdmin()" type="button">
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16">
+        <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8z"/>
+      </svg>
+      Volver a Gestión
+    </button>
+    <div class="separador-v"></div>
+    <h1 class="rel-titulo mb-0">Gestión de Relaciones</h1>
+    <div class="ms-auto d-flex align-items-center gap-2">
+      @if (usuarioSesion(); as u) {
+        <span class="texto-sesion d-none d-sm-inline">{{ u.nombre }}</span>
+      }
+      <span class="badge bg-danger">Administrativo</span>
+    </div>
+  </div>
+</header>
+
+<!-- CONTENIDO -->
+<main class="container py-4">
+
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h2 class="h5 fw-semibold mb-0">Apoderado → Estudiante</h2>
+      <p class="text-muted small mb-0">
+        Asigna y gestiona qué estudiantes tiene cada apoderado.
+      </p>
+    </div>
+    <button class="btn btn-outline-secondary btn-sm" (click)="cargarDatos()" type="button">
+      Actualizar
+    </button>
+  </div>
+
+  @if (error()) {
+    <div class="alert alert-danger mb-4">{{ error() }}</div>
+  }
+
+  @if (cargando()) {
+    <div class="text-center py-5 text-muted">
+      <div class="spinner-border spinner-border-sm me-2"></div>
+      Cargando datos...
+    </div>
+  } @else {
+
+    @if (apoderados().length === 0) {
+      <div class="card text-center py-5">
+        <p class="text-muted mb-0">No hay apoderados registrados en el sistema.</p>
+      </div>
+    }
+
+    <div class="d-flex flex-column gap-3">
+      @for (apo of apoderados(); track apo.idApoderado) {
+        <div class="card tarjeta-apoderado">
+          <div class="card-body">
+
+            <!-- Cabecera del apoderado -->
+            <div class="d-flex align-items-center gap-3 mb-3">
+              <div class="avatar-apoderado">
+                {{ apo.usuario.nombreUsuario.charAt(0).toUpperCase() }}
+              </div>
+              <div>
+                <div class="fw-semibold">{{ nombreCompleto(apo.usuario) }}</div>
+                <div class="text-muted small font-monospace">{{ apo.usuario.rutUsuario }}</div>
+              </div>
+              @if (apo.telefonoApoderado) {
+                <span class="ms-auto text-muted small d-none d-md-inline">
+                  📞 {{ apo.telefonoApoderado }}
+                </span>
+              }
+            </div>
+
+            <!-- Lista de estudiantes asignados -->
+            @if (estaCargandoRel(apo.idApoderado)) {
+              <div class="text-muted small ps-1 mb-2">
+                <span class="spinner-border spinner-border-sm me-1"></span>
+                Cargando estudiantes...
+              </div>
+            } @else {
+
+              @let relaciones = relacionesDeApoderado(apo.idApoderado);
+
+              @if (relaciones.length === 0) {
+                <p class="text-muted small ps-1 mb-2">Sin estudiantes asignados.</p>
+              } @else {
+                <ul class="lista-estudiantes mb-2">
+                  @for (rel of relaciones; track rel.id.idEstudiante) {
+                    @let est = obtenerEstudiante(rel.id.idEstudiante);
+                    <li class="item-estudiante">
+                      <div class="d-flex align-items-center gap-2">
+                        <span class="badge bg-info-subtle text-info-emphasis tag-parentesco">
+                          {{ rel.parentescoApoderadoEstudiante }}
+                        </span>
+                        @if (est) {
+                          <span class="fw-medium">{{ nombreCompleto(est.usuario) }}</span>
+                          <span class="text-muted small font-monospace">
+                            {{ est.usuario.rutUsuario }}
+                          </span>
+                        } @else {
+                          <span class="text-muted small">ID {{ rel.id.idEstudiante }}</span>
+                        }
+                      </div>
+                      <button class="btn btn-outline-danger btn-eliminar"
+                              (click)="eliminar(apo.idApoderado, rel.id.idEstudiante)"
+                              title="Desasignar estudiante"
+                              type="button">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" viewBox="0 0 16 16">
+                          <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
+                          <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
+                        </svg>
+                        Desasignar
+                      </button>
+                    </li>
+                  }
+                </ul>
+              }
+
+              <button class="btn btn-sm btn-asignar"
+                      (click)="abrirAsignar(apo)"
+                      [disabled]="estudiantesDisponibles().length === 0 && apoderadoModal()?.idApoderado !== apo.idApoderado"
+                      type="button">
+                + Asignar estudiante
+              </button>
+            }
+
+          </div>
+        </div>
+      }
+    </div>
+
+  }
+</main>
+
+<!-- MODAL ASIGNAR -->
+@if (apoderadoModal(); as apo) {
+  <div class="modal-overlay" (click)="cerrarModal()">
+    <div class="modal-caja" (click)="$event.stopPropagation()">
+      <div class="modal-encabezado">
+        <div>
+          <h3 class="modal-titulo">Asignar estudiante</h3>
+          <p class="text-muted small mb-0">
+            Apoderado: <strong>{{ nombreCompleto(apo.usuario) }}</strong>
+          </p>
+        </div>
+        <button class="btn-cerrar" (click)="cerrarModal()" type="button">✕</button>
+      </div>
+
+      <div class="modal-cuerpo">
+        @if (estudiantesDisponibles().length === 0) {
+          <div class="alert alert-info py-2 small mb-0">
+            Todos los estudiantes ya están asignados a este apoderado.
+          </div>
+        } @else {
+
+          <div class="mb-3">
+            <label class="form-label">Estudiante <span class="text-danger">*</span></label>
+            <select class="form-select"
+                    (change)="estudianteSeleccionado.set(+$any($event.target).value || null)">
+              <option value="">Selecciona un estudiante...</option>
+              @for (e of estudiantesDisponibles(); track e.idEstudiante) {
+                <option [value]="e.idEstudiante">
+                  {{ nombreCompleto(e.usuario) }} — {{ e.usuario.rutUsuario }}
+                </option>
+              }
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Parentesco <span class="text-danger">*</span></label>
+            <select class="form-select"
+                    (change)="parentesco.set($any($event.target).value)">
+              <option value="">Selecciona el parentesco...</option>
+              @for (op of opcionesParentesco; track op) {
+                <option [value]="op">{{ op }}</option>
+              }
+            </select>
+          </div>
+
+          @if (errorModal()) {
+            <div class="alert alert-danger py-2 small mb-0">{{ errorModal() }}</div>
+          }
+        }
+      </div>
+
+      <div class="modal-pie">
+        <button class="btn btn-outline-secondary" (click)="cerrarModal()" type="button">
+          Cancelar
+        </button>
+        @if (estudiantesDisponibles().length > 0) {
+          <button class="btn btn-primary" (click)="asignar()"
+                  [disabled]="guardando()" type="button">
+            @if (guardando()) {
+              <span class="spinner-border spinner-border-sm me-1"></span> Asignando...
+            } @else {
+              Asignar
+            }
+          </button>
+        }
+      </div>
+    </div>
+  </div>
+}

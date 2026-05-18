@@ -44,6 +44,15 @@ export class ServicioUsuarioAdmin {
 
   // ── Cuenta de acceso (ms-auth vía BFF) ─────────────────────────────────────
 
+  // Cambia la contraseña del usuario autenticado validando la actual
+  cambiarContrasena(idUsuario: number, passwordActual: string, passwordNuevo: string): Observable<void> {
+    return this.http.post<void>(`${this.api}/cuenta-acceso/cambiar-contrasena`, {
+      idUsuario,
+      passwordActual,
+      passwordNuevo,
+    });
+  }
+
   // Envía la contraseña en texto plano; el backend la hashea con BCrypt
   crearCuenta(idUsuario: number, passwordPlano: string): Observable<unknown> {
     return this.http.post(`${this.api}/cuenta-acceso/inicializar`, {
