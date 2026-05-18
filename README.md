@@ -1,59 +1,131 @@
-# FrontProyectoLibroAsistencia
+# Libro de Clases Digital — Frontend
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 19.2.26.
+Aplicación web del sistema de Libro de Clases Digital del **Colegio Bernardo O'Higgins**, desarrollada con **Angular 19** y Server-Side Rendering (SSR). Incluye la librería NPM `lib-auth` para autenticación reutilizable.
 
-## Development server
+---
 
-To start a local development server, run:
+## Requisitos previos
 
+| Herramienta | Versión mínima |
+|---|---|
+| Node.js | 18.x o superior |
+| npm | 9.x o superior |
+| Angular CLI | 19.x (`npm install -g @angular/cli`) |
+
+Verificar instalación:
 ```bash
-ng serve
+node -v && npm -v && ng version
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+---
 
-## Code scaffolding
+## Estructura del proyecto
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
-
-```bash
-ng generate component component-name
+```
+front-proyecto-libro-asistencia/
+├── src/app/
+│   ├── guards/            # authGuard (token) y adminGuard (rol ADMINISTRATIVO)
+│   ├── models/            # Interfaces TypeScript alineadas con los DTOs del backend
+│   ├── pages/
+│   │   ├── login-page/    # Página de acceso (/acceso)
+│   │   ├── dashboard/     # Panel principal con vista por rol (/dashboard)
+│   │   ├── admin/         # Mantenedor de usuarios (/admin)
+│   │   └── relaciones/    # Gestión apoderado-estudiante (/relaciones)
+│   └── services/          # Servicios HTTP hacia el BFF
+├── projects/
+│   └── lib-auth/          # Librería NPM de autenticación (componente reutilizable)
+├── package.json
+└── angular.json
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+---
+
+## Instalación
 
 ```bash
-ng generate --help
+# 1. Clonar el repositorio
+git clone <url-repositorio-frontend>
+cd front-proyecto-libro-asistencia
+
+# 2. Instalar dependencias
+npm install
+
+# 3. Compilar la librería lib-auth (OBLIGATORIO antes de iniciar)
+npx ng build lib-auth
 ```
 
-## Building
+> La librería debe compilarse cada vez que se modifique. Su output queda en `dist/lib-auth/` y es referenciado en `tsconfig.json`.
 
-To build the project run:
+---
+
+## Ejecución
 
 ```bash
-ng build
+# Modo desarrollo (con hot-reload)
+npm start
+# → Disponible en http://localhost:4200
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+> **Requisito:** el BFF debe estar corriendo en `http://localhost:8080` antes de iniciar el frontend.
 
-## Running unit tests
+---
 
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
+## Scripts disponibles
 
-```bash
-ng test
+| Script | Descripción |
+|---|---|
+| `npm start` | Servidor de desarrollo en `http://localhost:4200` |
+| `npm run build` | Compilación de producción (output en `dist/`)
+| `npx ng build lib-auth` | Compila la librería de autenticación |
+
+---
+
+## Librería NPM: `lib-auth`
+
+Componente Angular empaquetado según estándar NPM. Contiene todos los elementos de autenticación desacoplados del proyecto principal:
+
+| Elemento | Tipo | Descripción |
+|---|---|---|
+| `ComponenteFormularioAcceso` | Componente | Formulario de login con validación de RUT chileno |
+| `ComponenteContrasenaConmutable` | Componente | Input de contraseña con toggle de visibilidad |
+| `ComponenteEntradaFormulario` | Componente | Input genérico reutilizable con ControlValueAccessor |
+| `ServicioAutenticacion` | Servicio | Llama a `POST /auth/login`, guarda tokens |
+| `ServicioToken` | Servicio | Gestiona JWT en localStorage mediante Angular Signals |
+| `ServicioValidadorRut` | Servicio | Valida RUT chileno con algoritmo módulo 11 |
+| `jwtInterceptor` | Interceptor | Agrega `Authorization: Bearer <token>` a cada petición HTTP |
+| `authErrorInterceptor` | Interceptor | Redirige a `/acceso` ante respuestas 401 o 403 |
+
+---
+
+## Rutas protegidas
+
+| Ruta | Guard aplicado | Acceso |
+|---|---|---|
+| `/acceso` | — | Público |
+| `/dashboard` | `authGuard` | Cualquier usuario autenticado |
+| `/admin` | `authGuard` + `adminGuard` | Solo rol `ADMINISTRATIVO` |
+| `/relaciones` | `authGuard` + `adminGuard` | Solo rol `ADMINISTRATIVO` |
+
+---
+
+## Patrones de diseño implementados
+
+| Patrón | Implementación |
+|---|---|
+| **Interceptor** | `jwtInterceptor` y `authErrorInterceptor` interceptan y modifican peticiones HTTP |
+| **Guard** | `authGuard` y `adminGuard` protegen rutas por autenticación y rol |
+| **Facade** | `ServicioToken` encapsula toda la lógica de almacenamiento y lectura de JWT |
+| **Observer** | Angular Signals + RxJS para reactividad en servicios y componentes |
+| **Library / Plugin** | `lib-auth` es un módulo NPM independiente que puede reutilizarse en otros proyectos Angular |
+
+---
+
+## Flujo de autenticación
+
 ```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
+Usuario → /acceso → POST /auth/login (BFF:8080)
+                 → Guarda accessToken + refreshToken en localStorage
+                 → Redirige a /dashboard
+                 → jwtInterceptor agrega Bearer token en cada request
+                 → authErrorInterceptor intercepta 401/403 y redirige a /acceso
 ```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.

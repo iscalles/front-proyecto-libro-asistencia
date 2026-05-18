@@ -1,6 +1,9 @@
 import { Component, HostListener, computed, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
+import { ReactiveFormsModule, FormBuilder, Validators, AbstractControl } from '@angular/forms';
+import { HttpErrorResponse } from '@angular/common/http';
 import { ServicioToken, ServicioAutenticacion } from 'lib-auth';
+import { ServicioUsuarioAdmin } from '../../services/usuario-admin.service';
 
 const CONFIG_ROLES: Record<string, { etiqueta: string; clase: string }> = {
   DOCENTE:        { etiqueta: 'Docente',        clase: 'bg-success' },
@@ -9,17 +12,26 @@ const CONFIG_ROLES: Record<string, { etiqueta: string; clase: string }> = {
   ESTUDIANTE:     { etiqueta: 'Estudiante',     clase: 'bg-warning text-dark' },
 };
 
+// Validador de grupo: confirmar contraseña debe coincidir con passwordNuevo
+function passwordsCoinciden(group: AbstractControl) {
+  const nuevo     = group.get('passwordNuevo')?.value;
+  const confirmar = group.get('confirmarPassword')?.value;
+  return nuevo === confirmar ? null : { noCoinciden: true };
+}
+
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [RouterLink],
+  imports: [RouterLink, ReactiveFormsModule],
   templateUrl: './dashboard-page.component.html',
   styleUrl: './dashboard-page.component.scss'
 })
 export class PáginaDashboard {
-  private servicioToken = inject(ServicioToken);
-  private servicioAuth  = inject(ServicioAutenticacion);
-  private enrutador     = inject(Router);
+  private servicioToken  = inject(ServicioToken);
+  private servicioAuth   = inject(ServicioAutenticacion);
+  private servicioAdmin  = inject(ServicioUsuarioAdmin);
+  private fb             = inject(FormBuilder);
+  private enrutador      = inject(Router);
 
   readonly usuario = this.servicioToken.obtenerSeñalInfoUsuario();
 
@@ -28,18 +40,13 @@ export class PáginaDashboard {
     return roles.map(rol => CONFIG_ROLES[rol] ?? { etiqueta: rol, clase: 'bg-secondary' });
   });
 
-  // Guarda el rol que el usuario eligió; null = usar el primero disponible
   private readonly _rolSeleccionado = signal<string | null>(null);
 
-  // Rol activo: el seleccionado por el usuario, o el primero de la lista.
-  // Un usuario autenticado siempre tiene al menos un rol, así que roles[0] es seguro.
   readonly rolActivo = computed(() => {
     const roles = this.rolesFormateados();
     const seleccionado = this._rolSeleccionado();
     return roles.find(r => r.etiqueta === seleccionado) ?? roles[0];
   });
-
-  readonly estaAbiertoDropdown = signal(false);
 
   readonly saludo = computed(() => {
     const hora = new Date().getHours();
@@ -48,21 +55,89 @@ export class PáginaDashboard {
     return 'Buenas noches';
   });
 
-  toggleDropdown(evento: MouseEvent): void {
-    evento.stopPropagation(); // evita que el click llegue al HostListener del documento
-    this.estaAbiertoDropdown.update(v => !v);
+  //Dropdown de rol
+  readonly estaAbiertoDropdownRol   = signal(false);
+  readonly estaAbiertoMenuUsuario   = signal(false);
+
+  toggleDropdownRol(evento: MouseEvent): void {
+    evento.stopPropagation();
+    this.estaAbiertoDropdownRol.update(v => !v);
+    this.estaAbiertoMenuUsuario.set(false);
   }
 
-  // Cierra el dropdown cuando se hace click en cualquier otro lugar de la página
+  toggleMenuUsuario(evento: MouseEvent): void {
+    evento.stopPropagation();
+    this.estaAbiertoMenuUsuario.update(v => !v);
+    this.estaAbiertoDropdownRol.set(false);
+  }
+
   @HostListener('document:click')
-  cerrarDropdown(): void {
-    this.estaAbiertoDropdown.set(false);
+  cerrarDropdowns(): void {
+    this.estaAbiertoDropdownRol.set(false);
+    this.estaAbiertoMenuUsuario.set(false);
   }
 
   cambiarRol(rol: { etiqueta: string; clase: string }, evento: MouseEvent): void {
     evento.stopPropagation();
     this._rolSeleccionado.set(rol.etiqueta);
-    this.estaAbiertoDropdown.set(false);
+    this.estaAbiertoDropdownRol.set(false);
+  }
+
+  //Modal cambio de contraseña
+  readonly mostrarModalContrasena = signal(false);
+  readonly guardandoContrasena    = signal(false);
+  readonly errorContrasena        = signal<string | null>(null);
+  readonly exitoContrasena        = signal(false);
+
+  readonly formContrasena = this.fb.group(
+    {
+      passwordActual:    ['', Validators.required],
+      passwordNuevo:     ['', [Validators.required, Validators.minLength(6)]],
+      confirmarPassword: ['', Validators.required],
+    },
+    { validators: passwordsCoinciden }
+  );
+
+  abrirCambiarContrasena(): void {
+    this.estaAbiertoMenuUsuario.set(false);
+    this.formContrasena.reset();
+    this.errorContrasena.set(null);
+    this.exitoContrasena.set(false);
+    this.mostrarModalContrasena.set(true);
+  }
+
+  cerrarModalContrasena(): void {
+    this.mostrarModalContrasena.set(false);
+  }
+
+  errorCampoContrasena(campo: string, tipo: string): boolean {
+    const c = this.formContrasena.get(campo);
+    return !!(c?.hasError(tipo) && c.touched);
+  }
+
+  guardarContrasena(): void {
+    if (this.formContrasena.invalid) {
+      this.formContrasena.markAllAsTouched();
+      return;
+    }
+    const idUsuario = Number(this.usuario()?.idUsuario);
+    const { passwordActual, passwordNuevo } = this.formContrasena.value;
+
+    this.guardandoContrasena.set(true);
+    this.errorContrasena.set(null);
+
+    this.servicioAdmin.cambiarContrasena(idUsuario, passwordActual!, passwordNuevo!).subscribe({
+      next: () => {
+        this.guardandoContrasena.set(false);
+        this.exitoContrasena.set(true);
+        // Cierra el modal automáticamente tras 2 segundos
+        setTimeout(() => this.cerrarModalContrasena(), 2000);
+      },
+      error: (e: HttpErrorResponse) => {
+        this.guardandoContrasena.set(false);
+        this.errorContrasena.set(e.error?.message ?? 'No se pudo actualizar la contraseña.');
+      }
+    });
   }
 
   cerrarSesion(): void {

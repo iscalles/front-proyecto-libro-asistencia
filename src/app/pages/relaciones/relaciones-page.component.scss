@@ -1,0 +1,194 @@
+// ── Header ────────────────────────────────────────────────────────────────────
+
+.rel-header {
+  background-color: #1a3a5c;
+  min-height: 56px;
+  display: flex;
+  align-items: center;
+}
+
+.btn-volver {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.875rem;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  text-decoration: none;
+  &:hover { color: #fff; }
+}
+
+.separador-v {
+  width: 1px;
+  height: 20px;
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.rel-titulo {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #fff;
+}
+
+.texto-sesion {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.875rem;
+}
+
+// ── Tarjetas de apoderado ─────────────────────────────────────────────────────
+
+.tarjeta-apoderado {
+  border: 1px solid #e9ecef;
+  border-radius: 10px;
+  transition: box-shadow 0.2s ease;
+
+  &:hover { box-shadow: 0 2px 12px rgba(0, 0, 0, 0.07); }
+}
+
+.avatar-apoderado {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background-color: #1a3a5c;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+// ── Lista de estudiantes ──────────────────────────────────────────────────────
+
+.lista-estudiantes {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.item-estudiante {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 6px;
+  padding: 8px 12px;
+  flex-wrap: wrap;
+}
+
+.tag-parentesco {
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+
+.btn-eliminar {
+  font-size: 0.75rem;
+  padding: 3px 10px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.btn-asignar {
+  font-size: 0.82rem;
+  color: #1a3a5c;
+  border: 1px dashed #1a3a5c;
+  background: transparent;
+  border-radius: 6px;
+  padding: 5px 14px;
+  transition: background 0.15s, color 0.15s;
+
+  &:hover {
+    background: #1a3a5c;
+    color: #fff;
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    &:hover { background: transparent; color: #1a3a5c; }
+  }
+}
+
+// ── Modal ─────────────────────────────────────────────────────────────────────
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 1050;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  animation: fadeIn 0.15s ease;
+}
+
+.modal-caja {
+  background: #fff;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 460px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  animation: slideUp 0.18s ease;
+}
+
+.modal-encabezado {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.modal-titulo {
+  font-size: 1.05rem;
+  font-weight: 600;
+  margin: 0 0 2px;
+  color: #1a1a2e;
+}
+
+.btn-cerrar {
+  background: none;
+  border: none;
+  font-size: 1.1rem;
+  color: #6c757d;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  flex-shrink: 0;
+  line-height: 1;
+  &:hover { background: #f1f3f5; }
+}
+
+.modal-cuerpo { padding: 20px 24px; }
+
+.modal-pie {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 16px 24px;
+  border-top: 1px solid #e9ecef;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(14px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
