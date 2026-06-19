@@ -1,6 +1,6 @@
-import { Component, Input, Output, EventEmitter, forwardRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule, NG_VALUE_ACCESSOR, ControlValueAccessor } from '@angular/forms';
+import {Component, Input, Output, EventEmitter, forwardRef} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {FormsModule, NG_VALUE_ACCESSOR, ControlValueAccessor} from '@angular/forms';
 
 /**
  * ComponenteContrasenaConmutable
@@ -37,8 +37,10 @@ export class ComponenteContrasenaConmutable implements ControlValueAccessor {
   showPassword: boolean = false;
 
   // ControlValueAccessor methods
-  onChange: (value: string) => void = () => {};
-  onTouched: () => void = () => {};
+  onChange: (value: string) => void = () => {
+  };
+  onTouched: () => void = () => {
+  };
 
   writeValue(value: any): void {
     this.value = value || '';

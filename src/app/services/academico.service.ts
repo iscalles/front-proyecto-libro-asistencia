@@ -91,6 +91,9 @@ export class ServicioAcademico {
   listarCalificaciones(): Observable<Calificacion[]> {
     return this.http.get<Calificacion[]>(`${this.api}/calificaciones`);
   }
+  listarCalificacionesPorMatricula(idMatricula: number): Observable<Calificacion[]> {
+    return this.http.get<Calificacion[]>(`${this.api}/calificaciones/id_matricula/${idMatricula}`);
+  }
   crearCalificacion(dto: CalificacionRequest): Observable<Calificacion> {
     return this.http.post<Calificacion>(`${this.api}/calificaciones`, dto);
   }
