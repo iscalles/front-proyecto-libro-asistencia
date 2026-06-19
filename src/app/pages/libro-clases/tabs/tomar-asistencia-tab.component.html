@@ -1,0 +1,81 @@
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
+  <div class="d-flex align-items-center gap-2">
+    <label class="form-label mb-0">Fecha</label>
+    <input type="date" class="form-control form-control-sm" style="width: auto"
+           [value]="fecha()" (change)="onFechaChange($event)">
+  </div>
+  <button class="btn btn-outline-secondary btn-sm" (click)="cargarRoster()" type="button">
+    Actualizar
+  </button>
+</div>
+
+@if (errorRoster()) {
+  <div class="alert alert-danger">{{ errorRoster() }}</div>
+}
+
+@if (cargando()) {
+  <div class="text-center py-5 text-muted">
+    <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+    Cargando alumnos...
+  </div>
+} @else {
+  <div class="card">
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table tabla-mantenedor mb-0">
+          <thead>
+            <tr>
+              <th>Alumno</th>
+              <th style="width: 220px">Estado</th>
+              <th>Justificación</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (fila of filas.controls; track fila.value.idMatricula; let i = $index) {
+              <tr [formGroup]="fila">
+                <td class="fw-medium">{{ nombreAlumno(i) }}</td>
+                <td>
+                  <select class="form-select form-select-sm" formControlName="estadoAsistencia">
+                    @for (estado of estados; track estado) {
+                      <option [value]="estado">{{ etiquetasEstado[estado] }}</option>
+                    }
+                  </select>
+                </td>
+                <td>
+                  @if (necesitaJustificacion(i)) {
+                    <input class="form-control form-control-sm" type="text"
+                           formControlName="justificacionAsistencia"
+                           placeholder="Motivo de la justificación">
+                  } @else {
+                    <span class="text-muted small">—</span>
+                  }
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="3" class="text-center text-muted py-4">
+                  Este curso no tiene alumnos matriculados.
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  @if (roster().length > 0) {
+    <div class="d-flex justify-content-end align-items-center gap-3 mt-3">
+      @if (errorGuardar()) {
+        <span class="text-danger small">{{ errorGuardar() }}</span>
+      }
+      @if (exitoGuardar()) {
+        <span class="text-success small">Asistencia registrada correctamente.</span>
+      }
+      <button class="btn btn-primary" (click)="guardar()" [disabled]="guardando()" type="button">
+        @if (guardando()) { <span class="spinner-border spinner-border-sm me-1"></span> Guardando... }
+        @else { Guardar asistencia }
+      </button>
+    </div>
+  }
+}
