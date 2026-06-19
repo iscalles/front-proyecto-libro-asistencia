@@ -5,9 +5,10 @@ import { PáginaAdmin } from './pages/admin/admin-page.component';
 import { PáginaRelaciones } from './pages/relaciones/relaciones-page.component';
 import { PáginaAcademico } from './pages/academico/academico-page.component';
 import { PáginaSeguimiento } from './pages/seguimiento/seguimiento-page.component';
+import { PáginaLibroClases } from './pages/libro-clases/libro-clases-page.component';
 import { authGuard } from './guards/auth.guard';
-import { adminGuard } from './guards/role.guard';
 import { apoderadoGuard } from './guards/apoderado.guard';
+import { adminGuard, docenteGuard } from './guards/role.guard';
 
 export const routes: Routes = [
   {
@@ -38,6 +39,11 @@ export const routes: Routes = [
     path: 'seguimiento',
     component: PáginaSeguimiento,
     canActivate: [authGuard, apoderadoGuard]
+  },
+  {
+    path: 'libro-clases',
+    component: PáginaLibroClases,
+    canActivate: [authGuard, docenteGuard]
   },
   {
     path: '',

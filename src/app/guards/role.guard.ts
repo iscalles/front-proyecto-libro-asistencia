@@ -16,3 +16,16 @@ export const adminGuard: CanActivateFn = () => {
 
   return enrutador.createUrlTree(['/dashboard']);
 };
+
+// Guard de rol: verifica que el usuario autenticado tenga el rol DOCENTE.
+export const docenteGuard: CanActivateFn = () => {
+  const servicioToken = inject(ServicioToken);
+  const enrutador = inject(Router);
+
+  const usuario = servicioToken.obtenerInfoUsuario();
+  if (usuario?.roles?.includes('DOCENTE')) {
+    return true;
+  }
+
+  return enrutador.createUrlTree(['/dashboard']);
+};
