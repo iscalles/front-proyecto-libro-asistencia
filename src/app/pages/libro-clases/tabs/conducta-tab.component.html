@@ -1,0 +1,137 @@
+@if (errorRoster()) {
+  <div class="alert alert-danger">{{ errorRoster() }}</div>
+}
+
+<div class="row g-3">
+  <!-- ═══ LISTA DE ALUMNOS ═══════════════════════════════════════════════════════ -->
+  <div class="col-12 col-md-4">
+    <div class="card">
+      <div class="card-body p-0">
+        @if (cargandoRoster()) {
+          <div class="text-center py-4 text-muted">
+            <div class="spinner-border spinner-border-sm" role="status"></div>
+          </div>
+        } @else {
+          <ul class="list-group list-group-flush">
+            @for (alumno of roster(); track alumno.idMatricula) {
+              <li class="list-group-item list-group-item-action"
+                  [class.active]="alumnoSeleccionado()?.idMatricula === alumno.idMatricula"
+                  (click)="seleccionarAlumno(alumno)" style="cursor: pointer">
+                {{ alumno.nombreEstudiante }}
+              </li>
+            } @empty {
+              <li class="list-group-item text-muted small">Sin alumnos matriculados.</li>
+            }
+          </ul>
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ HISTORIAL DEL ALUMNO SELECCIONADO ═══════════════════════════════════════ -->
+  <div class="col-12 col-md-8">
+    @if (!alumnoSeleccionado()) {
+      <p class="text-muted">Selecciona un alumno para ver y registrar sus anotaciones de conducta.</p>
+    } @else {
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3 class="h6 fw-semibold mb-0">{{ alumnoSeleccionado()!.nombreEstudiante }}</h3>
+        <button class="btn btn-primary btn-sm" (click)="abrirCrear()" type="button">
+          + Nueva anotación
+        </button>
+      </div>
+
+      @if (cargandoHistorial()) {
+        <div class="text-center py-4 text-muted">
+          <div class="spinner-border spinner-border-sm" role="status"></div>
+        </div>
+      } @else {
+        <div class="card">
+          <div class="card-body p-0">
+            <div class="table-responsive">
+              <table class="table tabla-mantenedor mb-0">
+                <thead>
+                  <tr>
+                    <th>Fecha</th>
+                    <th>Tipo</th>
+                    <th>Descripción</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (c of historial(); track c.id_conducta) {
+                    <tr>
+                      <td>{{ c.fechaConducta }}</td>
+                      <td>
+                        <span class="badge" [class.bg-success]="c.tipoConducta === 'positiva'"
+                              [class.bg-danger]="c.tipoConducta === 'negativa'">
+                          {{ etiquetaTipo(c.tipoConducta) }}
+                        </span>
+                      </td>
+                      <td>{{ c.descripcionConducta }}</td>
+                    </tr>
+                  } @empty {
+                    <tr>
+                      <td colspan="3" class="text-center text-muted py-4">
+                        Este alumno no tiene anotaciones de conducta.
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      }
+    }
+  </div>
+</div>
+
+<!-- ═══ MODAL: NUEVA ANOTACIÓN ═══════════════════════════════════════════════════ -->
+@if (modalCrear()) {
+  <div class="modal-overlay" (click)="cerrarCrear()">
+    <div class="modal-caja modal-caja--sm" (click)="$event.stopPropagation()">
+      <div class="modal-encabezado">
+        <h3 class="modal-titulo">Nueva anotación de conducta</h3>
+        <button class="btn-cerrar" (click)="cerrarCrear()" type="button">✕</button>
+      </div>
+
+      <form [formGroup]="form" class="modal-cuerpo">
+        <div class="row g-3">
+          <div class="col-12">
+            <label class="form-label">Tipo <span class="text-danger">*</span></label>
+            <select class="form-select" formControlName="tipoConducta">
+              @for (tipo of tipos; track tipo) {
+                <option [value]="tipo">{{ etiquetasTipo[tipo] }}</option>
+              }
+            </select>
+          </div>
+          <div class="col-12">
+            <label class="form-label">Fecha <span class="text-danger">*</span></label>
+            <input class="form-control" type="date" formControlName="fechaConducta">
+          </div>
+          <div class="col-12">
+            <label class="form-label">Descripción <span class="text-danger">*</span></label>
+            <textarea class="form-control" rows="3"
+                      [class.is-invalid]="error('descripcionConducta','required')"
+                      formControlName="descripcionConducta"
+                      placeholder="Describe la situación observada"></textarea>
+            @if (error('descripcionConducta','required')) {
+              <div class="invalid-feedback">Este campo es obligatorio.</div>
+            }
+          </div>
+        </div>
+      </form>
+
+      @if (errorGuardar()) {
+        <div class="alert alert-danger mx-4 mb-0 py-2 small">{{ errorGuardar() }}</div>
+      }
+
+      <div class="modal-pie">
+        <button class="btn btn-outline-secondary" (click)="cerrarCrear()" type="button">Cancelar</button>
+        <button class="btn btn-primary" (click)="guardar()" [disabled]="guardando()" type="button">
+          @if (guardando()) { <span class="spinner-border spinner-border-sm me-1"></span> Guardando... }
+          @else { Registrar }
+        </button>
+      </div>
+    </div>
+  </div>
+}

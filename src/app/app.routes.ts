@@ -4,8 +4,9 @@ import { PáginaDashboard } from './pages/dashboard/dashboard-page.component';
 import { PáginaAdmin } from './pages/admin/admin-page.component';
 import { PáginaRelaciones } from './pages/relaciones/relaciones-page.component';
 import { PáginaAcademico } from './pages/academico/academico-page.component';
+import { PáginaLibroClases } from './pages/libro-clases/libro-clases-page.component';
 import { authGuard } from './guards/auth.guard';
-import { adminGuard } from './guards/role.guard';
+import { adminGuard, docenteGuard } from './guards/role.guard';
 
 export const routes: Routes = [
   {
@@ -31,6 +32,11 @@ export const routes: Routes = [
     path: 'academico',
     component: PáginaAcademico,
     canActivate: [authGuard, adminGuard]
+  },
+  {
+    path: 'libro-clases',
+    component: PáginaLibroClases,
+    canActivate: [authGuard, docenteGuard]
   },
   {
     path: '',
