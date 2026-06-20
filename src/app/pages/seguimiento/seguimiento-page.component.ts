@@ -8,7 +8,7 @@ import { ServicioRelaciones } from '../../services/relaciones.service';
 import { ServicioAcademico } from '../../services/academico.service';
 import { ServicioSeguimiento } from '../../services/seguimiento.service';
 import { EstudianteResponse, RelacionApEst } from '../../models/relaciones.models';
-import { Matricula, Calificacion, Evaluacion } from '../../models/academico.models';
+import { Matricula, Calificacion } from '../../models/academico.models';
 import { Asistencia, ResumenCalificaciones, ResumenAsistencia } from '../../models/seguimiento.models';
 
 interface AlumnoConParentesco {
@@ -43,21 +43,17 @@ export class PáginaSeguimiento implements OnInit {
   errorAsistencia = signal('');
   matriculas = signal<Matricula[]>([]);
   calificaciones = signal<Calificacion[]>([]);
-  evaluaciones = signal<Evaluacion[]>([]);
   asistencias = signal<Asistencia[]>([]);
 
   // ── Computed: resumen calificaciones ────────────────────────────────────────
   resumenCalificaciones = computed<ResumenCalificaciones[]>(() => {
     const cals = this.calificaciones();
-    const evals = this.evaluaciones();
     if (!cals.length) return [];
 
-    const evalMap = new Map<number, Evaluacion>(evals.map(e => [e.idEvaluacion, e]));
     const porAsignatura = new Map<string, { nota: number; nombre: string; fecha: string }[]>();
 
     for (const c of cals) {
-      const ev = evalMap.get(c.idEvaluacion);
-      const asignatura = ev?.nombreAsignatura ?? 'Sin asignatura';
+      const asignatura = c.nombreAsignatura ?? 'Sin asignatura';
       if (!porAsignatura.has(asignatura)) porAsignatura.set(asignatura, []);
       porAsignatura.get(asignatura)!.push({
         nota: c.notaCalificacion,
@@ -161,7 +157,6 @@ export class PáginaSeguimiento implements OnInit {
     this.calificaciones.set([]);
     this.asistencias.set([]);
     this.matriculas.set([]);
-    this.evaluaciones.set([]);
     this.errorDetalle.set('');
     this.errorAsistencia.set('');
   }
@@ -172,7 +167,6 @@ export class PáginaSeguimiento implements OnInit {
 
     forkJoin({
       matriculas: this.servicioAcademico.listarMatriculas(),
-      evaluaciones: this.servicioAcademico.listarEvaluaciones(),
       asistencias: this.servicioSeguimiento.obtenerAsistencias().pipe(
         catchError(() => {
           this.errorAsistencia.set('El servicio de asistencia no está disponible en este momento.');
@@ -180,12 +174,11 @@ export class PáginaSeguimiento implements OnInit {
         })
       ),
     }).subscribe({
-      next: ({ matriculas, evaluaciones, asistencias }) => {
+      next: ({ matriculas, asistencias }) => {
         const matriculasAlumno = matriculas.filter(
           m => m.estudianteIdUsuario === estudiante.usuario.idUsuario
         );
         this.matriculas.set(matriculasAlumno);
-        this.evaluaciones.set(evaluaciones);
 
         const idsMatricula = matriculasAlumno.map(m => m.idMatricula);
 

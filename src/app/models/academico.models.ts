@@ -91,6 +91,7 @@ export interface Calificacion {
   estudianteIdUsuario: number;
   idEvaluacion: number;
   nombreEvaluacion: string;
+  nombreAsignatura: string;
   fechaEvaluacion: string;
   fechaRegistro: string;
   creadoPorIdUsuario: number;
