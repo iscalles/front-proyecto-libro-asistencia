@@ -1,0 +1,120 @@
+<!-- ═══ INDICADOR DE % ASISTENCIA ════════════════════════════════════════════════ -->
+<div class="card mb-4">
+  <div class="card-body">
+    <div class="d-flex flex-wrap justify-content-between align-items-end gap-3 mb-3">
+      <h3 class="h6 fw-semibold mb-0">Resumen del periodo</h3>
+      <div class="d-flex align-items-center gap-2">
+        <label class="form-label mb-0 small">Desde</label>
+        <input type="date" class="form-control form-control-sm" style="width: auto"
+               [value]="desde()" (change)="onDesdeChange($event)">
+        <label class="form-label mb-0 small">Hasta</label>
+        <input type="date" class="form-control form-control-sm" style="width: auto"
+               [value]="hasta()" (change)="onHastaChange($event)">
+        <button class="btn btn-outline-secondary btn-sm" (click)="cargarResumen()" type="button">
+          Calcular
+        </button>
+      </div>
+    </div>
+
+    @if (errorResumen()) {
+      <div class="alert alert-danger py-2 small">{{ errorResumen() }}</div>
+    }
+
+    @if (cargandoResumen()) {
+      <div class="text-center py-4 text-muted">
+        <div class="spinner-border spinner-border-sm" role="status"></div>
+      </div>
+    } @else if (resumen()) {
+      @if (resumen(); as r) {
+      <div class="row g-3">
+        <div class="col-6 col-md-3">
+          <div class="tarjeta-indicador bg-primary-subtle">
+            <div class="valor text-primary">{{ r.porcentajeAsistencia.toFixed(1) }}%</div>
+            <div class="etiqueta">Asistencia</div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="tarjeta-indicador bg-success-subtle">
+            <div class="valor text-success">{{ r.totalPresentes }}</div>
+            <div class="etiqueta">Presentes</div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="tarjeta-indicador bg-danger-subtle">
+            <div class="valor text-danger">{{ r.totalAusentes }}</div>
+            <div class="etiqueta">Ausentes</div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="tarjeta-indicador bg-warning-subtle">
+            <div class="valor text-warning-emphasis">{{ r.totalJustificados }}</div>
+            <div class="etiqueta">Justificados</div>
+          </div>
+        </div>
+      </div>
+      <p class="text-muted small mt-3 mb-0">
+        {{ r.totalRegistros }} registro(s) entre {{ r.desde }} y {{ r.hasta }}.
+      </p>
+      }
+    }
+  </div>
+</div>
+
+<!-- ═══ DETALLE POR DÍA ═══════════════════════════════════════════════════════ -->
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
+  <h3 class="h6 fw-semibold mb-0">Detalle del día</h3>
+  <input type="date" class="form-control form-control-sm" style="width: auto"
+         [value]="fecha()" (change)="onFechaChange($event)">
+</div>
+
+@if (errorDia()) {
+  <div class="alert alert-danger">{{ errorDia() }}</div>
+}
+
+@if (cargandoDia()) {
+  <div class="text-center py-5 text-muted">
+    <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+    Cargando...
+  </div>
+} @else {
+  <div class="card">
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table tabla-mantenedor mb-0">
+          <thead>
+            <tr>
+              <th>Alumno</th>
+              <th>RUT</th>
+              <th>Estado</th>
+              <th>Justificación</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (a of reporteDia(); track a.idMatricula) {
+              <tr>
+                <td class="fw-medium">{{ a.nombreEstudiante }}</td>
+                <td>{{ a.rutEstudiante }}</td>
+                <td>
+                  <span class="badge"
+                        [class.bg-success]="a.estadoAsistencia.toLowerCase() === 'presente'"
+                        [class.bg-danger]="a.estadoAsistencia.toLowerCase() === 'ausente'"
+                        [class.bg-warning]="a.estadoAsistencia.toLowerCase() === 'justificado'"
+                        [class.bg-secondary]="a.estadoAsistencia.toLowerCase() === 'sin registro'">
+                    {{ etiquetaEstado(a.estadoAsistencia) }}
+                  </span>
+                </td>
+                <td>{{ a.justificacionAsistencia ?? '—' }}</td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="4" class="text-center text-muted py-4">
+                  Este curso no tiene alumnos matriculados.
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+}

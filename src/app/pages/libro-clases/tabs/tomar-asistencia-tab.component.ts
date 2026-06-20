@@ -38,6 +38,11 @@ export class TomarAsistenciaTab implements OnInit, OnChanges {
   readonly errorGuardar = signal<string | null>(null);
   readonly exitoGuardar = signal(false);
 
+  readonly modalConfirmacion = signal(false);
+  readonly resumenConfirmacion = signal<{ presentes: number; ausentes: number; justificados: number }>({
+    presentes: 0, ausentes: 0, justificados: 0,
+  });
+
   readonly fecha = signal(new Date().toISOString().slice(0, 10));
 
   filas!: FormArray<FormGroup>;
@@ -64,7 +69,7 @@ export class TomarAsistenciaTab implements OnInit, OnChanges {
         this.filas = this.fb.array(
           alumnos.map(a => this.fb.group({
             idMatricula: [a.idMatricula],
-            estadoAsistencia: ['presente' as EstadoAsistencia, Validators.required],
+            estadoAsistencia: ['Presente' as EstadoAsistencia, Validators.required],
             justificacionAsistencia: [''],
           }))
         );
@@ -78,7 +83,7 @@ export class TomarAsistenciaTab implements OnInit, OnChanges {
   }
 
   necesitaJustificacion(i: number): boolean {
-    return this.filas.at(i).value.estadoAsistencia === 'justificado';
+    return this.filas.at(i).value.estadoAsistencia === 'Justificado';
   }
 
   nombreAlumno(i: number): string {
@@ -86,10 +91,31 @@ export class TomarAsistenciaTab implements OnInit, OnChanges {
     return this.roster().find(a => a.idMatricula === idMatricula)?.nombreEstudiante ?? '';
   }
 
-  guardar(): void {
+  rutAlumno(i: number): string {
+    const idMatricula = this.filas.at(i).value.idMatricula;
+    return this.roster().find(a => a.idMatricula === idMatricula)?.rutEstudiante ?? '';
+  }
+
+  // ── Confirmación antes de guardar ───────────────────────────────────────────
+  abrirConfirmacion(): void {
     if (!this.filas || this.filas.length === 0) return;
     this.filas.markAllAsTouched();
 
+    const estados = this.filas.controls.map(g => g.value.estadoAsistencia as EstadoAsistencia);
+    this.resumenConfirmacion.set({
+      presentes: estados.filter(e => e === 'Presente').length,
+      ausentes: estados.filter(e => e === 'Ausente').length,
+      justificados: estados.filter(e => e === 'Justificado').length,
+    });
+    this.errorGuardar.set(null);
+    this.modalConfirmacion.set(true);
+  }
+
+  cerrarConfirmacion(): void {
+    this.modalConfirmacion.set(false);
+  }
+
+  confirmarGuardar(): void {
     const detalles = this.filas.controls.map(g => ({
       idMatricula: g.value.idMatricula,
       estadoAsistencia: g.value.estadoAsistencia as EstadoAsistencia,
@@ -109,10 +135,12 @@ export class TomarAsistenciaTab implements OnInit, OnChanges {
       next: () => {
         this.guardando.set(false);
         this.exitoGuardar.set(true);
+        this.modalConfirmacion.set(false);
       },
       error: (e: HttpErrorResponse) => {
         this.guardando.set(false);
         this.errorGuardar.set(e.error?.message ?? 'No se pudo registrar la asistencia.');
+        this.modalConfirmacion.set(false);
       }
     });
   }

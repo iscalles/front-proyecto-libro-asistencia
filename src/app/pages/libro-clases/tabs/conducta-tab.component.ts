@@ -1,4 +1,4 @@
-import { Component, OnInit, OnChanges, inject, signal, input } from '@angular/core';
+import { Component, OnInit, OnChanges, inject, signal, computed, input } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ServicioToken } from 'lib-auth';
@@ -34,6 +34,17 @@ export class ConductaTab implements OnInit, OnChanges {
   readonly roster = signal<RosterAlumno[]>([]);
   readonly cargandoRoster = signal(false);
   readonly errorRoster = signal<string | null>(null);
+
+  readonly busqueda = signal('');
+
+  readonly rosterFiltrado = computed(() => {
+    const q = this.busqueda().toLowerCase().trim();
+    if (!q) return this.roster();
+    return this.roster().filter(a =>
+      a.nombreEstudiante.toLowerCase().includes(q) ||
+      a.rutEstudiante?.toLowerCase().includes(q)
+    );
+  });
 
   readonly alumnoSeleccionado = signal<RosterAlumno | null>(null);
   readonly historial = signal<Conducta[]>([]);

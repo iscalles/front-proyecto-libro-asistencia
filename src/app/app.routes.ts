@@ -6,6 +6,8 @@ import { PáginaRelaciones } from './pages/relaciones/relaciones-page.component'
 import { PáginaAcademico } from './pages/academico/academico-page.component';
 import { PáginaSeguimiento } from './pages/seguimiento/seguimiento-page.component';
 import { PáginaLibroClases } from './pages/libro-clases/libro-clases-page.component';
+import { PáginaReportes } from './pages/reportes/reportes-page.component';
+import { PáginaCalificaciones } from './pages/calificaciones/calificaciones-page.component';
 import { authGuard } from './guards/auth.guard';
 import { apoderadoGuard } from './guards/apoderado.guard';
 import { adminGuard, docenteGuard } from './guards/role.guard';
@@ -43,6 +45,16 @@ export const routes: Routes = [
   {
     path: 'libro-clases',
     component: PáginaLibroClases,
+    canActivate: [authGuard, docenteGuard]
+  },
+  {
+    path: 'reportes',
+    component: PáginaReportes,
+    canActivate: [authGuard, adminGuard]
+  },
+  {
+    path: 'calificaciones',
+    component: PáginaCalificaciones,
     canActivate: [authGuard, docenteGuard]
   },
   {
