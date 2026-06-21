@@ -25,6 +25,7 @@ export class ServicioAutenticacion {
         // Guardar tokens
         this.servicioToken.guardarToken(respuesta.accessToken);
         this.servicioToken.guardarRefreshToken(respuesta.refreshToken);
+        this.servicioToken.guardarExpiracion(respuesta.expiresIn);
         // Guardar info del usuario
         this.servicioToken.guardarInfoUsuario({
           idUsuario: respuesta.idUsuario,
@@ -38,6 +39,48 @@ export class ServicioAutenticacion {
         const errorAutenticacion: ErrorAutenticacion = {
           codigo: error.error?.codigo || 'ERROR_DESCONOCIDO',
           mensaje: error.error?.mensaje || 'Error al iniciar sesión',
+          timestamp: Date.now()
+        };
+        return throwError(() => errorAutenticacion);
+      })
+    );
+  }
+
+  // Pide un access token nuevo usando el refresh token guardado.
+  // El backend rota ambos tokens (devuelve un refreshToken nuevo también).
+  refrescarSesion(): Observable<RespuestaAutenticacion> {
+    const refreshToken = this.servicioToken.obtenerRefreshToken();
+    if (!refreshToken) {
+      return throwError(() => ({
+        codigo: 'SIN_REFRESH_TOKEN',
+        mensaje: 'No hay sesión activa para extender',
+        timestamp: Date.now()
+      } as ErrorAutenticacion));
+    }
+
+    return this.clienteHttp.post<RespuestaAutenticacion>(
+      `${this.urlBase}/refresh`,
+      { refreshToken }
+    ).pipe(
+      tap(respuesta => {
+        this.servicioToken.guardarToken(respuesta.accessToken);
+        this.servicioToken.guardarRefreshToken(respuesta.refreshToken);
+        this.servicioToken.guardarExpiracion(respuesta.expiresIn);
+
+        // El backend no devuelve el RUT en el refresh; se conserva el que ya teníamos guardado.
+        const infoActual = this.servicioToken.obtenerInfoUsuario();
+        this.servicioToken.guardarInfoUsuario({
+          idUsuario: respuesta.idUsuario,
+          nombre: respuesta.nombre,
+          correo: respuesta.correo,
+          roles: respuesta.roles,
+          rutUsuario: infoActual?.rutUsuario ?? ''
+        });
+      }),
+      catchError(error => {
+        const errorAutenticacion: ErrorAutenticacion = {
+          codigo: error.error?.codigo || 'ERROR_REFRESH',
+          mensaje: error.error?.mensaje || 'No se pudo extender la sesión',
           timestamp: Date.now()
         };
         return throwError(() => errorAutenticacion);

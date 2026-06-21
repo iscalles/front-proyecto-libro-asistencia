@@ -1,0 +1,31 @@
+@if (mostrar()) {
+  <div class="modal-expiracion-overlay">
+    <div class="modal-expiracion-caja">
+      <div class="modal-expiracion-icono">⏳</div>
+
+      <h3 class="modal-expiracion-titulo">Tu sesión está por expirar</h3>
+      <p class="modal-expiracion-texto">
+        Por seguridad, tu sesión se cerrará en
+        <strong class="modal-expiracion-contador">{{ tiempoFormateado() }}</strong>
+        si no haces nada.
+      </p>
+
+      @if (error()) {
+        <div class="modal-expiracion-error">{{ error() }}</div>
+      }
+
+      <div class="modal-expiracion-acciones">
+        <button class="btn-secundario" (click)="cerrarSesion()" type="button">
+          Cerrar sesión
+        </button>
+        <button class="btn-primario" (click)="extenderSesion()" [disabled]="extendiendo()" type="button">
+          @if (extendiendo()) {
+            Extendiendo...
+          } @else {
+            Mantener sesión activa
+          }
+        </button>
+      </div>
+    </div>
+  </div>
+}
