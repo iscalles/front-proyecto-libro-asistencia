@@ -4,19 +4,18 @@
 } @else {
 
 <!-- Barra de herramientas -->
-<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
-  <div>
-    <h2 class="h5 fw-semibold mb-0">Listado de cursos</h2>
-    <p class="text-muted small mb-0">
-      {{ cursosFiltrados().length }} de {{ cursos().length }} curso(s)
-    </p>
-  </div>
-  <div class="d-flex gap-2 flex-wrap">
-    <div class="input-busqueda">
+<div class="mb-4">
+  <h2 class="h5 fw-semibold mb-0">Listado de cursos</h2>
+  <p class="text-muted small mb-3">
+    {{ cursosFiltrados().length }} de {{ cursos().length }} curso(s)
+  </p>
+
+  <div class="d-flex flex-wrap gap-2 align-items-center">
+    <div class="input-busqueda flex-grow-1">
       <svg class="icono-busqueda" xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
         <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.099zm-5.242 1.656a5.5 5.5 0 1 1 0-11 5.5 5.5 0 0 1 0 11z"/>
       </svg>
-      <input class="form-control form-control-sm input-busqueda__campo"
+      <input class="form-control form-control-sm input-busqueda__campo w-100"
              type="text"
              placeholder="Buscar por grado, sección o año..."
              [value]="busqueda()"

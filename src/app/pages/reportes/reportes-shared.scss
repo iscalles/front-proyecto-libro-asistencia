@@ -87,6 +87,67 @@
   }
 }
 
+// ── Buscador ──────────────────────────────────────────────────────────────────
+.input-busqueda {
+  position: relative;
+  display: flex;
+  align-items: center;
+
+  &__campo {
+    padding-left: 30px;
+    min-width: 220px;
+  }
+
+  &--grande {
+    .input-busqueda__campo {
+      padding-left: 40px;
+      padding-top: 10px;
+      padding-bottom: 10px;
+      font-size: 1rem;
+    }
+
+    .icono-busqueda {
+      left: 14px;
+    }
+  }
+}
+
+.icono-busqueda {
+  position: absolute;
+  left: 9px;
+  color: #adb5bd;
+  pointer-events: none;
+}
+
+// Bootstrap's form-select-lg trae un font-size mayor al del buscador; se nivela
+// para que ambos controles se vean consistentes sin tocar el alto/padding del select.
+.selector-anio {
+  font-size: 1rem;
+}
+
+// ── Tarjeta de selección de curso ───────────────────────────────────────────────
+.tarjeta-curso {
+  cursor: pointer;
+  border: none;
+  transition: box-shadow 0.15s, transform 0.15s;
+
+  &:hover {
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+  }
+
+  &--color-0 { background-color: #e7f3ff; }
+  &--color-1 { background-color: #e8f8ee; }
+  &--color-2 { background-color: #fff4e5; }
+  &--color-3 { background-color: #f3ecfb; }
+  &--color-4 { background-color: #fdeaf0; }
+  &--color-5 { background-color: #e6fbf8; }
+}
+
+.icono-curso {
+  font-size: 1.6rem;
+}
+
 // ── Indicadores ───────────────────────────────────────────────────────────────
 .tarjeta-indicador {
   border-radius: 10px;

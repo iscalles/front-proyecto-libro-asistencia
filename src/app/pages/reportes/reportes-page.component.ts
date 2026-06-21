@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { Router } from '@angular/router';
 import { ServicioToken } from 'lib-auth';
 import { ServicioAcademico } from '../../services/academico.service';
@@ -29,6 +29,38 @@ export class PáginaReportes implements OnInit {
   readonly cursoSeleccionado = signal<Curso | null>(null);
   readonly tabActiva = signal<Tab>('asistencia');
 
+  // ── Búsqueda y filtro de año sobre la grilla de tarjetas ────────────────────
+  readonly busquedaCurso = signal('');
+
+  // Por defecto se filtra por el año en curso; "" significa "todos los años"
+  readonly anioSeleccionado = signal<string>(String(new Date().getFullYear()));
+
+  readonly aniosDisponibles = computed(() => {
+    const anios = new Set(this.cursos().map(c => c.anioCurso));
+    return [...anios].sort((a, b) => b - a);
+  });
+
+  readonly cursosOrdenados = computed(() =>
+    [...this.cursos()].sort((a, b) =>
+      a.gradoCurso.localeCompare(b.gradoCurso, 'es', { numeric: true }) ||
+      a.seccionCurso.localeCompare(b.seccionCurso, 'es')
+    )
+  );
+
+  readonly cursosFiltrados = computed(() => {
+    const q = this.busquedaCurso().toLowerCase().trim();
+    const anio = this.anioSeleccionado();
+    let lista = this.cursosOrdenados();
+
+    if (anio) {
+      lista = lista.filter(c => String(c.anioCurso) === anio);
+    }
+    if (q) {
+      lista = lista.filter(c => `${c.gradoCurso} ${c.seccionCurso}`.toLowerCase().includes(q));
+    }
+    return lista;
+  });
+
   ngOnInit(): void {
     this.cargarCursos();
   }
@@ -48,9 +80,17 @@ export class PáginaReportes implements OnInit {
     });
   }
 
-  onCursoChange(idCurso: string): void {
-    const curso = this.cursos().find(c => c.id === Number(idCurso)) ?? null;
+  colorTarjeta(i: number): string {
+    return `tarjeta-curso--color-${i % 6}`;
+  }
+
+  seleccionarCurso(curso: Curso): void {
     this.cursoSeleccionado.set(curso);
+    this.tabActiva.set('asistencia');
+  }
+
+  volverASeleccion(): void {
+    this.cursoSeleccionado.set(null);
   }
 
   irAlDashboard(): void {

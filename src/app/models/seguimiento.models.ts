@@ -8,6 +8,7 @@ export interface Asistencia {
 
 export interface ResumenCalificaciones {
   nombreAsignatura: string;
+  nombreDocente: string;
   promedio: number;
   calificaciones: { nombre: string; fecha: string; nota: number }[];
 }

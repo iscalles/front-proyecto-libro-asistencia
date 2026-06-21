@@ -8,6 +8,7 @@ export class ServicioToken {
   private readonly REFRESH_TOKEN_KEY = 'refreshToken';
   private readonly USER_INFO_KEY = 'infoUsuario';
   private readonly EXPIRA_EN_KEY = 'expiraEn';
+  private readonly ROL_ACTIVO_KEY = 'rolActivo';
 
   private tokenSignal = signal<string | null>(this.obtenerTokenDelAlmacenamiento());
   private infoUsuarioSignal = signal<InfoUsuario | null>(this.obtenerInfoUsuarioDelAlmacenamiento());
@@ -56,11 +57,23 @@ export class ServicioToken {
     return this.obtenerToken() !== null && this.obtenerToken() !== '';
   }
 
+  // Recuerda qué rol estaba viendo el usuario en el dashboard (cuando tiene varios roles),
+  // para que volver desde un módulo no lo regrese siempre al primer rol por defecto.
+  guardarRolActivo(rol: string): void {
+    localStorage.setItem(this.ROL_ACTIVO_KEY, rol);
+  }
+
+  obtenerRolActivo(): string | null {
+    if (typeof window === 'undefined') return null;
+    return localStorage.getItem(this.ROL_ACTIVO_KEY);
+  }
+
   limpiar(): void {
     localStorage.removeItem(this.TOKEN_KEY);
     localStorage.removeItem(this.REFRESH_TOKEN_KEY);
     localStorage.removeItem(this.USER_INFO_KEY);
     localStorage.removeItem(this.EXPIRA_EN_KEY);
+    localStorage.removeItem(this.ROL_ACTIVO_KEY);
     this.tokenSignal.set(null);
     this.infoUsuarioSignal.set(null);
   }
