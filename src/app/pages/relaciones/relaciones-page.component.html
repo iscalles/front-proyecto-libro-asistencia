@@ -1,11 +1,11 @@
 <!-- HEADER -->
 <header class="rel-header shadow-sm">
   <div class="container-fluid px-4 d-flex align-items-center gap-3">
-    <button class="btn btn-link btn-volver p-0" (click)="irAlAdmin()" type="button">
+    <button class="btn btn-link btn-volver p-0" (click)="irAlDashboard()" type="button">
       <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16">
         <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8z"/>
       </svg>
-      Volver a Gestión
+      Dashboard
     </button>
     <div class="separador-v"></div>
     <h1 class="rel-titulo mb-0">Gestión de Relaciones</h1>
@@ -21,16 +21,25 @@
 <!-- CONTENIDO -->
 <main class="container py-4">
 
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <div>
-      <h2 class="h5 fw-semibold mb-0">Apoderado → Estudiante</h2>
-      <p class="text-muted small mb-0">
-        Asigna y gestiona qué estudiantes tiene cada apoderado.
-      </p>
+  <div class="mb-4">
+    <h2 class="h5 fw-semibold mb-0">Apoderado → Estudiante</h2>
+    <p class="text-muted small mb-3">
+      Asigna y gestiona qué estudiantes tiene cada apoderado.
+    </p>
+
+    <div class="d-flex flex-wrap gap-2 align-items-center">
+      <div class="input-busqueda flex-grow-1">
+        <svg class="icono-busqueda" xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
+          <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.099zm-5.242 1.656a5.5 5.5 0 1 1 0-11 5.5 5.5 0 0 1 0 11z"/>
+        </svg>
+        <input class="form-control form-control-sm input-busqueda__campo w-100" type="text"
+               placeholder="Buscar apoderado por nombre o RUT..."
+               [value]="busquedaApoderado()" (input)="busquedaApoderado.set($any($event.target).value)">
+      </div>
+      <button class="btn btn-outline-secondary btn-sm" (click)="cargarDatos()" type="button">
+        Actualizar
+      </button>
     </div>
-    <button class="btn btn-outline-secondary btn-sm" (click)="cargarDatos()" type="button">
-      Actualizar
-    </button>
   </div>
 
   @if (error()) {
@@ -48,10 +57,14 @@
       <div class="card text-center py-5">
         <p class="text-muted mb-0">No hay apoderados registrados en el sistema.</p>
       </div>
+    } @else if (apoderadosFiltrados().length === 0) {
+      <div class="card text-center py-5">
+        <p class="text-muted mb-0">Sin resultados para "<strong>{{ busquedaApoderado() }}</strong>".</p>
+      </div>
     }
 
     <div class="d-flex flex-column gap-3">
-      @for (apo of apoderados(); track apo.idApoderado) {
+      @for (apo of apoderadosFiltrados(); track apo.idApoderado) {
         <div class="card tarjeta-apoderado">
           <div class="card-body">
 
@@ -155,15 +168,27 @@
 
           <div class="mb-3">
             <label class="form-label">Estudiante <span class="text-danger">*</span></label>
-            <select class="form-select"
-                    (change)="estudianteSeleccionado.set(+$any($event.target).value || null)">
-              <option value="">Selecciona un estudiante...</option>
-              @for (e of estudiantesDisponibles(); track e.idEstudiante) {
-                <option [value]="e.idEstudiante">
-                  {{ nombreCompleto(e.usuario) }} — {{ e.usuario.rutUsuario }}
-                </option>
+            <div class="input-busqueda mb-2">
+              <svg class="icono-busqueda" xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.099zm-5.242 1.656a5.5 5.5 0 1 1 0-11 5.5 5.5 0 0 1 0 11z"/>
+              </svg>
+              <input class="form-control input-busqueda__campo w-100" type="text"
+                     placeholder="Buscar por RUT o nombre..."
+                     [value]="busquedaEstudianteModal()"
+                     (input)="busquedaEstudianteModal.set($any($event.target).value)">
+            </div>
+
+            <ul class="lista-seleccion-estudiante">
+              @for (e of estudiantesDisponiblesFiltrados(); track e.idEstudiante) {
+                <li [class.activo]="estudianteSeleccionado() === e.idEstudiante"
+                    (click)="seleccionarEstudianteModal(e.idEstudiante)">
+                  <span class="fw-medium">{{ nombreCompleto(e.usuario) }}</span>
+                  <span class="text-muted small font-monospace">{{ e.usuario.rutUsuario }}</span>
+                </li>
+              } @empty {
+                <li class="lista-seleccion-estudiante__vacio">Sin resultados para esa búsqueda.</li>
               }
-            </select>
+            </ul>
           </div>
 
           <div class="mb-3">

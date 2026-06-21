@@ -15,7 +15,7 @@
         <!-- Dropdown de ROL (solo si tiene más de uno) -->
         @if (rolesFormateados().length > 1) {
           <div class="dropdown">
-            <button class="btn btn-outline-light btn-sm dropdown-toggle-custom d-flex align-items-center gap-2"
+            <button class="btn btn-sm dropdown-toggle-custom d-flex align-items-center gap-2"
                     (click)="toggleDropdownRol($event)" type="button">
               <span class="badge {{ rolActivo().clase }}">{{ rolActivo().etiqueta }}</span>
               <svg class="icono-chevron" [class.rotado]="estaAbiertoDropdownRol()"
@@ -136,7 +136,7 @@
               </div>
               <h5 class="card-title">Calificaciones</h5>
               <p class="card-text text-muted small">Ingresa y gestiona las notas de tus alumnos.</p>
-              <button class="btn btn-success btn-sm" disabled>Próximamente</button>
+              <a routerLink="/calificaciones" class="btn btn-success btn-sm">Abrir Calificaciones</a>
             </div>
           </div>
         </div>
@@ -215,7 +215,7 @@
               </div>
               <h5 class="card-title">Reportes</h5>
               <p class="card-text text-muted small">Genera informes de asistencia y rendimiento.</p>
-              <button class="btn btn-danger btn-sm" disabled>Próximamente</button>
+              <a routerLink="/reportes" class="btn btn-danger btn-sm">Abrir módulo</a>
             </div>
           </div>
         </div>

@@ -40,7 +40,7 @@ export class PáginaDashboard {
     return roles.map(rol => CONFIG_ROLES[rol] ?? { etiqueta: rol, clase: 'bg-secondary' });
   });
 
-  private readonly _rolSeleccionado = signal<string | null>(null);
+  private readonly _rolSeleccionado = signal<string | null>(this.servicioToken.obtenerRolActivo());
 
   readonly rolActivo = computed(() => {
     const roles = this.rolesFormateados();
@@ -80,6 +80,7 @@ export class PáginaDashboard {
   cambiarRol(rol: { etiqueta: string; clase: string }, evento: MouseEvent): void {
     evento.stopPropagation();
     this._rolSeleccionado.set(rol.etiqueta);
+    this.servicioToken.guardarRolActivo(rol.etiqueta);
     this.estaAbiertoDropdownRol.set(false);
   }
 

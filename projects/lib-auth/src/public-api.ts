@@ -7,11 +7,13 @@
 export { ComponenteFormularioAcceso } from './lib/components/login-formulario/login-formulario.component';
 export { ComponenteContrasenaConmutable } from './lib/components/password-input/password-input.component';
 export { ComponenteEntradaFormulario } from './lib/components/input-formulario/input-formulario.component';
+export { ComponenteModalExpiracionSesion } from './lib/components/session-expiry-modal/session-expiry-modal.component';
 
 // Servicios
 export { ServicioAutenticacion } from './lib/services/auth.service';
 export { ServicioToken } from './lib/services/token.service';
 export { ServicioValidadorRut } from './lib/services/rut-validator.service';
+export { ServicioExpiracionSesion } from './lib/services/session-expiry.service';
 export { AUTH_API_URL } from './lib/services/auth.service';
 
 // Interceptores

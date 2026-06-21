@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { Router } from '@angular/router';
 import { ServicioToken } from 'lib-auth';
 import { ServicioAcademico } from '../../services/academico.service';
@@ -27,6 +27,18 @@ export class PáginaLibroClases implements OnInit {
   readonly cargandoCursos = signal(false);
   readonly errorCursos = signal<string | null>(null);
 
+  readonly busquedaCurso = signal('');
+
+  readonly misCursosFiltrados = computed(() => {
+    const q = this.busquedaCurso().toLowerCase().trim();
+    if (!q) return this.misCursos();
+    return this.misCursos().filter(c =>
+      c.nombreAsignatura.toLowerCase().includes(q) ||
+      c.gradoCurso.toLowerCase().includes(q) ||
+      c.seccionCurso.toLowerCase().includes(q)
+    );
+  });
+
   readonly cursoSeleccionado = signal<CursoAsignatura | null>(null);
   readonly tabActiva = signal<Tab>('asistencia');
 
@@ -48,6 +60,10 @@ export class PáginaLibroClases implements OnInit {
         this.cargandoCursos.set(false);
       }
     });
+  }
+
+  colorTarjeta(i: number): string {
+    return `tarjeta-curso--color-${i % 6}`;
   }
 
   seleccionarCurso(curso: CursoAsignatura): void {

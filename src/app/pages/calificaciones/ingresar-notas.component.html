@@ -1,10 +1,8 @@
 <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
-  <div class="d-flex align-items-center gap-2">
-    <label class="form-label mb-0 fw-semibold">Fecha</label>
-    <input type="date" class="form-control input-fecha-grande"
-           [value]="fecha()" (change)="onFechaChange($event)">
-  </div>
-  <button class="btn btn-outline-secondary btn-sm" (click)="cargarRoster()" type="button">
+  <h3 class="h6 fw-semibold mb-0">
+    Notas: {{ evaluacion().nombreEvaluacion }} ({{ evaluacion().fechaEvaluacion }})
+  </h3>
+  <button class="btn btn-outline-secondary btn-sm" (click)="cargarRosterYNotas()" type="button">
     Actualizar
   </button>
 </div>
@@ -27,8 +25,7 @@
             <tr>
               <th>RUT</th>
               <th>Alumno</th>
-              <th style="width: 220px">Estado</th>
-              <th>Justificación</th>
+              <th style="width: 160px">Nota (1.0 - 7.0)</th>
             </tr>
           </thead>
           <tbody>
@@ -37,25 +34,16 @@
                 <td>{{ rutAlumno(i) }}</td>
                 <td class="fw-medium">{{ nombreAlumno(i) }}</td>
                 <td>
-                  <select class="form-select form-select-sm" formControlName="estadoAsistencia">
-                    @for (estado of estados; track estado) {
-                      <option [value]="estado">{{ etiquetasEstado[estado] }}</option>
-                    }
-                  </select>
-                </td>
-                <td>
-                  @if (necesitaJustificacion(i)) {
-                    <input class="form-control form-control-sm" type="text"
-                           formControlName="justificacionAsistencia"
-                           placeholder="Motivo de la justificación">
-                  } @else {
-                    <span class="text-muted small">—</span>
-                  }
+                  <input class="form-control form-control-sm" type="number"
+                         step="0.1" min="1" max="7"
+                         [class.is-invalid]="notaInvalida(i)"
+                         formControlName="notaCalificacion"
+                         placeholder="Ej: 5.5">
                 </td>
               </tr>
             } @empty {
               <tr>
-                <td colspan="4" class="text-center text-muted py-4">
+                <td colspan="3" class="text-center text-muted py-4">
                   Este curso no tiene alumnos matriculados.
                 </td>
               </tr>
@@ -72,10 +60,10 @@
         <span class="text-danger small">{{ errorGuardar() }}</span>
       }
       @if (exitoGuardar()) {
-        <span class="text-success small">Asistencia registrada correctamente.</span>
+        <span class="text-success small">Notas registradas correctamente.</span>
       }
       <button class="btn btn-primary" (click)="abrirConfirmacion()" type="button">
-        Guardar asistencia
+        Guardar notas
       </button>
     </div>
   }
@@ -86,21 +74,16 @@
   <div class="modal-overlay" (click)="cerrarConfirmacion()">
     <div class="modal-caja modal-caja--sm" (click)="$event.stopPropagation()">
       <div class="modal-encabezado">
-        <h3 class="modal-titulo">Confirmar asistencia</h3>
+        <h3 class="modal-titulo">Confirmar notas</h3>
         <button class="btn-cerrar" (click)="cerrarConfirmacion()" type="button">✕</button>
       </div>
 
       <div class="modal-cuerpo">
-        <p class="mb-3">
-          Vas a registrar la asistencia del <strong>{{ fecha() }}</strong> para
-          <strong>{{ roster().length }}</strong> alumno(s). Si ya existía un registro para
-          esta fecha, será reemplazado.
+        <p class="mb-0">
+          Vas a registrar las notas de <strong>{{ evaluacion().nombreEvaluacion }}</strong> para
+          <strong>{{ roster().length }}</strong> alumno(s). Si ya existía una nota para algún alumno
+          en esta evaluación, será reemplazada.
         </p>
-        <ul class="list-unstyled mb-0 small">
-          <li class="mb-1"><span class="badge bg-success me-2">{{ resumenConfirmacion().presentes }}</span> presente(s)</li>
-          <li class="mb-1"><span class="badge bg-danger me-2">{{ resumenConfirmacion().ausentes }}</span> ausente(s)</li>
-          <li><span class="badge bg-warning me-2">{{ resumenConfirmacion().justificados }}</span> justificado(s)</li>
-        </ul>
       </div>
 
       @if (errorGuardar()) {

@@ -8,7 +8,7 @@
       Dashboard
     </button>
     <div class="separador-vertical"></div>
-    <h1 class="admin-titulo mb-0">Libro de Clases</h1>
+    <h1 class="admin-titulo mb-0">Calificaciones</h1>
 
     <div class="ms-auto d-flex align-items-center gap-2">
       @if (usuarioSesion(); as u) {
@@ -63,7 +63,7 @@
       </div>
     }
   } @else {
-    <!-- ═══ CURSO SELECCIONADO: TABS ═════════════════════════════════════════════ -->
+    <!-- ═══ CURSO SELECCIONADO: EVALUACIONES ═══════════════════════════════════════ -->
     <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
       <div>
         <button class="btn btn-link p-0 text-decoration-none mb-1" (click)="volverASeleccion()" type="button">
@@ -73,27 +73,86 @@
           {{ cursoSeleccionado()!.gradoCurso }} {{ cursoSeleccionado()!.seccionCurso }} · {{ cursoSeleccionado()!.nombreAsignatura }}
         </h2>
       </div>
+      <button class="btn btn-primary btn-sm" (click)="abrirCrearEvaluacion()" type="button">
+        + Nueva evaluación
+      </button>
     </div>
 
-    <nav class="tab-bar mb-3">
-      <button class="tab-boton" [class.activo]="tabActiva() === 'asistencia'"
-              (click)="tabActiva.set('asistencia')" type="button">
-        Tomar asistencia
-      </button>
-      <button class="tab-boton" [class.activo]="tabActiva() === 'conducta'"
-              (click)="tabActiva.set('conducta')" type="button">
-        Conducta
-      </button>
-    </nav>
+    @if (errorEvaluaciones()) {
+      <div class="alert alert-danger">{{ errorEvaluaciones() }}</div>
+    }
 
-    @switch (tabActiva()) {
-      @case ('asistencia') {
-        <app-tomar-asistencia-tab [curso]="cursoSeleccionado()!" />
-      }
-      @case ('conducta') {
-        <app-conducta-tab [curso]="cursoSeleccionado()!" />
-      }
+    @if (cargandoEvaluaciones()) {
+      <div class="text-center py-4 text-muted">
+        <div class="spinner-border spinner-border-sm" role="status"></div>
+      </div>
+    } @else {
+      <div class="row g-3 mb-4">
+        @for (e of evaluaciones(); track e.idEvaluacion) {
+          <div class="col-12 col-md-4">
+            <div class="card tarjeta-evaluacion h-100"
+                 [class.activa]="evaluacionSeleccionada()?.idEvaluacion === e.idEvaluacion"
+                 (click)="seleccionarEvaluacion(e)">
+              <div class="card-body">
+                <h5 class="card-title mb-1">{{ e.nombreEvaluacion }}</h5>
+                <p class="card-text text-muted small mb-0">{{ e.fechaEvaluacion }}</p>
+              </div>
+            </div>
+          </div>
+        } @empty {
+          <div class="col-12">
+            <p class="text-muted">Este curso no tiene evaluaciones todavía. Crea una para empezar a ingresar notas.</p>
+          </div>
+        }
+      </div>
+    }
+
+    @if (evaluacionSeleccionada(); as ev) {
+      <app-ingresar-notas [evaluacion]="ev" />
     }
   }
 
 </main>
+
+<!-- ═══ MODAL: NUEVA EVALUACIÓN ═══════════════════════════════════════════════ -->
+@if (modalCrearEvaluacion()) {
+  <div class="modal-overlay" (click)="cerrarCrearEvaluacion()">
+    <div class="modal-caja modal-caja--sm" (click)="$event.stopPropagation()">
+      <div class="modal-encabezado">
+        <h3 class="modal-titulo">Nueva evaluación</h3>
+        <button class="btn-cerrar" (click)="cerrarCrearEvaluacion()" type="button">✕</button>
+      </div>
+
+      <form [formGroup]="formEvaluacion" class="modal-cuerpo">
+        <div class="row g-3">
+          <div class="col-12">
+            <label class="form-label">Nombre <span class="text-danger">*</span></label>
+            <input class="form-control" type="text"
+                   [class.is-invalid]="error('nombreEvaluacion','required')"
+                   formControlName="nombreEvaluacion"
+                   placeholder="Ej: Prueba unidad 1">
+            @if (error('nombreEvaluacion','required')) {
+              <div class="invalid-feedback">Este campo es obligatorio.</div>
+            }
+          </div>
+          <div class="col-12">
+            <label class="form-label">Fecha <span class="text-danger">*</span></label>
+            <input class="form-control" type="date" formControlName="fechaEvaluacion">
+          </div>
+        </div>
+      </form>
+
+      @if (errorEvaluacionModal()) {
+        <div class="alert alert-danger mx-4 mb-0 py-2 small">{{ errorEvaluacionModal() }}</div>
+      }
+
+      <div class="modal-pie">
+        <button class="btn btn-outline-secondary" (click)="cerrarCrearEvaluacion()" type="button">Cancelar</button>
+        <button class="btn btn-primary" (click)="guardarEvaluacion()" [disabled]="guardandoEvaluacion()" type="button">
+          @if (guardandoEvaluacion()) { <span class="spinner-border spinner-border-sm me-1"></span> Guardando... }
+          @else { Crear evaluación }
+        </button>
+      </div>
+    </div>
+  </div>
+}

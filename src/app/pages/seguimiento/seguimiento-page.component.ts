@@ -21,12 +21,15 @@ interface AlumnoConParentesco {
   standalone: true,
   imports: [CommonModule, RouterModule],
   templateUrl: './seguimiento-page.component.html',
+  styleUrl: './seguimiento-shared.scss'
 })
 export class PáginaSeguimiento implements OnInit {
   private servicioToken = inject(ServicioToken);
   private servicioRelaciones = inject(ServicioRelaciones);
   private servicioAcademico = inject(ServicioAcademico);
   private servicioSeguimiento = inject(ServicioSeguimiento);
+
+  readonly usuarioSesion = this.servicioToken.obtenerSeñalInfoUsuario();
 
   // ── Estado general ───────────────────────────────────────────────────────────
   cargandoAlumnos = signal(false);
@@ -51,6 +54,7 @@ export class PáginaSeguimiento implements OnInit {
     if (!cals.length) return [];
 
     const porAsignatura = new Map<string, { nota: number; nombre: string; fecha: string }[]>();
+    const docentePorAsignatura = new Map<string, string>();
 
     for (const c of cals) {
       const asignatura = c.nombreAsignatura ?? 'Sin asignatura';
@@ -60,10 +64,14 @@ export class PáginaSeguimiento implements OnInit {
         nombre: c.nombreEvaluacion,
         fecha: c.fechaEvaluacion,
       });
+      if (c.nombreDocente && !docentePorAsignatura.has(asignatura)) {
+        docentePorAsignatura.set(asignatura, c.nombreDocente);
+      }
     }
 
     return Array.from(porAsignatura.entries()).map(([nombre, items]) => ({
       nombreAsignatura: nombre,
+      nombreDocente: docentePorAsignatura.get(nombre) ?? 'Sin docente asignado',
       promedio: +(items.reduce((s, i) => s + i.nota, 0) / items.length).toFixed(1),
       calificaciones: items,
     }));
@@ -232,6 +240,13 @@ export class PáginaSeguimiento implements OnInit {
     if (nota >= 6) return 'text-success fw-bold';
     if (nota >= 4) return 'text-warning fw-bold';
     return 'text-danger fw-bold';
+  }
+
+  // Clasifica una nota en la escala chilena (1.0-7.0) para elegir el color de acento
+  nivelRendimiento(nota: number): 'alto' | 'medio' | 'bajo' {
+    if (nota >= 6) return 'alto';
+    if (nota >= 4) return 'medio';
+    return 'bajo';
   }
 
   colorEstado(estado: string): string {

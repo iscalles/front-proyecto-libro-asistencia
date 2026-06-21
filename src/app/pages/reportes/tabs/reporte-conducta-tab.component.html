@@ -1,0 +1,92 @@
+@if (error()) {
+  <div class="alert alert-danger">{{ error() }}</div>
+}
+
+@if (cargando()) {
+  <div class="text-center py-5 text-muted">
+    <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+    Cargando...
+  </div>
+} @else {
+  <div class="card">
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table tabla-mantenedor mb-0">
+          <thead>
+            <tr>
+              <th>Alumno</th>
+              <th>RUT</th>
+              <th class="text-center">Positivas</th>
+              <th class="text-center">Negativas</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (a of resumen(); track a.estudianteIdUsuario) {
+              <tr style="cursor: pointer" (click)="toggleDetalle(a)">
+                <td class="fw-medium">{{ a.nombreEstudiante }}</td>
+                <td>{{ a.rutEstudiante }}</td>
+                <td class="text-center">
+                  <span class="badge bg-success">{{ a.totalPositivas }}</span>
+                </td>
+                <td class="text-center">
+                  <span class="badge bg-danger">{{ a.totalNegativas }}</span>
+                </td>
+                <td class="text-end text-muted small">
+                  {{ alumnoExpandido() === a.estudianteIdUsuario ? '▲ ocultar' : '▼ ver detalle' }}
+                </td>
+              </tr>
+              @if (alumnoExpandido() === a.estudianteIdUsuario) {
+                <tr>
+                  <td colspan="5" class="bg-light p-3">
+                    @if (cargandoHistorial()) {
+                      <div class="text-center py-3 text-muted">
+                        <div class="spinner-border spinner-border-sm" role="status"></div>
+                      </div>
+                    } @else {
+                      <table class="table table-sm mb-0">
+                        <thead>
+                          <tr>
+                            <th>Fecha</th>
+                            <th>Tipo</th>
+                            <th>Descripción</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          @for (c of historial(); track c.id_conducta) {
+                            <tr>
+                              <td>{{ c.fechaConducta }}</td>
+                              <td>
+                                <span class="badge" [class.bg-success]="c.tipoConducta === 'positiva'"
+                                      [class.bg-danger]="c.tipoConducta === 'negativa'">
+                                  {{ etiquetaTipo(c.tipoConducta) }}
+                                </span>
+                              </td>
+                              <td>{{ c.descripcionConducta }}</td>
+                            </tr>
+                          } @empty {
+                            <tr>
+                              <td colspan="3" class="text-center text-muted py-2">
+                                Sin anotaciones registradas.
+                              </td>
+                            </tr>
+                          }
+                        </tbody>
+                      </table>
+                    }
+                  </td>
+                </tr>
+              }
+            } @empty {
+              <tr>
+                <td colspan="5" class="text-center text-muted py-4">
+                  Este curso no tiene alumnos matriculados.
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+}

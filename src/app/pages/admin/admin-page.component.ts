@@ -27,17 +27,26 @@ export class PáginaAdmin implements OnInit {
   // ── Tabla y búsqueda ───────────────────────────────────────────────────────
   readonly usuarios     = signal<UsuarioDTOInternal[]>([]);
   readonly busqueda     = signal('');
+  readonly rolFiltro    = signal<string>('');
   readonly cargando     = signal(false);
   readonly errorTabla   = signal<string | null>(null);
 
-  // Filtra client-side por RUT o nombre completo (sin distinguir mayúsculas)
+  // Filtra client-side por RUT o nombre completo, y opcionalmente por rol
   readonly usuariosFiltrados = computed(() => {
     const q = this.busqueda().toLowerCase().trim();
-    if (!q) return this.usuarios();
-    return this.usuarios().filter(u =>
-      u.rutUsuario?.toLowerCase().includes(q) ||
-      this.nombreCompleto(u).toLowerCase().includes(q)
-    );
+    const rol = this.rolFiltro();
+    let lista = this.usuarios();
+
+    if (rol) {
+      lista = lista.filter(u => u.roles?.includes(rol));
+    }
+    if (q) {
+      lista = lista.filter(u =>
+        u.rutUsuario?.toLowerCase().includes(q) ||
+        this.nombreCompleto(u).toLowerCase().includes(q)
+      );
+    }
+    return lista;
   });
 
   // ── Estado de modales ──────────────────────────────────────────────────────
