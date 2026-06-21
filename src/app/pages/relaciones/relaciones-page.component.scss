@@ -34,6 +34,25 @@
   font-size: 0.875rem;
 }
 
+// ── Buscador ──────────────────────────────────────────────────────────────────
+.input-busqueda {
+  position: relative;
+  display: flex;
+  align-items: center;
+
+  &__campo {
+    padding-left: 30px;
+    min-width: 220px;
+  }
+}
+
+.icono-busqueda {
+  position: absolute;
+  left: 9px;
+  color: #adb5bd;
+  pointer-events: none;
+}
+
 // ── Tarjetas de apoderado ─────────────────────────────────────────────────────
 
 .tarjeta-apoderado {
@@ -117,6 +136,43 @@
     cursor: not-allowed;
     &:hover { background: transparent; color: #1a3a5c; }
   }
+}
+
+// ── Lista de selección de estudiante (modal asignar) ─────────────────────────
+.lista-seleccion-estudiante {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 220px;
+  overflow-y: auto;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+
+  li {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    padding: 8px 12px;
+    cursor: pointer;
+    border-bottom: 1px solid #f1f3f5;
+
+    &:last-child { border-bottom: none; }
+    &:hover { background: #f8f9fa; }
+
+    &.activo {
+      background: #e7f3ff;
+      box-shadow: inset 3px 0 0 #1a3a5c;
+    }
+  }
+}
+
+.lista-seleccion-estudiante__vacio {
+  padding: 14px 12px;
+  color: #6c757d;
+  font-size: 0.85rem;
+  text-align: center;
+  cursor: default !important;
+  &:hover { background: transparent !important; }
 }
 
 // ── Modal ─────────────────────────────────────────────────────────────────────

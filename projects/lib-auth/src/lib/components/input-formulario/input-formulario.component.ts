@@ -30,6 +30,8 @@ export class ComponenteEntradaFormulario implements ControlValueAccessor {
   @Input() error: string | null = null;
   @Input() hint: string = '';
   @Input() required: boolean = false;
+  // Reformatea el valor como RUT chileno (XX.XXX.XXX-X) en cada tecleo
+  @Input() esRut: boolean = false;
 
   @Output() valueChange = new EventEmitter<string>();
 
@@ -59,9 +61,20 @@ export class ComponenteEntradaFormulario implements ControlValueAccessor {
   // Input event handler
   onInput(event: Event): void {
     const target = event.target as HTMLInputElement;
-    this.value = target.value;
+    this.value = this.esRut ? this.formatearRut(target.value) : target.value;
     this.onChange(this.value);
     this.valueChange.emit(this.value);
+  }
+
+  // Inserta puntos de mil y el guión del dígito verificador a medida que se escribe,
+  // para que el usuario no tenga que tipearlos manualmente (ej: 123456789 -> 12.345.678-9)
+  private formatearRut(valor: string): string {
+    const limpio = valor.replace(/[^0-9kK]/g, '').toUpperCase().slice(0, 9);
+    if (limpio.length <= 1) return limpio;
+
+    const verificador = limpio.slice(-1);
+    const numero = limpio.slice(0, -1).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    return `${numero}-${verificador}`;
   }
 
   onFocus(): void {
