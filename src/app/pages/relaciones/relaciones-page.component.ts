@@ -34,12 +34,25 @@ export class PáginaRelaciones implements OnInit {
 
   readonly opcionesParentesco = OPCIONES_PARENTESCO;
 
+  // ── Búsqueda de apoderados ───────────────────────────────────────────────
+  readonly busquedaApoderado = signal('');
+
+  readonly apoderadosFiltrados = computed(() => {
+    const q = this.busquedaApoderado().toLowerCase().trim();
+    if (!q) return this.apoderados();
+    return this.apoderados().filter(a =>
+      this.nombreCompleto(a.usuario).toLowerCase().includes(q) ||
+      a.usuario.rutUsuario?.toLowerCase().includes(q)
+    );
+  });
+
   // ── Modal de asignación ───────────────────────────────────────────────────
   readonly apoderadoModal       = signal<ApoderadoResponse | null>(null);
   readonly estudianteSeleccionado = signal<number | null>(null);
   readonly parentesco           = signal('');
   readonly guardando            = signal(false);
   readonly errorModal           = signal<string | null>(null);
+  readonly busquedaEstudianteModal = signal('');
 
   // Estudiantes que aún NO están asignados al apoderado del modal
   readonly estudiantesDisponibles = computed(() => {
@@ -48,6 +61,17 @@ export class PáginaRelaciones implements OnInit {
     const relaciones = this.relacionesPor().get(apo.idApoderado) ?? [];
     const asignados  = new Set(relaciones.map(r => r.id.idEstudiante));
     return this.estudiantes().filter(e => !asignados.has(e.idEstudiante));
+  });
+
+  // Estudiantes disponibles, filtrados por RUT o nombre dentro del modal
+  readonly estudiantesDisponiblesFiltrados = computed(() => {
+    const q = this.busquedaEstudianteModal().toLowerCase().trim();
+    const lista = this.estudiantesDisponibles();
+    if (!q) return lista;
+    return lista.filter(e =>
+      e.usuario.rutUsuario?.toLowerCase().includes(q) ||
+      this.nombreCompleto(e.usuario).toLowerCase().includes(q)
+    );
   });
 
   ngOnInit(): void {
@@ -122,10 +146,15 @@ export class PáginaRelaciones implements OnInit {
     this.estudianteSeleccionado.set(null);
     this.parentesco.set('');
     this.errorModal.set(null);
+    this.busquedaEstudianteModal.set('');
   }
 
   cerrarModal(): void {
     this.apoderadoModal.set(null);
+  }
+
+  seleccionarEstudianteModal(idEstudiante: number): void {
+    this.estudianteSeleccionado.set(idEstudiante);
   }
 
   asignar(): void {
@@ -163,5 +192,5 @@ export class PáginaRelaciones implements OnInit {
     });
   }
 
-  irAlAdmin(): void { this.enrutador.navigate(['/admin']); }
+  irAlDashboard(): void { this.enrutador.navigate(['/dashboard']); }
 }

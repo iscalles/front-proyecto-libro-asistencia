@@ -24,16 +24,25 @@ node -v && npm -v && ng version
 ```
 front-proyecto-libro-asistencia/
 ├── src/app/
-│   ├── guards/            # authGuard (token) y adminGuard (rol ADMINISTRATIVO)
+│   ├── guards/
+│   │   ├── auth.guard.ts        # authGuard: exige estar autenticado
+│   │   ├── role.guard.ts        # adminGuard, docenteGuard, estudianteGuard (por rol)
+│   │   └── apoderado.guard.ts   # apoderadoGuard: rol APODERADO
 │   ├── models/            # Interfaces TypeScript alineadas con los DTOs del backend
 │   ├── pages/
-│   │   ├── login-page/    # Página de acceso (/acceso)
-│   │   ├── dashboard/     # Panel principal con vista por rol (/dashboard)
-│   │   ├── admin/         # Mantenedor de usuarios (/admin)
-│   │   └── relaciones/    # Gestión apoderado-estudiante (/relaciones)
-│   └── services/          # Servicios HTTP hacia el BFF
+│   │   ├── login-page/         # Página de acceso (/acceso)
+│   │   ├── dashboard/          # Panel principal con vista por rol (/dashboard)
+│   │   ├── admin/              # Mantenedor de usuarios (/admin)
+│   │   ├── relaciones/         # Gestión apoderado-estudiante (/relaciones)
+│   │   ├── academico/          # Mantenedor de cursos, asignaturas, evaluaciones, matrículas y calificaciones (/academico)
+│   │   ├── libro-clases/       # Toma de asistencia y registro de conducta del docente (/libro-clases)
+│   │   ├── calificaciones/     # Ingreso de notas por evaluación, vista docente (/calificaciones)
+│   │   ├── reportes/           # Reportes de asistencia y conducta por curso (/reportes)
+│   │   ├── seguimiento/        # Vista del apoderado: asistencia y notas de sus estudiantes (/seguimiento)
+│   │   └── mis-calificaciones/ # Vista del estudiante: sus propias notas y asignaturas (/mis-calificaciones)
+│   └── services/          # Servicios HTTP hacia el BFF (academico, asistencia, relaciones, seguimiento, usuario-admin)
 ├── projects/
-│   └── lib-auth/          # Librería NPM de autenticación (componente reutilizable)
+│   └── lib-auth/          # Librería NPM de autenticación (componentes, servicios e interceptores reutilizables)
 ├── package.json
 └── angular.json
 ```
@@ -92,6 +101,8 @@ Componente Angular empaquetado según estándar NPM. Contiene todos los elemento
 | `ServicioAutenticacion` | Servicio | Llama a `POST /auth/login`, guarda tokens |
 | `ServicioToken` | Servicio | Gestiona JWT en localStorage mediante Angular Signals |
 | `ServicioValidadorRut` | Servicio | Valida RUT chileno con algoritmo módulo 11 |
+| `ServicioExpiracionSesion` | Servicio | Vigila la expiración del access token y muestra un aviso ~2 minutos antes, permitiendo extender la sesión (refresh) o cerrarla |
+| `ComponenteModalExpiracionSesion` | Componente | Modal de aviso de expiración de sesión, conectado a `ServicioExpiracionSesion` |
 | `jwtInterceptor` | Interceptor | Agrega `Authorization: Bearer <token>` a cada petición HTTP |
 | `authErrorInterceptor` | Interceptor | Redirige a `/acceso` ante respuestas 401 o 403 |
 
@@ -105,6 +116,14 @@ Componente Angular empaquetado según estándar NPM. Contiene todos los elemento
 | `/dashboard` | `authGuard` | Cualquier usuario autenticado |
 | `/admin` | `authGuard` + `adminGuard` | Solo rol `ADMINISTRATIVO` |
 | `/relaciones` | `authGuard` + `adminGuard` | Solo rol `ADMINISTRATIVO` |
+| `/academico` | `authGuard` + `adminGuard` | Solo rol `ADMINISTRATIVO` — mantenedor de cursos, asignaturas, evaluaciones, matrículas y calificaciones |
+| `/reportes` | `authGuard` + `adminGuard` | Solo rol `ADMINISTRATIVO` — reportes de asistencia y conducta por curso |
+| `/libro-clases` | `authGuard` + `docenteGuard` | Solo rol `DOCENTE` — toma de asistencia y registro de conducta |
+| `/calificaciones` | `authGuard` + `docenteGuard` | Solo rol `DOCENTE` — ingreso de notas por evaluación |
+| `/seguimiento` | `authGuard` + `apoderadoGuard` | Solo rol `APODERADO` — asistencia y notas de sus estudiantes |
+| `/mis-calificaciones` | `authGuard` + `estudianteGuard` | Solo rol `ESTUDIANTE` — sus propias notas y asignaturas |
+
+> Los guards de rol (`adminGuard`, `docenteGuard`, `estudianteGuard` en `role.guard.ts`, y `apoderadoGuard` en `apoderado.guard.ts`) no redirigen a `/acceso` si el usuario no tiene el rol requerido, sino a `/dashboard`: el usuario ya está autenticado, solo no tiene permiso para esa sección.
 
 ---
 

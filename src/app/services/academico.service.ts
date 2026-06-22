@@ -8,7 +8,7 @@ import {
   Evaluacion, EvaluacionRequest,
   Matricula, MatriculaRequest,
   CursoAsignatura, CursoAsignaturaRequest,
-  Calificacion, CalificacionRequest,
+  Calificacion, CalificacionRequest, CalificacionLoteRequest,
 } from '../models/academico.models';
 
 // Todas las llamadas pasan por el BFF (puerto 8080), que reenvía a MS-Academico.
@@ -49,6 +49,9 @@ export class ServicioAcademico {
   listarEvaluaciones(): Observable<Evaluacion[]> {
     return this.http.get<Evaluacion[]>(`${this.api}/evaluaciones`);
   }
+  listarEvaluacionesPorCursoAsignatura(idCursoAsignatura: number): Observable<Evaluacion[]> {
+    return this.http.get<Evaluacion[]>(`${this.api}/evaluaciones/curso-asignatura/${idCursoAsignatura}`);
+  }
   crearEvaluacion(dto: EvaluacionRequest): Observable<Evaluacion> {
     return this.http.post<Evaluacion>(`${this.api}/evaluaciones`, dto);
   }
@@ -62,6 +65,9 @@ export class ServicioAcademico {
   // ── Matriculas ──────────────────────────────────────────────────────────────
   listarMatriculas(): Observable<Matricula[]> {
     return this.http.get<Matricula[]>(`${this.api}/matriculas`);
+  }
+  listarMatriculasPorCurso(idCurso: number): Observable<Matricula[]> {
+    return this.http.get<Matricula[]>(`${this.api}/matriculas/curso/${idCurso}`);
   }
   crearMatricula(dto: MatriculaRequest): Observable<Matricula> {
     return this.http.post<Matricula>(`${this.api}/matriculas`, dto);
@@ -90,6 +96,15 @@ export class ServicioAcademico {
   // ── Calificaciones ──────────────────────────────────────────────────────────
   listarCalificaciones(): Observable<Calificacion[]> {
     return this.http.get<Calificacion[]>(`${this.api}/calificaciones`);
+  }
+  listarCalificacionesPorMatricula(idMatricula: number): Observable<Calificacion[]> {
+    return this.http.get<Calificacion[]>(`${this.api}/calificaciones/id_matricula/${idMatricula}`);
+  }
+  listarCalificacionesPorEvaluacion(idEvaluacion: number): Observable<Calificacion[]> {
+    return this.http.get<Calificacion[]>(`${this.api}/calificaciones/id_evaluacion/${idEvaluacion}`);
+  }
+  registrarCalificacionesLote(dto: CalificacionLoteRequest): Observable<Calificacion[]> {
+    return this.http.post<Calificacion[]>(`${this.api}/calificaciones/lote`, dto);
   }
   crearCalificacion(dto: CalificacionRequest): Observable<Calificacion> {
     return this.http.post<Calificacion>(`${this.api}/calificaciones`, dto);

@@ -1,0 +1,323 @@
+<!-- ═══ HEADER ══════════════════════════════════════════════════════════════ -->
+<header class="admin-header shadow-sm">
+  <div class="container-fluid px-4 d-flex align-items-center gap-3">
+    <a routerLink="/dashboard" class="btn btn-link btn-volver p-0">
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16">
+        <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8z"/>
+      </svg>
+      Dashboard
+    </a>
+    <div class="separador-vertical"></div>
+    <h1 class="admin-titulo mb-0">Seguimiento del Alumno</h1>
+
+    <div class="ms-auto d-flex align-items-center gap-2">
+      @if (usuarioSesion(); as u) {
+        <span class="texto-sesion d-none d-sm-inline">{{ u.nombre }}</span>
+      }
+      <span class="badge bg-primary">Apoderado</span>
+    </div>
+  </div>
+</header>
+
+<main class="container py-4">
+
+  <!-- ═══ CARGANDO ALUMNOS ════════════════════════════════════════════════════ -->
+  @if (cargandoAlumnos()) {
+    <div class="text-center py-5">
+      <div class="spinner-border text-primary mb-3" role="status"></div>
+      <p class="text-muted">Cargando alumnos...</p>
+    </div>
+  }
+
+  <!-- ═══ ERROR ALUMNOS ══════════════════════════════════════════════════════ -->
+  @if (errorAlumnos()) {
+    <div class="alert alert-danger">{{ errorAlumnos() }}</div>
+  }
+
+  <!-- ═══ VISTA SELECCIÓN DE ALUMNO ════════════════════════════════════════ -->
+  @if (!cargandoAlumnos() && !errorAlumnos() && !alumnoSeleccionado()) {
+
+    <h4 class="fw-semibold mb-1">Selecciona un alumno</h4>
+    <p class="text-muted mb-4">Elige al alumno del que deseas ver el seguimiento académico.</p>
+
+    @if (alumnos().length === 0) {
+      <div class="alert alert-info">
+        No tienes alumnos asignados a tu perfil de apoderado.
+      </div>
+    }
+
+    <div class="row g-3">
+      @for (alumno of alumnos(); track alumno.estudiante.idEstudiante) {
+        <div class="col-12 col-md-4">
+          <div class="card h-100 tarjeta-alumno" role="button"
+               (click)="seleccionarAlumno(alumno)"
+               style="cursor:pointer; transition: box-shadow .2s"
+               (mouseenter)="$any($event.currentTarget).style.boxShadow='0 4px 16px rgba(13,110,253,.2)'"
+               (mouseleave)="$any($event.currentTarget).style.boxShadow='none'">
+            <div class="card-body d-flex align-items-center gap-3 p-4">
+              <div class="avatar-alumno bg-primary-subtle text-primary rounded-circle d-flex align-items-center justify-content-center"
+                   style="width:56px;height:56px;font-size:1.4rem;flex-shrink:0">
+                {{ alumno.estudiante.usuario.nombreUsuario.charAt(0).toUpperCase() }}
+              </div>
+              <div>
+                <h5 class="mb-1 fw-semibold">{{ nombreCompleto(alumno.estudiante) }}</h5>
+                <span class="badge bg-primary-subtle text-primary">{{ alumno.parentesco }}</span>
+                @if (alumno.estudiante.estadoEstudiante) {
+                  <span class="badge ms-1"
+                        [class]="alumno.estudiante.estadoEstudiante === 'Activo' ? 'bg-success-subtle text-success' : 'bg-secondary-subtle text-secondary'">
+                    {{ alumno.estudiante.estadoEstudiante }}
+                  </span>
+                }
+              </div>
+            </div>
+            <div class="card-footer bg-transparent text-end small text-primary">
+              Ver seguimiento →
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- ═══ VISTA DETALLE DEL ALUMNO ══════════════════════════════════════════ -->
+  @if (alumnoSeleccionado(); as alumno) {
+
+    <!-- Encabezado -->
+    <div class="d-flex align-items-center gap-3 mb-4">
+      <button class="btn btn-outline-secondary btn-sm" (click)="volverALista()">
+        ← Volver
+      </button>
+      <div>
+        <h4 class="mb-0 fw-semibold">{{ nombreCompleto(alumno.estudiante) }}</h4>
+        @if (!cargandoDetalle()) {
+          <span class="text-muted small">
+            Curso: {{ cursoPrincipal() }} &nbsp;·&nbsp; {{ alumno.parentesco }}
+          </span>
+        }
+      </div>
+    </div>
+
+    <!-- Error detalle -->
+    @if (errorDetalle()) {
+      <div class="alert alert-danger">{{ errorDetalle() }}</div>
+    }
+
+    <!-- Cargando detalle -->
+    @if (cargandoDetalle()) {
+      <div class="text-center py-5">
+        <div class="spinner-border text-primary mb-3" role="status"></div>
+        <p class="text-muted">Cargando información académica...</p>
+      </div>
+    }
+
+    @if (!cargandoDetalle()) {
+
+      <!-- Tabs -->
+      <nav class="tab-bar mb-4">
+        <button class="tab-boton" [class.activo]="tabActiva() === 'calificaciones'"
+                (click)="tabActiva.set('calificaciones')" type="button">
+          Calificaciones
+        </button>
+        <button class="tab-boton" [class.activo]="tabActiva() === 'asistencia'"
+                (click)="tabActiva.set('asistencia')" type="button">
+          Asistencia
+        </button>
+        <button class="tab-boton" [class.activo]="tabActiva() === 'conducta'"
+                (click)="tabActiva.set('conducta')" type="button">
+          Conducta
+        </button>
+      </nav>
+
+      <!-- ══ TAB CALIFICACIONES ══════════════════════════════════════════════ -->
+      @if (tabActiva() === 'calificaciones') {
+
+        @if (calificaciones().length === 0) {
+          <div class="alert alert-info">Este alumno no tiene calificaciones registradas.</div>
+        } @else {
+
+          <!-- Promedio general -->
+          <div class="card tarjeta-promedio mb-4">
+            <div class="card-body d-flex align-items-center gap-3 py-4">
+              <div class="circulo-promedio" [class]="'circulo-promedio--' + nivelRendimiento(promedioGeneral() ?? 0)">
+                {{ promedioGeneral() }}
+              </div>
+              <div>
+                <div class="fw-semibold fs-5">Promedio General</div>
+                <div class="text-muted small">Calculado sobre todas las asignaturas</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Por asignatura -->
+          @for (res of resumenCalificaciones(); track res.nombreAsignatura) {
+            <div class="card tarjeta-asignatura mb-3" [class]="'tarjeta-asignatura--' + nivelRendimiento(res.promedio)">
+              <div class="tarjeta-asignatura__header" [class]="'tarjeta-asignatura__header--' + nivelRendimiento(res.promedio)">
+                <div>
+                  <div class="tarjeta-asignatura__nombre">{{ res.nombreAsignatura }}</div>
+                  <div class="tarjeta-asignatura__docente">👤 {{ res.nombreDocente }}</div>
+                </div>
+                <span class="pildora-promedio" [class]="'pildora-promedio--' + nivelRendimiento(res.promedio)">
+                  Promedio {{ res.promedio }}
+                </span>
+              </div>
+              <div class="card-body p-0">
+                <div class="table-responsive">
+                  <table class="table tabla-mantenedor mb-0">
+                    <thead>
+                      <tr>
+                        <th>Evaluación</th>
+                        <th>Fecha</th>
+                        <th class="text-end">Nota</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @for (cal of res.calificaciones; track cal.nombre) {
+                        <tr>
+                          <td>{{ cal.nombre }}</td>
+                          <td class="text-muted small">{{ cal.fecha }}</td>
+                          <td class="text-end">
+                            <span [class]="colorPromedio(cal.nota)">{{ cal.nota }}</span>
+                          </td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          }
+        }
+      }
+
+      <!-- ══ TAB ASISTENCIA ═════════════════════════════════════════════════ -->
+      @if (tabActiva() === 'asistencia') {
+
+        @if (errorAsistencia()) {
+          <div class="alert alert-warning">{{ errorAsistencia() }}</div>
+        } @else if (asistencias().length === 0) {
+          <div class="alert alert-info">Este alumno no tiene registros de asistencia.</div>
+        } @else {
+
+          <!-- Resumen estadístico -->
+          <div class="row g-3 mb-4">
+            <div class="col-6 col-md-3">
+              <div class="card text-center border-0 bg-light">
+                <div class="card-body py-3">
+                  <div class="fs-3 fw-bold text-primary">{{ resumenAsistencia().porcentajeAsistencia }}%</div>
+                  <div class="small text-muted">Asistencia</div>
+                </div>
+              </div>
+            </div>
+            <div class="col-6 col-md-3">
+              <div class="card text-center border-0 bg-success-subtle">
+                <div class="card-body py-3">
+                  <div class="fs-3 fw-bold text-success">{{ resumenAsistencia().presentes }}</div>
+                  <div class="small text-muted">Presentes</div>
+                </div>
+              </div>
+            </div>
+            <div class="col-6 col-md-3">
+              <div class="card text-center border-0 bg-danger-subtle">
+                <div class="card-body py-3">
+                  <div class="fs-3 fw-bold text-danger">{{ resumenAsistencia().ausentes }}</div>
+                  <div class="small text-muted">Ausentes</div>
+                </div>
+              </div>
+            </div>
+            <div class="col-6 col-md-3">
+              <div class="card text-center border-0 bg-warning-subtle">
+                <div class="card-body py-3">
+                  <div class="fs-3 fw-bold text-warning">{{ resumenAsistencia().justificados }}</div>
+                  <div class="small text-muted">Justificados</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tabla de registros -->
+          <div class="card">
+            <div class="card-header fw-semibold">Historial de asistencia</div>
+            <div class="table-responsive">
+              <table class="table table-hover mb-0">
+                <thead class="table-light">
+                  <tr>
+                    <th class="ps-3">Fecha</th>
+                    <th>Estado</th>
+                    <th>Justificación</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (reg of asistenciasOrdenadas(); track reg.id_asistencia) {
+                    <tr>
+                      <td class="ps-3">{{ reg.fechaAsistencia }}</td>
+                      <td><span [class]="colorEstado(reg.estadoAsistencia)">{{ reg.estadoAsistencia }}</span></td>
+                      <td class="text-muted small">{{ reg.justificacionAsistencia || '—' }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </div>
+        }
+      }
+
+      <!-- ══ TAB CONDUCTA ══════════════════════════════════════════════════ -->
+      @if (tabActiva() === 'conducta') {
+
+        @if (errorConducta()) {
+          <div class="alert alert-warning">{{ errorConducta() }}</div>
+        } @else if (conductas().length === 0) {
+          <div class="alert alert-info">Este alumno no tiene registros de conducta.</div>
+        } @else {
+
+          <!-- Resumen por tipo -->
+          <div class="row g-3 mb-4 justify-content-around">
+            @for (tipo of ['Positiva', 'Negativa']; track tipo) {
+              <div class="col-6 col-md-4">
+                <div class="card text-center border-0"
+                     [class]="tipo === 'Positiva' ? 'bg-success-subtle' : tipo === 'Negativa' ? 'bg-danger-subtle' : 'bg-secondary-subtle'">
+                  <div class="card-body py-3">
+                    <div class="fs-3 fw-bold"
+                         [class]="tipo === 'Positiva' ? 'text-success' : tipo === 'Negativa' ? 'text-danger' : 'text-secondary'">
+                      {{ contarConductasPorTipo(tipo) }}
+                    </div>
+                    <div class="small text-muted">{{ tipo }}</div>
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+
+          <!-- Tabla historial -->
+          <div class="card">
+            <div class="card-header fw-semibold">Historial de conducta</div>
+            <div class="table-responsive">
+              <table class="table table-hover mb-0">
+                <thead class="table-light">
+                  <tr>
+                    <th class="ps-3">Fecha</th>
+                    <th>Tipo</th>
+                    <th>Descripción</th>
+                    <th>Docente</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (reg of conductas(); track reg.idConducta) {
+                    <tr>
+                      <td class="ps-3 text-nowrap">{{ reg.fechaConducta }}</td>
+                      <td><span [class]="colorTipoConducta(reg.tipoConducta)">{{ reg.tipoConducta }}</span></td>
+                      <td class="small">{{ reg.descripcionConducta }}</td>
+                      <td class="text-muted small">{{ reg.nombreDocente }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </div>
+        }
+      }
+
+    }
+  }
+
+</main>

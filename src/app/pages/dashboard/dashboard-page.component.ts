@@ -1,4 +1,4 @@
-import { Component, HostListener, computed, inject, signal } from '@angular/core';
+import { Component, HostListener, computed, inject, signal, effect } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, Validators, AbstractControl } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -40,13 +40,25 @@ export class PáginaDashboard {
     return roles.map(rol => CONFIG_ROLES[rol] ?? { etiqueta: rol, clase: 'bg-secondary' });
   });
 
-  private readonly _rolSeleccionado = signal<string | null>(null);
+  private readonly _rolSeleccionado = signal<string | null>(this.servicioToken.obtenerRolActivo());
 
   readonly rolActivo = computed(() => {
     const roles = this.rolesFormateados();
     const seleccionado = this._rolSeleccionado();
     return roles.find(r => r.etiqueta === seleccionado) ?? roles[0];
   });
+
+  // Si la cuenta se creó recién (contraseña temporal enviada por correo), se obliga a
+  // definir una propia antes de poder usar el resto de la app.
+  readonly debeCambiarPassword = computed(() => this.usuario()?.debeCambiarPassword ?? false);
+
+  constructor() {
+    effect(() => {
+      if (this.debeCambiarPassword()) {
+        this.mostrarModalContrasena.set(true);
+      }
+    });
+  }
 
   readonly saludo = computed(() => {
     const hora = new Date().getHours();
@@ -80,6 +92,7 @@ export class PáginaDashboard {
   cambiarRol(rol: { etiqueta: string; clase: string }, evento: MouseEvent): void {
     evento.stopPropagation();
     this._rolSeleccionado.set(rol.etiqueta);
+    this.servicioToken.guardarRolActivo(rol.etiqueta);
     this.estaAbiertoDropdownRol.set(false);
   }
 
@@ -130,6 +143,14 @@ export class PáginaDashboard {
       next: () => {
         this.guardandoContrasena.set(false);
         this.exitoContrasena.set(true);
+
+        // Limpia el flag localmente: si era un cambio obligatorio, deja de serlo
+        // y el modal ya puede cerrarse sin volver a forzarse.
+        const infoActual = this.usuario();
+        if (infoActual) {
+          this.servicioToken.guardarInfoUsuario({ ...infoActual, debeCambiarPassword: false });
+        }
+
         // Cierra el modal automáticamente tras 2 segundos
         setTimeout(() => this.cerrarModalContrasena(), 2000);
       },

@@ -66,12 +66,33 @@
 // ── Tarjeta de selección de curso ───────────────────────────────────────────────
 .tarjeta-curso {
   cursor: pointer;
+  border: none;
   transition: box-shadow 0.15s, transform 0.15s;
 
   &:hover {
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
     transform: translateY(-2px);
   }
+
+  // Paleta pastel que rota según la posición de la tarjeta (ver nth-child)
+  &--color-0 { background-color: #e7f3ff; }
+  &--color-1 { background-color: #e8f8ee; }
+  &--color-2 { background-color: #fff4e5; }
+  &--color-3 { background-color: #f3ecfb; }
+  &--color-4 { background-color: #fdeaf0; }
+  &--color-5 { background-color: #e6fbf8; }
+}
+
+// ── Selector de fecha (más visible) ──────────────────────────────────────────
+.input-fecha-grande {
+  width: auto;
+  font-size: 1.05rem;
+  font-weight: 600;
+  padding: 10px 14px;
+  border-width: 2px;
+  border-color: #1a3a5c;
+  color: #1a3a5c;
+  border-radius: 8px;
 }
 
 // ── Tabla ─────────────────────────────────────────────────────────────────────
@@ -102,6 +123,25 @@
   font-size: 0.78rem;
   padding: 3px 10px;
   border-radius: 4px;
+}
+
+// ── Buscador ──────────────────────────────────────────────────────────────────
+.input-busqueda {
+  position: relative;
+  display: flex;
+  align-items: center;
+
+  &__campo {
+    padding-left: 30px;
+    min-width: 220px;
+  }
+}
+
+.icono-busqueda {
+  position: absolute;
+  left: 9px;
+  color: #adb5bd;
+  pointer-events: none;
 }
 
 // ── Modales ───────────────────────────────────────────────────────────────────

@@ -53,6 +53,7 @@ export interface Matricula {
   anioAcademicoMatricula: number;
   estudianteIdUsuario: number;
   nombreEstudiante: string;
+  rutEstudiante: string;
   idCurso: number;
   gradoCurso: string;
   seccionCurso: string;
@@ -91,6 +92,8 @@ export interface Calificacion {
   estudianteIdUsuario: number;
   idEvaluacion: number;
   nombreEvaluacion: string;
+  nombreAsignatura: string;
+  nombreDocente: string;
   fechaEvaluacion: string;
   fechaRegistro: string;
   creadoPorIdUsuario: number;
@@ -103,4 +106,15 @@ export interface CalificacionRequest {
   idMatricula: number;
   idEvaluacion: number;
   creadoPorIdUsuario: number;
+}
+
+export interface DetalleCalificacionRequest {
+  idMatricula: number;
+  notaCalificacion: number;
+}
+
+export interface CalificacionLoteRequest {
+  idEvaluacion: number;
+  creadoPorIdUsuario: number;
+  detalles: DetalleCalificacionRequest[];
 }

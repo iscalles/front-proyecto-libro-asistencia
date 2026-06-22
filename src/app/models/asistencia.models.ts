@@ -4,17 +4,18 @@ export interface RosterAlumno {
   idMatricula: number;
   estudianteIdUsuario: number;
   nombreEstudiante: string;
+  rutEstudiante: string;
   idCurso: number;
 }
 
-export type EstadoAsistencia = 'presente' | 'ausente' | 'justificado';
+export type EstadoAsistencia = 'Presente' | 'Ausente' | 'Justificado';
 
-export const ESTADOS_ASISTENCIA: EstadoAsistencia[] = ['presente', 'ausente', 'justificado'];
+export const ESTADOS_ASISTENCIA: EstadoAsistencia[] = ['Presente', 'Ausente', 'Justificado'];
 
 export const ETIQUETAS_ESTADO_ASISTENCIA: Record<EstadoAsistencia, string> = {
-  presente: 'Presente',
-  ausente: 'Ausente',
-  justificado: 'Justificado',
+  Presente: 'Presente',
+  Ausente: 'Ausente',
+  Justificado: 'Justificado',
 };
 
 export interface Asistencia {
@@ -61,4 +62,32 @@ export interface ConductaRequest {
   fechaConducta: string; // dd-MM-yyyy
   docenteIdUsuario: number;
   estudianteIdUsuario: number;
+}
+
+// ── Reportes administrativos ───────────────────────────────────────────────────
+export interface ReporteAsistenciaDia {
+  idMatricula: number;
+  nombreEstudiante: string;
+  rutEstudiante: string;
+  estadoAsistencia: string;
+  justificacionAsistencia: string | null;
+}
+
+export interface ReporteAsistenciaResumen {
+  idCurso: number;
+  desde: string;
+  hasta: string;
+  totalRegistros: number;
+  totalPresentes: number;
+  totalAusentes: number;
+  totalJustificados: number;
+  porcentajeAsistencia: number;
+}
+
+export interface ReporteConductaAlumno {
+  estudianteIdUsuario: number;
+  nombreEstudiante: string;
+  rutEstudiante: string;
+  totalPositivas: number;
+  totalNegativas: number;
 }

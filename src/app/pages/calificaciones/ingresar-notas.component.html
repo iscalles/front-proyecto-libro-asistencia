@@ -1,0 +1,102 @@
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
+  <h3 class="h6 fw-semibold mb-0">
+    Notas: {{ evaluacion().nombreEvaluacion }} ({{ evaluacion().fechaEvaluacion }})
+  </h3>
+  <button class="btn btn-outline-secondary btn-sm" (click)="cargarRosterYNotas()" type="button">
+    Actualizar
+  </button>
+</div>
+
+@if (errorRoster()) {
+  <div class="alert alert-danger">{{ errorRoster() }}</div>
+}
+
+@if (cargando()) {
+  <div class="text-center py-5 text-muted">
+    <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+    Cargando alumnos...
+  </div>
+} @else {
+  <div class="card">
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table tabla-mantenedor mb-0">
+          <thead>
+            <tr>
+              <th>RUT</th>
+              <th>Alumno</th>
+              <th style="width: 160px">Nota (1.0 - 7.0)</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (fila of filas.controls; track fila.value.idMatricula; let i = $index) {
+              <tr [formGroup]="fila">
+                <td>{{ rutAlumno(i) }}</td>
+                <td class="fw-medium">{{ nombreAlumno(i) }}</td>
+                <td>
+                  <input class="form-control form-control-sm" type="number"
+                         step="0.1" min="1" max="7"
+                         [class.is-invalid]="notaInvalida(i)"
+                         formControlName="notaCalificacion"
+                         placeholder="Ej: 5.5">
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="3" class="text-center text-muted py-4">
+                  Este curso no tiene alumnos matriculados.
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  @if (roster().length > 0) {
+    <div class="d-flex justify-content-end align-items-center gap-3 mt-3">
+      @if (errorGuardar()) {
+        <span class="text-danger small">{{ errorGuardar() }}</span>
+      }
+      @if (exitoGuardar()) {
+        <span class="text-success small">Notas registradas correctamente.</span>
+      }
+      <button class="btn btn-primary" (click)="abrirConfirmacion()" type="button">
+        Guardar notas
+      </button>
+    </div>
+  }
+}
+
+<!-- ═══ MODAL: CONFIRMAR GUARDADO ═════════════════════════════════════════════ -->
+@if (modalConfirmacion()) {
+  <div class="modal-overlay" (click)="cerrarConfirmacion()">
+    <div class="modal-caja modal-caja--sm" (click)="$event.stopPropagation()">
+      <div class="modal-encabezado">
+        <h3 class="modal-titulo">Confirmar notas</h3>
+        <button class="btn-cerrar" (click)="cerrarConfirmacion()" type="button">✕</button>
+      </div>
+
+      <div class="modal-cuerpo">
+        <p class="mb-0">
+          Vas a registrar las notas de <strong>{{ evaluacion().nombreEvaluacion }}</strong> para
+          <strong>{{ roster().length }}</strong> alumno(s). Si ya existía una nota para algún alumno
+          en esta evaluación, será reemplazada.
+        </p>
+      </div>
+
+      @if (errorGuardar()) {
+        <div class="alert alert-danger mx-4 mb-0 py-2 small">{{ errorGuardar() }}</div>
+      }
+
+      <div class="modal-pie">
+        <button class="btn btn-outline-secondary" (click)="cerrarConfirmacion()" type="button">Cancelar</button>
+        <button class="btn btn-primary" (click)="confirmarGuardar()" [disabled]="guardando()" type="button">
+          @if (guardando()) { <span class="spinner-border spinner-border-sm me-1"></span> Guardando... }
+          @else { Confirmar y guardar }
+        </button>
+      </div>
+    </div>
+  </div>
+}

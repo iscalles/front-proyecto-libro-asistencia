@@ -1,7 +1,7 @@
 <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
   <div class="d-flex align-items-center gap-2">
-    <label class="form-label mb-0">Fecha</label>
-    <input type="date" class="form-control form-control-sm" style="width: auto"
+    <label class="form-label mb-0 fw-semibold">Fecha</label>
+    <input type="date" class="form-control input-fecha-grande"
            [value]="fecha()" (change)="onFechaChange($event)">
   </div>
   <button class="btn btn-outline-secondary btn-sm" (click)="cargarRoster()" type="button">
@@ -25,6 +25,7 @@
         <table class="table tabla-mantenedor mb-0">
           <thead>
             <tr>
+              <th>RUT</th>
               <th>Alumno</th>
               <th style="width: 220px">Estado</th>
               <th>Justificación</th>
@@ -33,6 +34,7 @@
           <tbody>
             @for (fila of filas.controls; track fila.value.idMatricula; let i = $index) {
               <tr [formGroup]="fila">
+                <td>{{ rutAlumno(i) }}</td>
                 <td class="fw-medium">{{ nombreAlumno(i) }}</td>
                 <td>
                   <select class="form-select form-select-sm" formControlName="estadoAsistencia">
@@ -53,7 +55,7 @@
               </tr>
             } @empty {
               <tr>
-                <td colspan="3" class="text-center text-muted py-4">
+                <td colspan="4" class="text-center text-muted py-4">
                   Este curso no tiene alumnos matriculados.
                 </td>
               </tr>
@@ -72,10 +74,46 @@
       @if (exitoGuardar()) {
         <span class="text-success small">Asistencia registrada correctamente.</span>
       }
-      <button class="btn btn-primary" (click)="guardar()" [disabled]="guardando()" type="button">
-        @if (guardando()) { <span class="spinner-border spinner-border-sm me-1"></span> Guardando... }
-        @else { Guardar asistencia }
+      <button class="btn btn-primary" (click)="abrirConfirmacion()" type="button">
+        Guardar asistencia
       </button>
     </div>
   }
+}
+
+<!-- ═══ MODAL: CONFIRMAR GUARDADO ═════════════════════════════════════════════ -->
+@if (modalConfirmacion()) {
+  <div class="modal-overlay" (click)="cerrarConfirmacion()">
+    <div class="modal-caja modal-caja--sm" (click)="$event.stopPropagation()">
+      <div class="modal-encabezado">
+        <h3 class="modal-titulo">Confirmar asistencia</h3>
+        <button class="btn-cerrar" (click)="cerrarConfirmacion()" type="button">✕</button>
+      </div>
+
+      <div class="modal-cuerpo">
+        <p class="mb-3">
+          Vas a registrar la asistencia del <strong>{{ fecha() }}</strong> para
+          <strong>{{ roster().length }}</strong> alumno(s). Si ya existía un registro para
+          esta fecha, será reemplazado.
+        </p>
+        <ul class="list-unstyled mb-0 small">
+          <li class="mb-1"><span class="badge bg-success me-2">{{ resumenConfirmacion().presentes }}</span> presente(s)</li>
+          <li class="mb-1"><span class="badge bg-danger me-2">{{ resumenConfirmacion().ausentes }}</span> ausente(s)</li>
+          <li><span class="badge bg-warning me-2">{{ resumenConfirmacion().justificados }}</span> justificado(s)</li>
+        </ul>
+      </div>
+
+      @if (errorGuardar()) {
+        <div class="alert alert-danger mx-4 mb-0 py-2 small">{{ errorGuardar() }}</div>
+      }
+
+      <div class="modal-pie">
+        <button class="btn btn-outline-secondary" (click)="cerrarConfirmacion()" type="button">Cancelar</button>
+        <button class="btn btn-primary" (click)="confirmarGuardar()" [disabled]="guardando()" type="button">
+          @if (guardando()) { <span class="spinner-border spinner-border-sm me-1"></span> Guardando... }
+          @else { Confirmar y guardar }
+        </button>
+      </div>
+    </div>
+  </div>
 }

@@ -5,6 +5,14 @@
 <div class="row g-3">
   <!-- ═══ LISTA DE ALUMNOS ═══════════════════════════════════════════════════════ -->
   <div class="col-12 col-md-4">
+    <div class="input-busqueda mb-2">
+      <svg class="icono-busqueda" xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
+        <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
+      </svg>
+      <input class="form-control form-control-sm input-busqueda__campo w-100" type="text"
+             placeholder="Buscar por nombre o RUT..."
+             [value]="busqueda()" (input)="busqueda.set(($any($event.target)).value)">
+    </div>
     <div class="card">
       <div class="card-body p-0">
         @if (cargandoRoster()) {
@@ -13,14 +21,17 @@
           </div>
         } @else {
           <ul class="list-group list-group-flush">
-            @for (alumno of roster(); track alumno.idMatricula) {
+            @for (alumno of rosterFiltrado(); track alumno.idMatricula) {
               <li class="list-group-item list-group-item-action"
                   [class.active]="alumnoSeleccionado()?.idMatricula === alumno.idMatricula"
                   (click)="seleccionarAlumno(alumno)" style="cursor: pointer">
-                {{ alumno.nombreEstudiante }}
+                <div class="fw-medium">{{ alumno.nombreEstudiante }}</div>
+                <div class="small text-muted">{{ alumno.rutEstudiante }}</div>
               </li>
             } @empty {
-              <li class="list-group-item text-muted small">Sin alumnos matriculados.</li>
+              <li class="list-group-item text-muted small">
+                {{ roster().length === 0 ? 'Sin alumnos matriculados.' : 'Sin resultados para la búsqueda.' }}
+              </li>
             }
           </ul>
         }

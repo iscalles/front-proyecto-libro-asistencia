@@ -75,6 +75,18 @@ export class ServicioValidadorRut {
   }
 
 
+  // Reformatea un RUT mientras se escribe, sin requerir que ya tenga guión:
+  // inserta los puntos de mil y separa el dígito verificador en cada tecleo
+  // (ej: "123456789" -> "12.345.678-9").
+  formatearEnVivo(valor: string): string {
+    const limpio = valor.replace(/[^0-9kK]/g, '').toUpperCase().slice(0, 9);
+    if (limpio.length <= 1) return limpio;
+
+    const verificador = limpio.slice(-1);
+    const numero = limpio.slice(0, -1).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    return `${numero}-${verificador}`;
+  }
+
   formatRut(rut: string): string {
     const cleanedRut = this.cleanRut(rut);
     

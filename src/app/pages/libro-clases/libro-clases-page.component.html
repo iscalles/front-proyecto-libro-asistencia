@@ -24,6 +24,14 @@
   @if (!cursoSeleccionado()) {
     <!-- ═══ SELECCIÓN DE CURSO-ASIGNATURA ═══════════════════════════════════════ -->
     <h2 class="h5 fw-semibold mb-3">Selecciona un curso</h2>
+    <div class="input-busqueda mb-3">
+      <svg class="icono-busqueda" xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
+        <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
+      </svg>
+      <input class="form-control input-busqueda__campo w-100" type="text"
+             placeholder="Buscar por asignatura, grado o sección..."
+             [value]="busquedaCurso()" (input)="busquedaCurso.set(($any($event.target)).value)">
+    </div>
 
     @if (errorCursos()) {
       <div class="alert alert-danger">{{ errorCursos() }}</div>
@@ -36,9 +44,9 @@
       </div>
     } @else {
       <div class="row g-3">
-        @for (c of misCursos(); track c.idCursoAsignatura) {
+        @for (c of misCursosFiltrados(); track c.idCursoAsignatura; let i = $index) {
           <div class="col-12 col-md-4">
-            <div class="card tarjeta-curso h-100" (click)="seleccionarCurso(c)">
+            <div class="card tarjeta-curso h-100" [class]="colorTarjeta(i)" (click)="seleccionarCurso(c)">
               <div class="card-body">
                 <h5 class="card-title mb-1">{{ c.gradoCurso }} {{ c.seccionCurso }}</h5>
                 <p class="card-text text-muted small mb-0">{{ c.nombreAsignatura }}</p>
@@ -47,7 +55,9 @@
           </div>
         } @empty {
           <div class="col-12">
-            <p class="text-muted">No tienes cursos asignados todavía.</p>
+            <p class="text-muted">
+              {{ misCursos().length === 0 ? 'No tienes cursos asignados todavía.' : 'Sin resultados para la búsqueda.' }}
+            </p>
           </div>
         }
       </div>

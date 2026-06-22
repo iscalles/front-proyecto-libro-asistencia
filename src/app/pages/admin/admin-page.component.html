@@ -23,25 +23,32 @@
 <main class="container py-4">
 
   <!-- Barra de herramientas -->
-  <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
-    <div>
-      <h2 class="h5 fw-semibold mb-0">Listado de usuarios</h2>
-      <p class="text-muted small mb-0">
-        {{ usuariosFiltrados().length }} de {{ usuarios().length }} usuario(s)
-      </p>
-    </div>
-    <div class="d-flex gap-2 flex-wrap">
+  <div class="mb-4">
+    <h2 class="h5 fw-semibold mb-0">Listado de usuarios</h2>
+    <p class="text-muted small mb-3">
+      {{ usuariosFiltrados().length }} de {{ usuarios().length }} usuario(s)
+    </p>
+
+    <div class="d-flex flex-wrap gap-2 align-items-center">
       <!-- Buscador -->
-      <div class="input-busqueda">
+      <div class="input-busqueda flex-grow-1">
         <svg class="icono-busqueda" xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
           <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.099zm-5.242 1.656a5.5 5.5 0 1 1 0-11 5.5 5.5 0 0 1 0 11z"/>
         </svg>
-        <input class="form-control form-control-sm input-busqueda__campo"
+        <input class="form-control form-control-sm input-busqueda__campo w-100"
                type="text"
                placeholder="Buscar por RUT o nombre..."
                [value]="busqueda()"
                (input)="busqueda.set($any($event.target).value)">
       </div>
+      <!-- Filtro por rol -->
+      <select class="form-select form-select-sm" style="max-width: 200px"
+              [value]="rolFiltro()" (change)="rolFiltro.set($any($event.target).value)">
+        <option value="">Todos los roles</option>
+        @for (rol of rolesDisponibles; track rol) {
+          <option [value]="rol">{{ etiquetasRol[rol] }}</option>
+        }
+      </select>
       <button class="btn btn-outline-secondary btn-sm" (click)="cargarUsuarios()" type="button">
         Actualizar
       </button>
@@ -147,7 +154,7 @@
           <div class="col-12">
             <label class="form-label">RUT <span class="text-danger">*</span></label>
             <input class="form-control" [class.is-invalid]="error('rutUsuario','required') || error('rutUsuario','pattern')"
-                   formControlName="rutUsuario" placeholder="12.345.678-5">
+                   formControlName="rutUsuario" placeholder="12.345.678-5" (input)="onRutInput($event)">
             @if (error('rutUsuario','required'))  { <div class="invalid-feedback">El RUT es obligatorio.</div> }
             @if (error('rutUsuario','pattern'))   { <div class="invalid-feedback">Formato requerido: 12.345.678-5</div> }
           </div>
@@ -201,7 +208,7 @@
               }
             </div>
             <p class="text-muted small mt-1 mb-0">
-              La contraseña inicial es la misma que la del usuario de prueba existente.
+              Se generará una contraseña inicial en el siguiente paso.
             </p>
           </div>
         </div>
@@ -358,21 +365,11 @@
       </div>
       <div class="modal-cuerpo">
         <p class="mb-3">
-          Entrega estas credenciales a <strong>{{ c.nombre }}</strong> de forma segura:
+          Se envió un correo a <strong>{{ c.correo }}</strong> con las instrucciones de acceso
+          de <strong>{{ c.nombre }}</strong>.
         </p>
-        <div class="credenciales-bloque">
-          <div class="credencial-fila">
-            <span class="credencial-label">Correo</span>
-            <span class="credencial-valor">{{ c.correo }}</span>
-          </div>
-          <div class="credencial-fila credencial-fila--destacada">
-            <span class="credencial-label">Contraseña temporal</span>
-            <span class="credencial-valor font-monospace fw-bold fs-5 letra-espaciada">{{ c.contrasena }}</span>
-          </div>
-        </div>
-        <div class="alert alert-warning py-2 small mt-3 mb-0">
-          <strong>Atención:</strong> esta contraseña solo se muestra una vez.
-          Cópiala antes de cerrar esta ventana.
+        <div class="alert alert-info py-2 small mb-0">
+          La contraseña es temporal: se le pedirá definir una propia la primera vez que inicie sesión.
         </div>
       </div>
       <div class="modal-pie">

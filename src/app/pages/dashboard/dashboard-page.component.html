@@ -15,7 +15,7 @@
         <!-- Dropdown de ROL (solo si tiene más de uno) -->
         @if (rolesFormateados().length > 1) {
           <div class="dropdown">
-            <button class="btn btn-outline-light btn-sm dropdown-toggle-custom d-flex align-items-center gap-2"
+            <button class="btn btn-sm dropdown-toggle-custom d-flex align-items-center gap-2"
                     (click)="toggleDropdownRol($event)" type="button">
               <span class="badge {{ rolActivo().clase }}">{{ rolActivo().etiqueta }}</span>
               <svg class="icono-chevron" [class.rotado]="estaAbiertoDropdownRol()"
@@ -136,7 +136,7 @@
               </div>
               <h5 class="card-title">Calificaciones</h5>
               <p class="card-text text-muted small">Ingresa y gestiona las notas de tus alumnos.</p>
-              <button class="btn btn-success btn-sm" disabled>Próximamente</button>
+              <a routerLink="/calificaciones" class="btn btn-success btn-sm">Abrir Calificaciones</a>
             </div>
           </div>
         </div>
@@ -153,7 +153,7 @@
               </div>
               <h5 class="card-title">Seguimiento del Alumno</h5>
               <p class="card-text text-muted small">Consulta la asistencia y notas de tu pupilo.</p>
-              <button class="btn btn-primary btn-sm" disabled>Próximamente</button>
+              <a routerLink="/seguimiento" class="btn btn-primary btn-sm">Abrir módulo</a>
             </div>
           </div>
         </div>
@@ -215,7 +215,7 @@
               </div>
               <h5 class="card-title">Reportes</h5>
               <p class="card-text text-muted small">Genera informes de asistencia y rendimiento.</p>
-              <button class="btn btn-danger btn-sm" disabled>Próximamente</button>
+              <a routerLink="/reportes" class="btn btn-danger btn-sm">Abrir módulo</a>
             </div>
           </div>
         </div>
@@ -233,6 +233,23 @@
               <h5 class="card-title">Relaciones Apoderado-Alumno</h5>
               <p class="card-text text-muted small">Asigna y gestiona los estudiantes de cada apoderado.</p>
               <a routerLink="/relaciones" class="btn btn-danger btn-sm">Abrir módulo</a>
+            </div>
+          </div>
+        </div>
+      }
+
+      @if (rolActivo().etiqueta === 'Estudiante') {
+        <div class="col-12 col-md-4">
+          <div class="card tarjeta-modulo h-100">
+            <div class="card-body">
+              <div class="icono-modulo bg-warning-subtle text-warning-emphasis mb-3">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
+                  <path d="M0 0h1v15h15v1H0V0zm14.817 3.113a.5.5 0 0 1 .07.704l-4.5 5.5a.5.5 0 0 1-.74.037L7.06 6.767l-3.656 5.027a.5.5 0 0 1-.808-.588l4-5.5a.5.5 0 0 1 .758-.06l2.609 2.61 4.15-5.073a.5.5 0 0 1 .704-.07z"/>
+                </svg>
+              </div>
+              <h5 class="card-title">Mis Calificaciones</h5>
+              <p class="card-text text-muted small">Consulta tus notas y las asignaturas que cursas.</p>
+              <a routerLink="/mis-calificaciones" class="btn btn-warning btn-sm">Abrir módulo</a>
             </div>
           </div>
         </div>
@@ -269,13 +286,21 @@
 
 <!-- ═══ MODAL: CAMBIAR CONTRASEÑA ════════════════════════════════════════════ -->
 @if (mostrarModalContrasena()) {
-  <div class="modal-contrasena-overlay" (click)="cerrarModalContrasena()">
+  <div class="modal-contrasena-overlay" (click)="debeCambiarPassword() ? null : cerrarModalContrasena()">
     <div class="modal-contrasena-caja" (click)="$event.stopPropagation()">
 
       <div class="modal-contrasena-encabezado">
         <h3 class="modal-contrasena-titulo">Cambiar contraseña</h3>
-        <button class="btn-cerrar-modal" (click)="cerrarModalContrasena()" type="button">✕</button>
+        @if (!debeCambiarPassword()) {
+          <button class="btn-cerrar-modal" (click)="cerrarModalContrasena()" type="button">✕</button>
+        }
       </div>
+
+      @if (debeCambiarPassword() && !exitoContrasena()) {
+        <div class="alert alert-info mx-4 mt-3 mb-0 py-2 small">
+          Por seguridad, debes definir tu propia contraseña antes de continuar.
+        </div>
+      }
 
       @if (exitoContrasena()) {
         <!-- Estado de éxito -->
@@ -333,9 +358,11 @@
         </form>
 
         <div class="modal-contrasena-pie">
-          <button class="btn btn-outline-secondary" (click)="cerrarModalContrasena()" type="button">
-            Cancelar
-          </button>
+          @if (!debeCambiarPassword()) {
+            <button class="btn btn-outline-secondary" (click)="cerrarModalContrasena()" type="button">
+              Cancelar
+            </button>
+          }
           <button class="btn btn-primary" (click)="guardarContrasena()"
                   [disabled]="guardandoContrasena()" type="button">
             @if (guardandoContrasena()) {

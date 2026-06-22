@@ -1,0 +1,158 @@
+<!-- ═══ HEADER ══════════════════════════════════════════════════════════════ -->
+<header class="admin-header shadow-sm">
+  <div class="container-fluid px-4 d-flex align-items-center gap-3">
+    <button class="btn btn-link btn-volver p-0" (click)="irAlDashboard()" type="button">
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16">
+        <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8z"/>
+      </svg>
+      Dashboard
+    </button>
+    <div class="separador-vertical"></div>
+    <h1 class="admin-titulo mb-0">Calificaciones</h1>
+
+    <div class="ms-auto d-flex align-items-center gap-2">
+      @if (usuarioSesion(); as u) {
+        <span class="texto-sesion d-none d-sm-inline">{{ u.nombre }}</span>
+      }
+      <span class="badge bg-success">Docente</span>
+    </div>
+  </div>
+</header>
+
+<main class="container py-4">
+
+  @if (!cursoSeleccionado()) {
+    <!-- ═══ SELECCIÓN DE CURSO-ASIGNATURA ═══════════════════════════════════════ -->
+    <h2 class="h5 fw-semibold mb-3">Selecciona un curso</h2>
+    <div class="input-busqueda mb-3">
+      <svg class="icono-busqueda" xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
+        <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
+      </svg>
+      <input class="form-control input-busqueda__campo w-100" type="text"
+             placeholder="Buscar por asignatura, grado o sección..."
+             [value]="busquedaCurso()" (input)="busquedaCurso.set(($any($event.target)).value)">
+    </div>
+
+    @if (errorCursos()) {
+      <div class="alert alert-danger">{{ errorCursos() }}</div>
+    }
+
+    @if (cargandoCursos()) {
+      <div class="text-center py-5 text-muted">
+        <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+        Cargando tus cursos...
+      </div>
+    } @else {
+      <div class="row g-3">
+        @for (c of misCursosFiltrados(); track c.idCursoAsignatura; let i = $index) {
+          <div class="col-12 col-md-4">
+            <div class="card tarjeta-curso h-100" [class]="colorTarjeta(i)" (click)="seleccionarCurso(c)">
+              <div class="card-body">
+                <h5 class="card-title mb-1">{{ c.gradoCurso }} {{ c.seccionCurso }}</h5>
+                <p class="card-text text-muted small mb-0">{{ c.nombreAsignatura }}</p>
+              </div>
+            </div>
+          </div>
+        } @empty {
+          <div class="col-12">
+            <p class="text-muted">
+              {{ misCursos().length === 0 ? 'No tienes cursos asignados todavía.' : 'Sin resultados para la búsqueda.' }}
+            </p>
+          </div>
+        }
+      </div>
+    }
+  } @else {
+    <!-- ═══ CURSO SELECCIONADO: EVALUACIONES ═══════════════════════════════════════ -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
+      <div>
+        <button class="btn btn-link p-0 text-decoration-none mb-1" (click)="volverASeleccion()" type="button">
+          ← Cambiar curso
+        </button>
+        <h2 class="h5 fw-semibold mb-0">
+          {{ cursoSeleccionado()!.gradoCurso }} {{ cursoSeleccionado()!.seccionCurso }} · {{ cursoSeleccionado()!.nombreAsignatura }}
+        </h2>
+      </div>
+      <button class="btn btn-primary btn-sm" (click)="abrirCrearEvaluacion()" type="button">
+        + Nueva evaluación
+      </button>
+    </div>
+
+    @if (errorEvaluaciones()) {
+      <div class="alert alert-danger">{{ errorEvaluaciones() }}</div>
+    }
+
+    @if (cargandoEvaluaciones()) {
+      <div class="text-center py-4 text-muted">
+        <div class="spinner-border spinner-border-sm" role="status"></div>
+      </div>
+    } @else {
+      <div class="row g-3 mb-4">
+        @for (e of evaluaciones(); track e.idEvaluacion) {
+          <div class="col-12 col-md-4">
+            <div class="card tarjeta-evaluacion h-100"
+                 [class.activa]="evaluacionSeleccionada()?.idEvaluacion === e.idEvaluacion"
+                 (click)="seleccionarEvaluacion(e)">
+              <div class="card-body">
+                <h5 class="card-title mb-1">{{ e.nombreEvaluacion }}</h5>
+                <p class="card-text text-muted small mb-0">{{ e.fechaEvaluacion }}</p>
+              </div>
+            </div>
+          </div>
+        } @empty {
+          <div class="col-12">
+            <p class="text-muted">Este curso no tiene evaluaciones todavía. Crea una para empezar a ingresar notas.</p>
+          </div>
+        }
+      </div>
+    }
+
+    @if (evaluacionSeleccionada(); as ev) {
+      <app-ingresar-notas [evaluacion]="ev" />
+    }
+  }
+
+</main>
+
+<!-- ═══ MODAL: NUEVA EVALUACIÓN ═══════════════════════════════════════════════ -->
+@if (modalCrearEvaluacion()) {
+  <div class="modal-overlay" (click)="cerrarCrearEvaluacion()">
+    <div class="modal-caja modal-caja--sm" (click)="$event.stopPropagation()">
+      <div class="modal-encabezado">
+        <h3 class="modal-titulo">Nueva evaluación</h3>
+        <button class="btn-cerrar" (click)="cerrarCrearEvaluacion()" type="button">✕</button>
+      </div>
+
+      <form [formGroup]="formEvaluacion" class="modal-cuerpo">
+        <div class="row g-3">
+          <div class="col-12">
+            <label class="form-label">Nombre <span class="text-danger">*</span></label>
+            <input class="form-control" type="text"
+                   [class.is-invalid]="error('nombreEvaluacion','required')"
+                   formControlName="nombreEvaluacion"
+                   placeholder="Ej: Prueba unidad 1">
+            @if (error('nombreEvaluacion','required')) {
+              <div class="invalid-feedback">Este campo es obligatorio.</div>
+            }
+          </div>
+          <div class="col-12">
+            <label class="form-label">Fecha <span class="text-danger">*</span></label>
+            <input class="form-control" type="date" formControlName="fechaEvaluacion">
+          </div>
+        </div>
+      </form>
+
+      @if (errorEvaluacionModal()) {
+        <div class="alert alert-danger mx-4 mb-0 py-2 small">{{ errorEvaluacionModal() }}</div>
+      }
+
+      <div class="modal-pie">
+        <button class="btn btn-outline-secondary" (click)="cerrarCrearEvaluacion()" type="button">Cancelar</button>
+        <button class="btn btn-primary" (click)="guardarEvaluacion()" [disabled]="guardandoEvaluacion()" type="button">
+          @if (guardandoEvaluacion()) { <span class="spinner-border spinner-border-sm me-1"></span> Guardando... }
+          @else { Crear evaluación }
+        </button>
+      </div>
+    </div>
+  </div>
+}

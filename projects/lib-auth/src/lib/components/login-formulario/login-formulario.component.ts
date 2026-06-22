@@ -31,6 +31,12 @@ export class ComponenteFormularioAcceso implements OnInit {
   serverError: ErrorAutenticacion | null = null;
   showPassword = false;
 
+  // ── Recuperar contraseña ─────────────────────────────────────────────────────
+  mostrarRecuperar = false;
+  recuperarForm!: FormGroup;
+  recuperarEnviando = false;
+  recuperarExito = false;
+
   constructor(
     private constructorFormulario: FormBuilder,
     private servicioAutenticacion: ServicioAutenticacion,
@@ -40,6 +46,48 @@ export class ComponenteFormularioAcceso implements OnInit {
 
   ngOnInit(): void {
     this.inicializarFormulario();
+    this.recuperarForm = this.constructorFormulario.group({
+      correo: ['', [Validators.required, Validators.email]]
+    });
+  }
+
+  abrirRecuperar(evento: Event): void {
+    evento.preventDefault();
+    this.mostrarRecuperar = true;
+    this.recuperarExito = false;
+    this.recuperarForm.reset();
+  }
+
+  volverAlLogin(): void {
+    this.mostrarRecuperar = false;
+  }
+
+  get errorCorreoRecuperar(): string | null {
+    const control = this.recuperarForm.get('correo');
+    if (!control?.errors || !control?.touched) return null;
+    if (control.errors['required']) return 'El correo es requerido';
+    if (control.errors['email']) return 'Ingresa un correo válido';
+    return null;
+  }
+
+  enviarRecuperacion(): void {
+    if (this.recuperarForm.invalid) {
+      this.recuperarForm.markAllAsTouched();
+      return;
+    }
+    this.recuperarEnviando = true;
+    this.servicioAutenticacion.recuperarPassword(this.recuperarForm.value.correo).subscribe({
+      next: () => {
+        this.recuperarEnviando = false;
+        this.recuperarExito = true;
+      },
+      error: () => {
+        // Aun si la llamada falla por un problema de red, no se distingue el motivo
+        // al usuario: el mensaje de éxito es siempre el mismo por seguridad.
+        this.recuperarEnviando = false;
+        this.recuperarExito = true;
+      }
+    });
   }
 
   /**

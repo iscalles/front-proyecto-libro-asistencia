@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, forkJoin, of } from 'rxjs';
+import { Observable, forkJoin, of, throwError } from 'rxjs';
 import { switchMap, map, catchError } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 import {
@@ -134,7 +134,18 @@ export class ServicioUsuarioAdmin {
           ...roles.map(r => this.asignarRol(id, r)),
           ...roles.map(r => this.crearPerfil(id, r).pipe(catchError(() => of(null)))),
         ];
-        return forkJoin(tareas).pipe(map(() => ({ usuario, contrasena })));
+        return forkJoin(tareas).pipe(
+          map(() => ({ usuario, contrasena })),
+          catchError(error =>
+            // Si falla la cuenta de acceso o la asignación de roles, no debe quedar un
+            // usuario a medio crear (sin login). Se revierte para que el admin pueda
+            // reintentar sin chocar con "ya existe usuario con ese RUT".
+            this.eliminarUsuario(id).pipe(
+              catchError(() => of(null)),
+              switchMap(() => throwError(() => error))
+            )
+          )
+        );
       })
     );
   }

@@ -1,6 +1,7 @@
-import { Component, Input, Output, EventEmitter, forwardRef } from '@angular/core';
+import { Component, Input, Output, EventEmitter, forwardRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, NG_VALUE_ACCESSOR, ControlValueAccessor } from '@angular/forms';
+import { ServicioValidadorRut } from '../../services/rut-validator.service';
 
 /**
  * ComponenteEntradaFormulario
@@ -22,6 +23,8 @@ import { FormsModule, NG_VALUE_ACCESSOR, ControlValueAccessor } from '@angular/f
   ]
 })
 export class ComponenteEntradaFormulario implements ControlValueAccessor {
+  private servicioRut = inject(ServicioValidadorRut);
+
   @Input() label: string = '';
   @Input() name: string = '';
   @Input() placeholder: string = '';
@@ -30,6 +33,8 @@ export class ComponenteEntradaFormulario implements ControlValueAccessor {
   @Input() error: string | null = null;
   @Input() hint: string = '';
   @Input() required: boolean = false;
+  // Reformatea el valor como RUT chileno (XX.XXX.XXX-X) en cada tecleo
+  @Input() esRut: boolean = false;
 
   @Output() valueChange = new EventEmitter<string>();
 
@@ -59,7 +64,7 @@ export class ComponenteEntradaFormulario implements ControlValueAccessor {
   // Input event handler
   onInput(event: Event): void {
     const target = event.target as HTMLInputElement;
-    this.value = target.value;
+    this.value = this.esRut ? this.servicioRut.formatearEnVivo(target.value) : target.value;
     this.onChange(this.value);
     this.valueChange.emit(this.value);
   }
