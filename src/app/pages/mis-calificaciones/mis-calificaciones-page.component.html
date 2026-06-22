@@ -1,0 +1,139 @@
+<!-- ═══ HEADER ══════════════════════════════════════════════════════════════ -->
+<header class="admin-header shadow-sm">
+  <div class="container-fluid px-4 d-flex align-items-center gap-3">
+    <button class="btn btn-link btn-volver p-0" (click)="irAlDashboard()" type="button">
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16">
+        <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8z"/>
+      </svg>
+      Dashboard
+    </button>
+    <div class="separador-vertical"></div>
+    <h1 class="admin-titulo mb-0">Mis Calificaciones</h1>
+
+    <div class="ms-auto d-flex align-items-center gap-2">
+      @if (usuarioSesion(); as u) {
+        <span class="texto-sesion d-none d-sm-inline">{{ u.nombre }}</span>
+      }
+      <span class="badge bg-warning text-dark">Estudiante</span>
+    </div>
+  </div>
+</header>
+
+<main class="container py-4">
+
+  @if (error()) {
+    <div class="alert alert-danger">{{ error() }}</div>
+  }
+
+  @if (cargando()) {
+    <div class="text-center py-5">
+      <div class="spinner-border text-primary mb-3" role="status"></div>
+      <p class="text-muted">Cargando tu información académica...</p>
+    </div>
+  } @else if (!matriculaActual()) {
+    <div class="alert alert-info">No tienes una matrícula registrada todavía.</div>
+  } @else {
+
+    <div class="mb-4">
+      <h2 class="h5 fw-semibold mb-0">
+        {{ matriculaActual()!.gradoCurso }} {{ matriculaActual()!.seccionCurso }}
+      </h2>
+      <p class="text-muted small mb-0">Año {{ matriculaActual()!.anioCurso }}</p>
+    </div>
+
+    <!-- Tabs -->
+    <nav class="tab-bar mb-4">
+      <button class="tab-boton" [class.activo]="tabActiva() === 'calificaciones'"
+              (click)="tabActiva.set('calificaciones')" type="button">
+        Calificaciones
+      </button>
+      <button class="tab-boton" [class.activo]="tabActiva() === 'asignaturas'"
+              (click)="tabActiva.set('asignaturas')" type="button">
+        Mis Asignaturas
+      </button>
+    </nav>
+
+    <!-- ══ TAB CALIFICACIONES ══════════════════════════════════════════════ -->
+    @if (tabActiva() === 'calificaciones') {
+
+      @if (calificaciones().length === 0) {
+        <div class="alert alert-info">Todavía no tienes calificaciones registradas.</div>
+      } @else {
+
+        <!-- Promedio general -->
+        <div class="card tarjeta-promedio mb-4">
+          <div class="card-body d-flex align-items-center gap-3 py-4">
+            <div class="circulo-promedio" [class]="'circulo-promedio--' + nivelRendimiento(promedioGeneral() ?? 0)">
+              {{ promedioGeneral() }}
+            </div>
+            <div>
+              <div class="fw-semibold fs-5">Promedio General</div>
+              <div class="text-muted small">Calculado sobre todas las asignaturas</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Por asignatura -->
+        @for (res of resumenCalificaciones(); track res.nombreAsignatura) {
+          <div class="card tarjeta-asignatura mb-3" [class]="'tarjeta-asignatura--' + nivelRendimiento(res.promedio)">
+            <div class="tarjeta-asignatura__header" [class]="'tarjeta-asignatura__header--' + nivelRendimiento(res.promedio)">
+              <div>
+                <div class="tarjeta-asignatura__nombre">{{ res.nombreAsignatura }}</div>
+                <div class="tarjeta-asignatura__docente">👤 {{ res.nombreDocente }}</div>
+              </div>
+              <span class="pildora-promedio" [class]="'pildora-promedio--' + nivelRendimiento(res.promedio)">
+                Promedio {{ res.promedio }}
+              </span>
+            </div>
+            <div class="card-body p-0">
+              <div class="table-responsive">
+                <table class="table tabla-mantenedor mb-0">
+                  <thead>
+                    <tr>
+                      <th>Evaluación</th>
+                      <th>Fecha</th>
+                      <th class="text-end">Nota</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (cal of res.calificaciones; track cal.nombre) {
+                      <tr>
+                        <td>{{ cal.nombre }}</td>
+                        <td class="text-muted small">{{ cal.fecha }}</td>
+                        <td class="text-end">
+                          <span [class]="colorPromedio(cal.nota)">{{ cal.nota }}</span>
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        }
+      }
+    }
+
+    <!-- ══ TAB MIS ASIGNATURAS ═════════════════════════════════════════════ -->
+    @if (tabActiva() === 'asignaturas') {
+
+      @if (misAsignaturas().length === 0) {
+        <div class="alert alert-info">No hay asignaturas registradas para tu curso todavía.</div>
+      } @else {
+        <div class="row g-3">
+          @for (ca of misAsignaturas(); track ca.idCursoAsignatura; let i = $index) {
+            <div class="col-12 col-md-4">
+              <div class="card tarjeta-curso h-100" [class]="colorTarjeta(i)">
+                <div class="card-body">
+                  <h5 class="card-title mb-1">{{ ca.nombreAsignatura }}</h5>
+                  <p class="card-text text-muted small mb-0">👤 {{ ca.nombreDocente }}</p>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    }
+  }
+
+</main>

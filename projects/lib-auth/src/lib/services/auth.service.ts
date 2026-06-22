@@ -32,7 +32,8 @@ export class ServicioAutenticacion {
           nombre: respuesta.nombre,
           correo: respuesta.correo,
           roles: respuesta.roles,
-          rutUsuario: credenciales.rutUsuario
+          rutUsuario: credenciales.rutUsuario,
+          debeCambiarPassword: respuesta.debeCambiarPassword ?? false
         });
       }),
       catchError(error => {
@@ -74,7 +75,8 @@ export class ServicioAutenticacion {
           nombre: respuesta.nombre,
           correo: respuesta.correo,
           roles: respuesta.roles,
-          rutUsuario: infoActual?.rutUsuario ?? ''
+          rutUsuario: infoActual?.rutUsuario ?? '',
+          debeCambiarPassword: infoActual?.debeCambiarPassword ?? false
         });
       }),
       catchError(error => {
@@ -86,6 +88,13 @@ export class ServicioAutenticacion {
         return throwError(() => errorAutenticacion);
       })
     );
+  }
+
+  // Solicita el envío de una contraseña temporal nueva al correo registrado.
+  // El backend siempre responde igual (exista o no el correo), así que esto nunca
+  // debería fallar salvo por un error real de red/servidor.
+  recuperarPassword(correo: string): Observable<void> {
+    return this.clienteHttp.post<void>(`${this.urlBase}/recuperar-password`, { correo });
   }
 
   cerrarSesion(): Observable<any> {

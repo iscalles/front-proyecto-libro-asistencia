@@ -11,6 +11,7 @@ export interface RespuestaAutenticacion {
   correo: string;
   roles: string[];
   expiresIn: number;
+  debeCambiarPassword?: boolean;
 }
 
 export interface InfoUsuario {
@@ -19,6 +20,7 @@ export interface InfoUsuario {
   correo: string;
   roles: string[];
   rutUsuario: string;
+  debeCambiarPassword?: boolean;
 }
 
 export interface ErrorAutenticacion {

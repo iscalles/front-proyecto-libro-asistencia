@@ -29,3 +29,16 @@ export const docenteGuard: CanActivateFn = () => {
 
   return enrutador.createUrlTree(['/dashboard']);
 };
+
+// Guard de rol: verifica que el usuario autenticado tenga el rol ESTUDIANTE.
+export const estudianteGuard: CanActivateFn = () => {
+  const servicioToken = inject(ServicioToken);
+  const enrutador = inject(Router);
+
+  const usuario = servicioToken.obtenerInfoUsuario();
+  if (usuario?.roles?.includes('ESTUDIANTE')) {
+    return true;
+  }
+
+  return enrutador.createUrlTree(['/dashboard']);
+};
