@@ -8,9 +8,10 @@ import { PáginaSeguimiento } from './pages/seguimiento/seguimiento-page.compone
 import { PáginaLibroClases } from './pages/libro-clases/libro-clases-page.component';
 import { PáginaReportes } from './pages/reportes/reportes-page.component';
 import { PáginaCalificaciones } from './pages/calificaciones/calificaciones-page.component';
+import { PáginaMisCalificaciones } from './pages/mis-calificaciones/mis-calificaciones-page.component';
 import { authGuard } from './guards/auth.guard';
 import { apoderadoGuard } from './guards/apoderado.guard';
-import { adminGuard, docenteGuard } from './guards/role.guard';
+import { adminGuard, docenteGuard, estudianteGuard } from './guards/role.guard';
 
 export const routes: Routes = [
   {
@@ -56,6 +57,11 @@ export const routes: Routes = [
     path: 'calificaciones',
     component: PáginaCalificaciones,
     canActivate: [authGuard, docenteGuard]
+  },
+  {
+    path: 'mis-calificaciones',
+    component: PáginaMisCalificaciones,
+    canActivate: [authGuard, estudianteGuard]
   },
   {
     path: '',

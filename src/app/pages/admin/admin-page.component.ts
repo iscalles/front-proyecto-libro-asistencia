@@ -2,7 +2,7 @@ import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { Router } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
-import { ServicioToken } from 'lib-auth';
+import { ServicioToken, ServicioValidadorRut } from 'lib-auth';
 import { ServicioUsuarioAdmin } from '../../services/usuario-admin.service';
 import {
   UsuarioDTOInternal, UsuarioDTO,
@@ -19,6 +19,7 @@ import {
 export class PáginaAdmin implements OnInit {
   private servicioToken = inject(ServicioToken);
   private servicioAdmin = inject(ServicioUsuarioAdmin);
+  private servicioRut   = inject(ServicioValidadorRut);
   private fb           = inject(FormBuilder);
   private enrutador    = inject(Router);
 
@@ -102,6 +103,14 @@ export class PáginaAdmin implements OnInit {
   }
 
   // ── Helpers ────────────────────────────────────────────────────────────────
+
+  // Reformatea el RUT mientras se escribe (igual que en el login), para que no
+  // haya que tipear los puntos ni el guión manualmente.
+  onRutInput(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const formateado = this.servicioRut.formatearEnVivo(input.value);
+    this.form.get('rutUsuario')?.setValue(formateado);
+  }
 
   nombreCompleto(u: { nombreUsuario: string; primerApellidoUsuario: string; segundoApellidoUsuario?: string }): string {
     return [u.nombreUsuario, u.primerApellidoUsuario, u.segundoApellidoUsuario]

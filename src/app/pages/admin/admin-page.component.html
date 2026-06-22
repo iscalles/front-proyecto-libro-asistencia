@@ -154,7 +154,7 @@
           <div class="col-12">
             <label class="form-label">RUT <span class="text-danger">*</span></label>
             <input class="form-control" [class.is-invalid]="error('rutUsuario','required') || error('rutUsuario','pattern')"
-                   formControlName="rutUsuario" placeholder="12.345.678-5">
+                   formControlName="rutUsuario" placeholder="12.345.678-5" (input)="onRutInput($event)">
             @if (error('rutUsuario','required'))  { <div class="invalid-feedback">El RUT es obligatorio.</div> }
             @if (error('rutUsuario','pattern'))   { <div class="invalid-feedback">Formato requerido: 12.345.678-5</div> }
           </div>
@@ -208,7 +208,7 @@
               }
             </div>
             <p class="text-muted small mt-1 mb-0">
-              La contraseña inicial es la misma que la del usuario de prueba existente.
+              Se generará una contraseña inicial en el siguiente paso.
             </p>
           </div>
         </div>
@@ -365,21 +365,11 @@
       </div>
       <div class="modal-cuerpo">
         <p class="mb-3">
-          Entrega estas credenciales a <strong>{{ c.nombre }}</strong> de forma segura:
+          Se envió un correo a <strong>{{ c.correo }}</strong> con las instrucciones de acceso
+          de <strong>{{ c.nombre }}</strong>.
         </p>
-        <div class="credenciales-bloque">
-          <div class="credencial-fila">
-            <span class="credencial-label">Correo</span>
-            <span class="credencial-valor">{{ c.correo }}</span>
-          </div>
-          <div class="credencial-fila credencial-fila--destacada">
-            <span class="credencial-label">Contraseña temporal</span>
-            <span class="credencial-valor font-monospace fw-bold fs-5 letra-espaciada">{{ c.contrasena }}</span>
-          </div>
-        </div>
-        <div class="alert alert-warning py-2 small mt-3 mb-0">
-          <strong>Atención:</strong> esta contraseña solo se muestra una vez.
-          Cópiala antes de cerrar esta ventana.
+        <div class="alert alert-info py-2 small mb-0">
+          La contraseña es temporal: se le pedirá definir una propia la primera vez que inicie sesión.
         </div>
       </div>
       <div class="modal-pie">
