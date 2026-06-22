@@ -6,6 +6,16 @@ export interface Asistencia {
   idMatricula: number;
 }
 
+export interface Conducta {
+  idConducta: number;
+  tipoConducta: string;
+  descripcionConducta: string;
+  fechaConducta: string;   // formato dd-MM-yyyy
+  docenteIdUsuario: number;
+  nombreDocente: string;
+  estudianteIdUsuario: number;
+}
+
 export interface ResumenCalificaciones {
   nombreAsignatura: string;
   nombreDocente: string;

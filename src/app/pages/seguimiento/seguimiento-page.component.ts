@@ -9,7 +9,7 @@ import { ServicioAcademico } from '../../services/academico.service';
 import { ServicioSeguimiento } from '../../services/seguimiento.service';
 import { EstudianteResponse, RelacionApEst } from '../../models/relaciones.models';
 import { Matricula, Calificacion } from '../../models/academico.models';
-import { Asistencia, ResumenCalificaciones, ResumenAsistencia } from '../../models/seguimiento.models';
+import { Asistencia, Conducta, ResumenCalificaciones, ResumenAsistencia } from '../../models/seguimiento.models';
 
 interface AlumnoConParentesco {
   estudiante: EstudianteResponse;
@@ -38,15 +38,17 @@ export class PáginaSeguimiento implements OnInit {
 
   // ── Alumno seleccionado ──────────────────────────────────────────────────────
   alumnoSeleccionado = signal<AlumnoConParentesco | null>(null);
-  tabActiva = signal<'calificaciones' | 'asistencia'>('calificaciones');
+  tabActiva = signal<'calificaciones' | 'asistencia' | 'conducta'>('calificaciones');
 
   // ── Datos del alumno ─────────────────────────────────────────────────────────
   cargandoDetalle = signal(false);
   errorDetalle = signal('');
   errorAsistencia = signal('');
+  errorConducta = signal('');
   matriculas = signal<Matricula[]>([]);
   calificaciones = signal<Calificacion[]>([]);
   asistencias = signal<Asistencia[]>([]);
+  conductas = signal<Conducta[]>([]);
 
   // ── Computed: resumen calificaciones ────────────────────────────────────────
   resumenCalificaciones = computed<ResumenCalificaciones[]>(() => {
@@ -164,9 +166,11 @@ export class PáginaSeguimiento implements OnInit {
     this.alumnoSeleccionado.set(null);
     this.calificaciones.set([]);
     this.asistencias.set([]);
+    this.conductas.set([]);
     this.matriculas.set([]);
     this.errorDetalle.set('');
     this.errorAsistencia.set('');
+    this.errorConducta.set('');
   }
 
   private cargarDetalleAlumno(estudiante: EstudianteResponse): void {
@@ -178,11 +182,17 @@ export class PáginaSeguimiento implements OnInit {
       asistencias: this.servicioSeguimiento.obtenerAsistencias().pipe(
         catchError(() => {
           this.errorAsistencia.set('El servicio de asistencia no está disponible en este momento.');
-          return of([] as import('../../models/seguimiento.models').Asistencia[]);
+          return of([] as Asistencia[]);
+        })
+      ),
+      conductas: this.servicioSeguimiento.obtenerConductasDeEstudiante(estudiante.usuario.idUsuario).pipe(
+        catchError(() => {
+          this.errorConducta.set('El servicio de conducta no está disponible en este momento.');
+          return of([] as Conducta[]);
         })
       ),
     }).subscribe({
-      next: ({ matriculas, asistencias }) => {
+      next: ({ matriculas, asistencias, conductas }) => {
         const matriculasAlumno = matriculas.filter(
           m => m.estudianteIdUsuario === estudiante.usuario.idUsuario
         );
@@ -192,6 +202,13 @@ export class PáginaSeguimiento implements OnInit {
 
         this.asistencias.set(
           asistencias.filter(a => idsMatricula.includes(a.idMatricula))
+        );
+        this.conductas.set(
+          [...conductas].sort((a, b) => {
+            const [da, ma, ya] = a.fechaConducta.split('-').map(Number);
+            const [db, mb, yb] = b.fechaConducta.split('-').map(Number);
+            return new Date(yb, mb - 1, db).getTime() - new Date(ya, ma - 1, da).getTime();
+          })
         );
 
         if (!matriculasAlumno.length) {
@@ -247,6 +264,21 @@ export class PáginaSeguimiento implements OnInit {
     if (nota >= 6) return 'alto';
     if (nota >= 4) return 'medio';
     return 'bajo';
+  }
+
+  contarConductasPorTipo(tipo: string): number {
+    return this.conductas().filter(
+      c => c.tipoConducta?.toLowerCase() === tipo.toLowerCase()
+    ).length;
+  }
+
+  colorTipoConducta(tipo: string): string {
+    switch (tipo?.toLowerCase()) {
+      case 'positiva':   return 'badge bg-success';
+      case 'negativa':   return 'badge bg-danger';
+      case 'neutral':    return 'badge bg-secondary';
+      default:           return 'badge bg-info text-dark';
+    }
   }
 
   colorEstado(estado: string): string {
