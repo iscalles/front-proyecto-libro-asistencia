@@ -88,6 +88,24 @@ describe('ServicioAutenticacion', () => {
     );
   });
 
+  it('iniciarSesion() debería usar valores por defecto cuando el error no trae codigo ni mensaje', () => {
+    const credenciales: CredencialesAutenticacion = { rutUsuario: 'rut-malo', password: 'mal' };
+
+    servicio.iniciarSesion(credenciales).subscribe({
+      next: () => fail('debería haber fallado'),
+      error: (err) => {
+        expect(err.codigo).toBe('ERROR_DESCONOCIDO');
+        expect(err.mensaje).toBe('Error al iniciar sesión');
+      },
+    });
+
+    // Error sin cuerpo — activa los || fallback del catchError
+    httpMock.expectOne(`${API}/auth/login`).flush(
+      null,
+      { status: 500, statusText: 'Server Error' }
+    );
+  });
+
   // ── refrescarSesion ────────────────────────────────────────────────────────
 
   it('refrescarSesion() debería POST a /auth/refresh con el refresh token', () => {
@@ -110,6 +128,34 @@ describe('ServicioAutenticacion', () => {
         expect(err.codigo).toBe('SIN_REFRESH_TOKEN');
       },
     });
+  });
+
+  it('refrescarSesion() debería usar valores por defecto cuando el error no trae codigo ni mensaje', () => {
+    servicioToken.guardarRefreshToken('refresh-jwt');
+
+    servicio.refrescarSesion().subscribe({
+      next: () => fail('debería haber fallado'),
+      error: (err) => {
+        expect(err.codigo).toBe('ERROR_REFRESH');
+        expect(err.mensaje).toBe('No se pudo extender la sesión');
+      },
+    });
+
+    httpMock.expectOne(`${API}/auth/refresh`).flush(
+      null,
+      { status: 500, statusText: 'Server Error' }
+    );
+  });
+
+  it('refrescarSesion() debería usar rutUsuario vacío cuando no hay info de usuario previa', () => {
+    // Sin info de usuario guardada — activa la rama ?? '' de infoActual?.rutUsuario
+    servicioToken.guardarRefreshToken('refresh-jwt');
+
+    servicio.refrescarSesion().subscribe(resp => {
+      expect(servicioToken.obtenerInfoUsuario()?.rutUsuario).toBe('');
+    });
+
+    httpMock.expectOne(`${API}/auth/refresh`).flush(respuestaMock);
   });
 
   // ── cerrarSesion ───────────────────────────────────────────────────────────
