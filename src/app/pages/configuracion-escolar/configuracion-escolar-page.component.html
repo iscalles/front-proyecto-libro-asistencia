@@ -1,0 +1,292 @@
+<!-- ═══ HEADER ══════════════════════════════════════════════════════════════ -->
+<header class="admin-header shadow-sm">
+  <div class="container-fluid px-4 d-flex align-items-center gap-3">
+    <button class="btn btn-link btn-volver p-0" (click)="irAlDashboard()" type="button">
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16">
+        <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8z"/>
+      </svg>
+      Dashboard
+    </button>
+    <div class="separador-vertical"></div>
+    <h1 class="admin-titulo mb-0">Configuración Escolar</h1>
+
+    <div class="ms-auto d-flex align-items-center gap-2">
+      <app-campanita-notificaciones />
+      @if (usuarioSesion(); as u) {
+        <span class="texto-sesion d-none d-sm-inline">{{ u.nombre }}</span>
+      }
+      <span class="badge bg-danger">Administrativo</span>
+    </div>
+  </div>
+</header>
+
+<main class="container py-4">
+
+  <!-- ═══ TABS ════════════════════════════════════════════════════════════════ -->
+  <nav class="tab-bar mb-4">
+    <button class="tab-boton" [class.activo]="tabActiva() === 'periodos'"
+            (click)="tabActiva.set('periodos')" type="button">
+      Períodos Escolares
+    </button>
+    <button class="tab-boton" [class.activo]="tabActiva() === 'feriados'"
+            (click)="tabActiva.set('feriados')" type="button">
+      Feriados y Días No Lectivos
+    </button>
+  </nav>
+
+  <!-- ═══ TAB: PERÍODOS ═══════════════════════════════════════════════════════ -->
+  @if (tabActiva() === 'periodos') {
+
+    <p class="text-muted small mb-4">
+      Define los períodos lectivos del año escolar. Solo se puede registrar asistencia dentro de las fechas de un período activo.
+    </p>
+
+    <!-- Formulario de alta -->
+    <div class="card mb-4">
+      <div class="card-header fw-semibold">Agregar período escolar</div>
+      <div class="card-body">
+        <div class="row g-3" [formGroup]="formPeriodo">
+          <div class="col-12 col-md-4">
+            <label class="form-label">Nombre <span class="text-danger">*</span></label>
+            <input class="form-control"
+                   [class.is-invalid]="errorCampo(formPeriodo, 'nombre', 'required')"
+                   type="text"
+                   formControlName="nombre"
+                   placeholder="Ej: Primer semestre 2026">
+            @if (errorCampo(formPeriodo, 'nombre', 'required')) {
+              <div class="invalid-feedback">Campo obligatorio.</div>
+            }
+          </div>
+          <div class="col-6 col-md-3">
+            <label class="form-label">Fecha inicio <span class="text-danger">*</span></label>
+            <input class="form-control"
+                   [class.is-invalid]="errorCampo(formPeriodo, 'fechaInicio', 'required')"
+                   type="date"
+                   formControlName="fechaInicio">
+            @if (errorCampo(formPeriodo, 'fechaInicio', 'required')) {
+              <div class="invalid-feedback">Campo obligatorio.</div>
+            }
+          </div>
+          <div class="col-6 col-md-3">
+            <label class="form-label">Fecha término <span class="text-danger">*</span></label>
+            <input class="form-control"
+                   [class.is-invalid]="errorCampo(formPeriodo, 'fechaFin', 'required')"
+                   type="date"
+                   formControlName="fechaFin">
+            @if (errorCampo(formPeriodo, 'fechaFin', 'required')) {
+              <div class="invalid-feedback">Campo obligatorio.</div>
+            }
+          </div>
+          <div class="col-12 col-md-2 d-flex align-items-end">
+            <button class="btn btn-danger w-100" (click)="guardarPeriodo()"
+                    [disabled]="guardando()" type="button">
+              @if (guardando()) {
+                <span class="spinner-border spinner-border-sm me-1" role="status"></span>
+              }
+              Agregar
+            </button>
+          </div>
+        </div>
+
+        @if (errorGuardar()) {
+          <div class="alert alert-danger py-2 small mt-3 mb-0">{{ errorGuardar() }}</div>
+        }
+        @if (exitoGuardar()) {
+          <div class="alert alert-success py-2 small mt-3 mb-0">Período agregado correctamente.</div>
+        }
+      </div>
+    </div>
+
+    <!-- Tabla de períodos -->
+    @if (errorPeriodos()) {
+      <div class="alert alert-danger">{{ errorPeriodos() }}</div>
+    }
+
+    @if (cargandoPeriodos()) {
+      <div class="text-center py-5 text-muted">
+        <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+        Cargando períodos...
+      </div>
+    } @else {
+      <div class="card">
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table tabla-config mb-0">
+              <thead>
+                <tr>
+                  <th>Nombre</th>
+                  <th>Inicio</th>
+                  <th>Término</th>
+                  <th style="width: 80px"></th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (p of periodos(); track p.id) {
+                  <tr>
+                    <td class="fw-medium">{{ p.nombre }}</td>
+                    <td>{{ formatearFecha(p.fechaInicio) }}</td>
+                    <td>{{ formatearFecha(p.fechaFin) }}</td>
+                    <td>
+                      <button class="btn btn-xs btn-outline-danger"
+                              (click)="abrirEliminar('periodo', p.id, p.nombre)"
+                              type="button">
+                        Eliminar
+                      </button>
+                    </td>
+                  </tr>
+                } @empty {
+                  <tr>
+                    <td colspan="4" class="text-center text-muted py-4">
+                      No hay períodos escolares registrados.
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    }
+  }
+
+  <!-- ═══ TAB: FERIADOS ══════════════════════════════════════════════════════ -->
+  @if (tabActiva() === 'feriados') {
+
+    <p class="text-muted small mb-4">
+      Registra feriados y días en que el colegio no opera. El sistema bloqueará el registro de asistencia en estas fechas.
+    </p>
+
+    <!-- Formulario de alta -->
+    <div class="card mb-4">
+      <div class="card-header fw-semibold">Agregar feriado o día no lectivo</div>
+      <div class="card-body">
+        <div class="row g-3" [formGroup]="formFeriado">
+          <div class="col-12 col-md-3">
+            <label class="form-label">Fecha <span class="text-danger">*</span></label>
+            <input class="form-control"
+                   [class.is-invalid]="errorCampo(formFeriado, 'fecha', 'required')"
+                   type="date"
+                   formControlName="fecha">
+            @if (errorCampo(formFeriado, 'fecha', 'required')) {
+              <div class="invalid-feedback">Campo obligatorio.</div>
+            }
+          </div>
+          <div class="col-12 col-md-7">
+            <label class="form-label">Descripción <span class="text-danger">*</span></label>
+            <input class="form-control"
+                   [class.is-invalid]="errorCampo(formFeriado, 'descripcion', 'required')"
+                   type="text"
+                   formControlName="descripcion"
+                   placeholder="Ej: Fiestas Patrias, Día del Trabajo...">
+            @if (errorCampo(formFeriado, 'descripcion', 'required')) {
+              <div class="invalid-feedback">Campo obligatorio.</div>
+            }
+          </div>
+          <div class="col-12 col-md-2 d-flex align-items-end">
+            <button class="btn btn-danger w-100" (click)="guardarFeriado()"
+                    [disabled]="guardando()" type="button">
+              @if (guardando()) {
+                <span class="spinner-border spinner-border-sm me-1" role="status"></span>
+              }
+              Agregar
+            </button>
+          </div>
+        </div>
+
+        @if (errorGuardar()) {
+          <div class="alert alert-danger py-2 small mt-3 mb-0">{{ errorGuardar() }}</div>
+        }
+        @if (exitoGuardar()) {
+          <div class="alert alert-success py-2 small mt-3 mb-0">Fecha excluida agregada correctamente.</div>
+        }
+      </div>
+    </div>
+
+    <!-- Tabla de feriados -->
+    @if (errorFeriados()) {
+      <div class="alert alert-danger">{{ errorFeriados() }}</div>
+    }
+
+    @if (cargandoFeriados()) {
+      <div class="text-center py-5 text-muted">
+        <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+        Cargando feriados...
+      </div>
+    } @else {
+      <div class="card">
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table tabla-config mb-0">
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Descripción</th>
+                  <th style="width: 80px"></th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (f of feriados(); track f.id) {
+                  <tr>
+                    <td class="fw-medium">{{ formatearFecha(f.fecha) }}</td>
+                    <td>{{ f.descripcion }}</td>
+                    <td>
+                      <button class="btn btn-xs btn-outline-danger"
+                              (click)="abrirEliminar('feriado', f.id, f.descripcion)"
+                              type="button">
+                        Eliminar
+                      </button>
+                    </td>
+                  </tr>
+                } @empty {
+                  <tr>
+                    <td colspan="3" class="text-center text-muted py-4">
+                      No hay fechas excluidas registradas.
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    }
+  }
+
+</main>
+
+<!-- ═══ MODAL: CONFIRMAR ELIMINACIÓN ════════════════════════════════════════ -->
+@if (itemEliminar(); as item) {
+  <div class="modal-overlay" (click)="cerrarEliminar()">
+    <div class="modal-caja modal-caja--sm" (click)="$event.stopPropagation()">
+      <div class="modal-encabezado">
+        <h3 class="modal-titulo">Confirmar eliminación</h3>
+        <button class="btn-cerrar" (click)="cerrarEliminar()" type="button">✕</button>
+      </div>
+      <div class="modal-cuerpo">
+        <p class="mb-1">
+          ¿Estás seguro que deseas eliminar
+          @if (item.tipo === 'periodo') { el período escolar } @else { el feriado }
+          <strong>{{ item.nombre }}</strong>?
+        </p>
+        <p class="text-muted small mb-0">Esta acción no se puede deshacer.</p>
+        @if (errorEliminar()) {
+          <div class="alert alert-danger py-2 small mt-3 mb-0">{{ errorEliminar() }}</div>
+        }
+      </div>
+      <div class="modal-pie">
+        <button class="btn btn-outline-secondary" (click)="cerrarEliminar()" type="button">
+          Cancelar
+        </button>
+        <button class="btn btn-danger" (click)="confirmarEliminar()"
+                [disabled]="eliminando()" type="button">
+          @if (eliminando()) {
+            <span class="spinner-border spinner-border-sm me-1" role="status"></span>
+            Eliminando...
+          } @else {
+            Eliminar
+          }
+        </button>
+      </div>
+    </div>
+  </div>
+}

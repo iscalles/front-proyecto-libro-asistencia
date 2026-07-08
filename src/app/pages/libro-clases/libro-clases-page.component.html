@@ -11,6 +11,7 @@
     <h1 class="admin-titulo mb-0">Libro de Clases</h1>
 
     <div class="ms-auto d-flex align-items-center gap-2">
+      <app-campanita-notificaciones />
       @if (usuarioSesion(); as u) {
         <span class="texto-sesion d-none d-sm-inline">{{ u.nombre }}</span>
       }
@@ -62,6 +63,7 @@
         }
       </div>
     }
+
   } @else {
     <!-- ═══ CURSO SELECCIONADO: TABS ═════════════════════════════════════════════ -->
     <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
@@ -88,7 +90,10 @@
 
     @switch (tabActiva()) {
       @case ('asistencia') {
-        <app-tomar-asistencia-tab [curso]="cursoSeleccionado()!" />
+        <app-tomar-asistencia-tab
+          [curso]="cursoSeleccionado()!"
+          [fechaInicial]="fechaSeleccionada()"
+          (asistenciaGuardada)="onAsistenciaGuardada()" />
       }
       @case ('conducta') {
         <app-conducta-tab [curso]="cursoSeleccionado()!" />
@@ -97,3 +102,100 @@
   }
 
 </main>
+
+<!-- ═══ MODAL: SELECCIÓN DE FECHA ════════════════════════════════════════════ -->
+@if (modalAbierta()) {
+  <div class="modal-overlay" (click)="cancelarModal()">
+    <div class="modal-caja" (click)="$event.stopPropagation()">
+
+      <!-- ── Estado 1: elegir fecha ─────────────────────────────────────── -->
+      @if (estadoModal() === 'seleccion') {
+        <div class="modal-encabezado">
+          <h3 class="modal-titulo">Registrar asistencia</h3>
+          <button class="btn-cerrar" (click)="cancelarModal()" type="button">✕</button>
+        </div>
+
+        <div class="modal-cuerpo">
+          <p class="text-muted small mb-4">
+            <strong>{{ cursoParaModal()!.gradoCurso }} {{ cursoParaModal()!.seccionCurso }}</strong>
+            · {{ cursoParaModal()!.nombreAsignatura }}
+          </p>
+
+          <!-- Botón "Hoy" -->
+          <button
+            class="btn w-100 mb-3 py-3 fw-semibold"
+            [class.btn-primary]="fechaModal() === hoy"
+            [class.btn-outline-primary]="fechaModal() !== hoy"
+            (click)="usarFechaHoy()"
+            type="button">
+            📅 Usar el día de hoy — {{ formatearFechaDisplay(hoy) }}
+          </button>
+
+          <!-- Separador -->
+          <div class="d-flex align-items-center gap-2 mb-3 text-muted small">
+            <hr class="flex-grow-1 m-0">
+            <span>o elegir otra fecha</span>
+            <hr class="flex-grow-1 m-0">
+          </div>
+
+          <!-- Date picker -->
+          <input type="date" class="form-control mb-3"
+                 [value]="fechaModal()"
+                 (change)="onFechaModalChange($event)">
+
+          <!-- Error de validación -->
+          @if (errorValidacionModal()) {
+            <div class="alert alert-warning d-flex align-items-center gap-2 py-2 mb-0 small">
+              <span>⚠️</span>
+              <span>{{ errorValidacionModal() }}</span>
+            </div>
+          }
+        </div>
+
+        <div class="modal-pie">
+          <button class="btn btn-outline-secondary" (click)="cancelarModal()" type="button">
+            Cancelar
+          </button>
+          <button class="btn btn-primary" (click)="confirmarFechaModal()"
+                  [disabled]="validandoModal() || !fechaModal()" type="button">
+            @if (validandoModal()) {
+              <span class="spinner-border spinner-border-sm me-1" role="status"></span>
+              Verificando...
+            } @else {
+              Continuar
+            }
+          </button>
+        </div>
+      }
+
+      <!-- ── Estado 2: ya hay registros para esa fecha ──────────────────── -->
+      @if (estadoModal() === 'confirmar-existente') {
+        <div class="modal-encabezado">
+          <h3 class="modal-titulo">Asistencia ya registrada</h3>
+          <button class="btn-cerrar" (click)="cancelarModal()" type="button">✕</button>
+        </div>
+
+        <div class="modal-cuerpo">
+          <p class="mb-2">
+            Ya existen registros de asistencia para el
+            <strong>{{ formatearFechaDisplay(fechaModal()) }}</strong>
+            en <strong>{{ cursoParaModal()!.gradoCurso }} {{ cursoParaModal()!.seccionCurso }}</strong>.
+          </p>
+          <p class="text-muted small mb-0">
+            ¿Deseas modificar la asistencia registrada para esta fecha?
+          </p>
+        </div>
+
+        <div class="modal-pie">
+          <button class="btn btn-outline-secondary" (click)="volverSeleccionFecha()" type="button">
+            ← Elegir otra fecha
+          </button>
+          <button class="btn btn-primary" (click)="abrirFormulario()" type="button">
+            Sí, modificar
+          </button>
+        </div>
+      }
+
+    </div>
+  </div>
+}

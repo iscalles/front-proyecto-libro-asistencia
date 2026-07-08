@@ -1,0 +1,52 @@
+<!-- ═══ HEADER ══════════════════════════════════════════════════════════════ -->
+<header class="admin-header shadow-sm">
+  <div class="container-fluid px-4 d-flex align-items-center gap-3">
+    <button class="btn btn-link btn-volver p-0" (click)="irAlDashboard()" type="button">
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16">
+        <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8z"/>
+      </svg>
+      Dashboard
+    </button>
+    <div class="separador-vertical"></div>
+    <h1 class="admin-titulo mb-0">Notificaciones</h1>
+
+    <div class="ms-auto d-flex align-items-center gap-2">
+      @if (usuarioSesion(); as u) {
+        <span class="texto-sesion d-none d-sm-inline">{{ u.nombre }}</span>
+      }
+    </div>
+  </div>
+</header>
+
+<!-- ═══ CONTENIDO PRINCIPAL ══════════════════════════════════════════════════ -->
+<main class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="h5 fw-semibold mb-0">Historial completo</h2>
+    @if (notificaciones().length > 0) {
+      <button type="button" class="btn btn-sm btn-outline-secondary" (click)="marcarTodasLeidas()">
+        Marcar todas como leídas
+      </button>
+    }
+  </div>
+
+  @if (cargando()) {
+    <p class="text-muted">Cargando...</p>
+  } @else if (error()) {
+    <p class="text-danger">{{ error() }}</p>
+  } @else if (notificaciones().length === 0) {
+    <p class="text-muted">No tienes notificaciones.</p>
+  } @else {
+    <div class="list-group">
+      @for (n of notificaciones(); track n.id) {
+        <div class="list-group-item notificacion-item" [class.no-leida]="!n.leida" (click)="marcarLeida(n)">
+          <div class="d-flex justify-content-between align-items-center mb-1">
+            <span class="badge bg-secondary">{{ ETIQUETAS_TIPO_NOTIFICACION[n.tipoNotificacion] }}</span>
+            <small class="text-muted">{{ n.fechaEnvio }}</small>
+          </div>
+          <div class="fw-semibold">{{ n.asunto }}</div>
+          <div class="text-muted">{{ n.mensaje }}</div>
+        </div>
+      }
+    </div>
+  }
+</main>

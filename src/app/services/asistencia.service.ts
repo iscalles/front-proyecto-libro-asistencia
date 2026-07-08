@@ -7,6 +7,7 @@ import {
   Asistencia, AsistenciaLoteRequest,
   Conducta, ConductaRequest,
   ReporteAsistenciaDia, ReporteAsistenciaResumen, ReporteConductaAlumno,
+  ValidacionFecha, FechaExcluida, PeriodoEscolar,
 } from '../models/asistencia.models';
 
 // Convierte un Date a dd-MM-yyyy (formato que espera el backend)
@@ -32,6 +33,39 @@ export class ServicioAsistencia {
 
   registrarAsistenciaLote(dto: AsistenciaLoteRequest): Observable<Asistencia[]> {
     return this.http.post<Asistencia[]>(`${this.api}/asistencia/lote`, dto);
+  }
+
+  validarFechaAsistencia(fechaIso: string): Observable<ValidacionFecha> {
+    const params = new HttpParams().set('fecha', aFormatoBackend(fechaIso));
+    return this.http.get<ValidacionFecha>(`${this.api}/asistencia/validar-fecha`, { params });
+  }
+
+  // ── Fechas excluidas (feriados / días no lectivos) ─────────────────────────
+  listarFechasExcluidas(): Observable<FechaExcluida[]> {
+    return this.http.get<FechaExcluida[]>(`${this.api}/fechas-excluidas`);
+  }
+
+  agregarFechaExcluida(dto: Omit<FechaExcluida, 'id'>): Observable<FechaExcluida> {
+    const payload = { ...dto, fecha: aFormatoBackend(dto.fecha) };
+    return this.http.post<FechaExcluida>(`${this.api}/fechas-excluidas`, payload);
+  }
+
+  eliminarFechaExcluida(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.api}/fechas-excluidas/${id}`);
+  }
+
+  // ── Períodos escolares ─────────────────────────────────────────────────────
+  listarPeriodosEscolares(): Observable<PeriodoEscolar[]> {
+    return this.http.get<PeriodoEscolar[]>(`${this.api}/periodos-escolares`);
+  }
+
+  agregarPeriodoEscolar(dto: Omit<PeriodoEscolar, 'id'>): Observable<PeriodoEscolar> {
+    const payload = { ...dto, fechaInicio: aFormatoBackend(dto.fechaInicio), fechaFin: aFormatoBackend(dto.fechaFin) };
+    return this.http.post<PeriodoEscolar>(`${this.api}/periodos-escolares`, payload);
+  }
+
+  eliminarPeriodoEscolar(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.api}/periodos-escolares/${id}`);
   }
 
   // ── Conducta ────────────────────────────────────────────────────────────────

@@ -6,11 +6,12 @@ import { ServicioToken } from 'lib-auth';
 import { ServicioAcademico } from '../../services/academico.service';
 import { CursoAsignatura, Evaluacion, EvaluacionRequest } from '../../models/academico.models';
 import { IngresarNotas } from './ingresar-notas.component';
+import { CampanitaNotificaciones } from '../../components/notificaciones/campanita-notificaciones.component';
 
 @Component({
   selector: 'app-calificaciones',
   standalone: true,
-  imports: [ReactiveFormsModule, IngresarNotas],
+  imports: [ReactiveFormsModule, IngresarNotas, CampanitaNotificaciones],
   templateUrl: './calificaciones-page.component.html',
   styleUrl: './calificaciones-shared.scss'
 })
