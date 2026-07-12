@@ -11,6 +11,7 @@ import { PáginaCalificaciones } from './pages/calificaciones/calificaciones-pag
 import { PáginaMisCalificaciones } from './pages/mis-calificaciones/mis-calificaciones-page.component';
 import { PáginaNotificaciones } from './pages/notificaciones/notificaciones-page.component';
 import { PáginaConfiguracionEscolar } from './pages/configuracion-escolar/configuracion-escolar-page.component';
+import { PáginaErrorConexion } from './pages/error-conexion/error-conexion-page.component';
 import { authGuard } from './guards/auth.guard';
 import { apoderadoGuard } from './guards/apoderado.guard';
 import { adminGuard, docenteGuard, estudianteGuard } from './guards/role.guard';
@@ -74,6 +75,10 @@ export const routes: Routes = [
     path: 'configuracion-escolar',
     component: PáginaConfiguracionEscolar,
     canActivate: [authGuard, adminGuard]
+  },
+  {
+    path: 'error-conexion',
+    component: PáginaErrorConexion
   },
   {
     path: '',
