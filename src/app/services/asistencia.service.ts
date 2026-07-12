@@ -6,7 +6,7 @@ import {
   RosterAlumno,
   Asistencia, AsistenciaLoteRequest,
   Conducta, ConductaRequest,
-  ReporteAsistenciaDia, ReporteAsistenciaResumen, ReporteConductaAlumno,
+  ReporteAsistenciaDia, ReporteAsistenciaResumen, ReporteConductaAlumno, ReporteAlumnoAsistencia,
   ValidacionFecha, FechaExcluida, PeriodoEscolar,
 } from '../models/asistencia.models';
 
@@ -97,5 +97,12 @@ export class ServicioAsistencia {
 
   reporteConductaPorCurso(idCurso: number): Observable<ReporteConductaAlumno[]> {
     return this.http.get<ReporteConductaAlumno[]>(`${this.api}/conducta/curso/${idCurso}/reporte-resumen`);
+  }
+
+  reporteAlumnoPorCurso(idCurso: number, desdeIso: string, hastaIso: string): Observable<ReporteAlumnoAsistencia[]> {
+    const params = new HttpParams()
+      .set('desde', aFormatoBackend(desdeIso))
+      .set('hasta', aFormatoBackend(hastaIso));
+    return this.http.get<ReporteAlumnoAsistencia[]>(`${this.api}/asistencia/curso/${idCurso}/reporte-por-alumno`, { params });
   }
 }

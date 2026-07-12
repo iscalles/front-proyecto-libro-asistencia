@@ -109,3 +109,19 @@ export interface ReporteConductaAlumno {
   totalPositivas: number;
   totalNegativas: number;
 }
+
+export interface ReporteAlumnoAsistencia {
+  idMatricula: number;
+  estudianteIdUsuario: number;
+  nombreEstudiante: string;
+  rutEstudiante: string;
+  totalPresentes: number;
+  totalAusentes: number;
+  totalJustificados: number;
+  porcentajeAsistencia: number;
+}
+
+export interface ReporteAlumnoCompleto extends ReporteAlumnoAsistencia {
+  totalPositivas: number;
+  totalNegativas: number;
+}

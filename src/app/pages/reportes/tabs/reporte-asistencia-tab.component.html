@@ -66,13 +66,13 @@
   <div class="d-flex align-items-center gap-2">
     <input type="date" class="form-control form-control-sm" style="width: auto"
            [value]="fecha()" (change)="onFechaChange($event)">
-    <button class="btn btn-sm btn-outline-danger"
+    <button class="btn btn-sm btn-danger"
             [disabled]="cargandoDia() || reporteDia().length === 0"
             (click)="exportarPdf()" type="button"
             title="Descargar PDF">
       PDF
     </button>
-    <button class="btn btn-sm btn-outline-success"
+    <button class="btn btn-sm btn-success"
             [disabled]="cargandoDia() || reporteDia().length === 0"
             (click)="exportarExcel()" type="button"
             title="Descargar Excel">
