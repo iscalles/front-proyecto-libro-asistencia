@@ -7,6 +7,7 @@ import { CursoAsignatura } from '../../models/academico.models';
 import { TomarAsistenciaTab } from './tabs/tomar-asistencia-tab.component';
 import { ConductaTab } from './tabs/conducta-tab.component';
 import { CampanitaNotificaciones } from '../../components/notificaciones/campanita-notificaciones.component';
+import { CampanitaMensajes } from '../../components/mensajes/campanita-mensajes.component';
 
 type Tab = 'asistencia' | 'conducta';
 type EstadoModal = 'seleccion' | 'confirmar-existente';
@@ -14,7 +15,7 @@ type EstadoModal = 'seleccion' | 'confirmar-existente';
 @Component({
   selector: 'app-libro-clases',
   standalone: true,
-  imports: [TomarAsistenciaTab, ConductaTab, CampanitaNotificaciones],
+  imports: [TomarAsistenciaTab, ConductaTab, CampanitaNotificaciones, CampanitaMensajes],
   templateUrl: './libro-clases-page.component.html',
   styleUrl: './libro-clases-shared.scss'
 })

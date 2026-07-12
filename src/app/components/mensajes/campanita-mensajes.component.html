@@ -1,0 +1,35 @@
+<div class="campanita-wrapper" (click)="$event.stopPropagation()">
+  <button type="button" class="rounded-circle d-flex align-items-center justify-content-center campanita-boton" (click)="toggle($event)" aria-label="Mensajes">
+    <i class="bi bi-chat-dots-fill"></i>
+    @if (totalNoLeidos() > 0) {
+      <span class="badge rounded-pill bg-danger campanita-badge">{{ totalNoLeidos() }}</span>
+    }
+  </button>
+
+  @if (abierto()) {
+    <div class="campanita-dropdown shadow-sm">
+      <div class="campanita-header">
+        <span class="fw-semibold">Mensajes</span>
+      </div>
+
+      <div class="campanita-lista">
+        @if (cargando()) {
+          <div class="campanita-vacio">Cargando...</div>
+        } @else if (resumenPorRemitente().length === 0) {
+          <div class="campanita-vacio">No tienes mensajes sin leer</div>
+        } @else {
+          @for (r of resumenPorRemitente(); track r.idUsuario) {
+            <a routerLink="/mensajes" class="campanita-item" (click)="abierto.set(false)">
+              <span class="campanita-remitente">{{ r.nombre }}</span>
+              <span class="badge rounded-pill bg-primary campanita-cantidad">{{ r.cantidad }}</span>
+            </a>
+          }
+        }
+      </div>
+
+      <div class="campanita-footer">
+        <a routerLink="/mensajes" class="btn btn-sm btn-link" (click)="abierto.set(false)">Ver todos</a>
+      </div>
+    </div>
+  }
+</div>

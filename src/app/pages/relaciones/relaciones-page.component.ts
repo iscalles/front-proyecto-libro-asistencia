@@ -9,11 +9,12 @@ import {
   RelacionApEst, UsuarioAnidado, OPCIONES_PARENTESCO
 } from '../../models/relaciones.models';
 import { CampanitaNotificaciones } from '../../components/notificaciones/campanita-notificaciones.component';
+import { CampanitaMensajes } from '../../components/mensajes/campanita-mensajes.component';
 
 @Component({
   selector: 'app-relaciones',
   standalone: true,
-  imports: [CampanitaNotificaciones],
+  imports: [CampanitaNotificaciones, CampanitaMensajes],
   templateUrl: './relaciones-page.component.html',
   styleUrl: './relaciones-page.component.scss'
 })

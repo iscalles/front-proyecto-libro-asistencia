@@ -6,6 +6,7 @@ import { ServicioToken } from 'lib-auth';
 import { ServicioAsistencia } from '../../services/asistencia.service';
 import { ServicioAcademico } from '../../services/academico.service';
 import { CampanitaNotificaciones } from '../../components/notificaciones/campanita-notificaciones.component';
+import { CampanitaMensajes } from '../../components/mensajes/campanita-mensajes.component';
 import { FechaExcluida, PeriodoEscolar } from '../../models/asistencia.models';
 import { CursoAsignatura, HorarioClase, DIAS_SEMANA } from '../../models/academico.models';
 
@@ -14,7 +15,7 @@ type Tab = 'periodos' | 'feriados' | 'horarios';
 @Component({
   selector: 'app-configuracion-escolar',
   standalone: true,
-  imports: [ReactiveFormsModule, CampanitaNotificaciones],
+  imports: [ReactiveFormsModule, CampanitaNotificaciones, CampanitaMensajes],
   templateUrl: './configuracion-escolar-page.component.html',
   styleUrl: './configuracion-escolar-page.component.scss'
 })
