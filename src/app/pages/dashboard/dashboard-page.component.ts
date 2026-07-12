@@ -5,6 +5,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { ServicioToken, ServicioAutenticacion } from 'lib-auth';
 import { ServicioUsuarioAdmin } from '../../services/usuario-admin.service';
 import { CampanitaNotificaciones } from '../../components/notificaciones/campanita-notificaciones.component';
+import { CampanitaMensajes } from '../../components/mensajes/campanita-mensajes.component';
 
 const CONFIG_ROLES: Record<string, { etiqueta: string; clase: string }> = {
   DOCENTE:        { etiqueta: 'Docente',        clase: 'bg-success' },
@@ -23,7 +24,7 @@ function passwordsCoinciden(group: AbstractControl) {
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [RouterLink, ReactiveFormsModule, CampanitaNotificaciones],
+  imports: [RouterLink, ReactiveFormsModule, CampanitaNotificaciones, CampanitaMensajes],
   templateUrl: './dashboard-page.component.html',
   styleUrl: './dashboard-page.component.scss'
 })

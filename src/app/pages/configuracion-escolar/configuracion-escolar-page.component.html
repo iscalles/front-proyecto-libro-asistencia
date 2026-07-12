@@ -11,6 +11,7 @@
     <h1 class="admin-titulo mb-0">Configuración Escolar</h1>
 
     <div class="ms-auto d-flex align-items-center gap-2">
+      <app-campanita-mensajes />
       <app-campanita-notificaciones />
       @if (usuarioSesion(); as u) {
         <span class="texto-sesion d-none d-sm-inline">{{ u.nombre }}</span>

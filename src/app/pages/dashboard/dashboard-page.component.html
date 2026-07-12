@@ -10,6 +10,7 @@
     <!-- Zona derecha: campana + menú de usuario (incluye rol) -->
     <div class="d-flex align-items-center gap-3">
 
+      <app-campanita-mensajes />
       <app-campanita-notificaciones />
 
       @if (usuario(); as u) {
@@ -131,6 +132,21 @@
             </div>
           </div>
         </div>
+
+        <div class="col-12 col-md-4">
+          <div class="card tarjeta-modulo h-100">
+            <div class="card-body">
+              <div class="icono-modulo bg-success-subtle text-success mb-3">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
+                  <path d="M1.5 1a.5.5 0 0 0-.5-.5H3.5a.5.5 0 0 1 0 1H1v9.586l1.293-1.293A.5.5 0 0 1 2.5 10H14a.5.5 0 0 0 .5-.5V2a.5.5 0 0 0-.5-.5H1.5zM14 12H2.914l-1.5 1.5A.5.5 0 0 1 0 13.5v-11A1.5 1.5 0 0 1 1.5 1h13A1.5 1.5 0 0 1 16 2.5v8a1.5 1.5 0 0 1-1.5 1.5z"/>
+                </svg>
+              </div>
+              <h5 class="card-title">Mensajes</h5>
+              <p class="card-text text-muted small">Comunícate directamente con los apoderados de tus alumnos.</p>
+              <a routerLink="/mensajes" class="btn btn-success btn-sm">Abrir Mensajes</a>
+            </div>
+          </div>
+        </div>
       }
 
       @if (rolActivo().etiqueta === 'Apoderado') {
@@ -157,9 +173,9 @@
                   <path d="M1.5 1a.5.5 0 0 0-.5.5v3a.5.5 0 0 1-1 0v-3A1.5 1.5 0 0 1 1.5 0h3a.5.5 0 0 1 0 1h-3zM11 .5a.5.5 0 0 1 .5-.5h3A1.5 1.5 0 0 1 16 1.5v3a.5.5 0 0 1-1 0v-3a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 1-.5-.5zM.5 11a.5.5 0 0 1 .5.5v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 1 0 1h-3A1.5 1.5 0 0 1 0 14.5v-3a.5.5 0 0 1 .5-.5zm15 0a.5.5 0 0 1 .5.5v3a1.5 1.5 0 0 1-1.5 1.5h-3a.5.5 0 0 1 0-1h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 1 .5-.5z"/>
                 </svg>
               </div>
-              <h5 class="card-title">Comunicaciones</h5>
-              <p class="card-text text-muted small">Revisa circulares y comunicados del colegio.</p>
-              <button class="btn btn-primary btn-sm" disabled>Próximamente</button>
+              <h5 class="card-title">Mensajes</h5>
+              <p class="card-text text-muted small">Comunícate directamente con los profesores de tu pupilo.</p>
+              <a routerLink="/mensajes" class="btn btn-primary btn-sm">Abrir Mensajes</a>
             </div>
           </div>
         </div>
@@ -257,6 +273,21 @@
               <h5 class="card-title">Mis Calificaciones</h5>
               <p class="card-text text-muted small">Consulta tus notas y las asignaturas que cursas.</p>
               <a routerLink="/mis-calificaciones" class="btn btn-warning btn-sm">Abrir módulo</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-12 col-md-4">
+          <div class="card tarjeta-modulo h-100">
+            <div class="card-body">
+              <div class="icono-modulo bg-warning-subtle text-warning-emphasis mb-3">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
+                  <path d="M1.5 1a.5.5 0 0 0-.5-.5H3.5a.5.5 0 0 1 0 1H1v9.586l1.293-1.293A.5.5 0 0 1 2.5 10H14a.5.5 0 0 0 .5-.5V2a.5.5 0 0 0-.5-.5H1.5zM14 12H2.914l-1.5 1.5A.5.5 0 0 1 0 13.5v-11A1.5 1.5 0 0 1 1.5 1h13A1.5 1.5 0 0 1 16 2.5v8a1.5 1.5 0 0 1-1.5 1.5z"/>
+                </svg>
+              </div>
+              <h5 class="card-title">Mensajes</h5>
+              <p class="card-text text-muted small">Comunícate directamente con tus profesores.</p>
+              <a routerLink="/mensajes" class="btn btn-warning btn-sm">Abrir Mensajes</a>
             </div>
           </div>
         </div>

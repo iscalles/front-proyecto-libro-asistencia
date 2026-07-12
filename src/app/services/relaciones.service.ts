@@ -23,6 +23,12 @@ export class ServicioRelaciones {
     );
   }
 
+  obtenerApoderadosDeEstudiante(idEstudiante: number): Observable<RelacionApEst[]> {
+    return this.http.get<RelacionApEst[]>(
+      `${this.api}/apoderado-estudiante/estudiante/${idEstudiante}/apoderados`
+    );
+  }
+
   crearRelacion(idApoderado: number, idEstudiante: number, parentesco: string): Observable<RelacionApEst> {
     return this.http.post<RelacionApEst>(`${this.api}/apoderado-estudiante`, {
       idApoderado,

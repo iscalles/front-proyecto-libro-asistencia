@@ -1,0 +1,243 @@
+// El host ocupa exactamente el viewport y reparte el espacio entre el header
+// (tamaño fijo) y el <main> (todo lo restante), para que el panel de chat pueda
+// llenar el 100% de lo que sobra sin depender de un número mágico como
+// "100vh - 140px" que se rompe si el header cambia de alto.
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+// ── Header (mismo patrón que admin-page.component.scss) ───────────────────────
+
+.admin-header {
+  background-color: #1a3a5c;
+  min-height: 56px;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.btn-volver {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.875rem;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  text-decoration: none;
+
+  &:hover { color: #fff; }
+}
+
+.separador-vertical {
+  width: 1px;
+  height: 20px;
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.admin-titulo {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #fff;
+}
+
+.texto-sesion {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.875rem;
+}
+
+// En md+ ambas columnas deben verse siempre, aunque Angular les haya agregado
+// ".d-none" (que en móvil oculta una de las dos según haya o no conversación
+// seleccionada). ".d-none" de Bootstrap es "display:none !important" con una
+// sola clase de especificidad: un selector compuesto (dos clases) + !important
+// le gana sin depender del orden en que se inyecten las hojas de estilo.
+@media (min-width: 768px) {
+  .lista-contactos-col.d-none,
+  .conversacion-col.d-none {
+    display: flex !important;
+  }
+}
+
+// ── Panel de chat ───────────────────────────────────────────────────────────────
+
+// El <main> es el único hijo del host que debe crecer: toma todo el espacio
+// restante bajo el header, y su padding (py-4 px-4 de Bootstrap) queda excluido
+// del cálculo de altura del panel gracias a box-sizing: border-box.
+main.container-fluid {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.panel-chat {
+  height: 100%;
+  min-height: 0;
+  background: #fff;
+  border: 1px solid #e3e6ea;
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+// ── Lista de contactos ──────────────────────────────────────────────────────────
+
+.lista-contactos-col {
+  border-right: 1px solid #e3e6ea;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+.lista-contactos-header {
+  padding: 1rem;
+  border-bottom: 1px solid #e3e6ea;
+}
+
+.lista-contactos-body {
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+}
+
+.item-contacto {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border: none;
+  background: none;
+  text-align: left;
+  border-bottom: 1px solid #f1f3f5;
+  cursor: pointer;
+
+  &:hover { background: #f8f9fa; }
+
+  &.activo { background: #eef6ff; }
+}
+
+.avatar-contacto {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #0d6efd;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+}
+
+.info-contacto {
+  min-width: 0;
+  flex: 1;
+}
+
+.nombre-contacto {
+  font-weight: 600;
+  font-size: 0.9rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.detalle-contacto {
+  font-size: 0.75rem;
+  color: #6c757d;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.badge-no-leidos {
+  flex-shrink: 0;
+}
+
+// ── Conversación ─────────────────────────────────────────────────────────────────
+
+.conversacion-col {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+.conversacion-vacia {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.conversacion-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #e3e6ea;
+  flex-shrink: 0;
+}
+
+.conversacion-cuerpo {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  background: #f8f9fa;
+}
+
+.fila-burbuja {
+  display: flex;
+  justify-content: flex-start;
+
+  &.fila-burbuja--mia {
+    justify-content: flex-end;
+  }
+}
+
+.burbuja {
+  max-width: 70%;
+  background: #fff;
+  border: 1px solid #e3e6ea;
+  border-radius: 0.75rem;
+  padding: 0.5rem 0.75rem;
+
+  &.burbuja--mia {
+    background: #0d6efd;
+    color: #fff;
+    border-color: #0d6efd;
+  }
+}
+
+.burbuja-asunto {
+  font-weight: 600;
+  font-size: 0.8rem;
+  margin-bottom: 0.15rem;
+}
+
+.burbuja-cuerpo {
+  font-size: 0.9rem;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.burbuja-fecha {
+  font-size: 0.7rem;
+  opacity: 0.7;
+  margin-top: 0.25rem;
+  text-align: right;
+}
+
+.conversacion-input {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  border-top: 1px solid #e3e6ea;
+  flex-shrink: 0;
+}

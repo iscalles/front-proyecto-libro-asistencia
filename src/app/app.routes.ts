@@ -10,6 +10,7 @@ import { PáginaReportes } from './pages/reportes/reportes-page.component';
 import { PáginaCalificaciones } from './pages/calificaciones/calificaciones-page.component';
 import { PáginaMisCalificaciones } from './pages/mis-calificaciones/mis-calificaciones-page.component';
 import { PáginaNotificaciones } from './pages/notificaciones/notificaciones-page.component';
+import { PáginaMensajes } from './pages/mensajes/mensajes-page.component';
 import { PáginaConfiguracionEscolar } from './pages/configuracion-escolar/configuracion-escolar-page.component';
 import { PáginaErrorConexion } from './pages/error-conexion/error-conexion-page.component';
 import { authGuard } from './guards/auth.guard';
@@ -69,6 +70,11 @@ export const routes: Routes = [
   {
     path: 'notificaciones',
     component: PáginaNotificaciones,
+    canActivate: [authGuard]
+  },
+  {
+    path: 'mensajes',
+    component: PáginaMensajes,
     canActivate: [authGuard]
   },
   {
