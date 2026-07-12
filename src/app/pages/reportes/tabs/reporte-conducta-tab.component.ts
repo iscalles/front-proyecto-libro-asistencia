@@ -1,5 +1,6 @@
 import { Component, OnChanges, inject, signal, input } from '@angular/core';
 import { ServicioAsistencia } from '../../../services/asistencia.service';
+import { ExportarService } from '../../../services/exportar.service';
 import { Curso } from '../../../models/academico.models';
 import { ReporteConductaAlumno, Conducta, ETIQUETAS_TIPO_CONDUCTA } from '../../../models/asistencia.models';
 
@@ -14,6 +15,7 @@ export class ReporteConductaTab implements OnChanges {
   readonly curso = input.required<Curso>();
 
   private servicio = inject(ServicioAsistencia);
+  private exportar = inject(ExportarService);
 
   readonly resumen = signal<ReporteConductaAlumno[]>([]);
   readonly cargando = signal(false);
@@ -33,7 +35,9 @@ export class ReporteConductaTab implements OnChanges {
     this.error.set(null);
     this.servicio.reporteConductaPorCurso(this.curso().id).subscribe({
       next: (registros) => {
-        this.resumen.set(registros);
+        this.resumen.set([...registros].sort((a, b) =>
+          a.nombreEstudiante.localeCompare(b.nombreEstudiante, 'es')
+        ));
         this.cargando.set(false);
       },
       error: () => {
@@ -63,5 +67,13 @@ export class ReporteConductaTab implements OnChanges {
 
   etiquetaTipo(tipo: string): string {
     return ETIQUETAS_TIPO_CONDUCTA[tipo as keyof typeof ETIQUETAS_TIPO_CONDUCTA] ?? tipo;
+  }
+
+  exportarPdf(): void {
+    this.exportar.conductaPdf(this.resumen(), this.curso());
+  }
+
+  exportarExcel(): void {
+    this.exportar.conductaExcel(this.resumen(), this.curso());
   }
 }

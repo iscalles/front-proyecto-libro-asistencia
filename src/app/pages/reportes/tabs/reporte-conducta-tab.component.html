@@ -2,6 +2,24 @@
   <div class="alert alert-danger">{{ error() }}</div>
 }
 
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h3 class="h6 fw-semibold mb-0">Resumen de conducta</h3>
+  <div class="d-flex gap-2">
+    <button class="btn btn-sm btn-outline-danger"
+            [disabled]="cargando() || resumen().length === 0"
+            (click)="exportarPdf()" type="button"
+            title="Descargar PDF">
+      PDF
+    </button>
+    <button class="btn btn-sm btn-outline-success"
+            [disabled]="cargando() || resumen().length === 0"
+            (click)="exportarExcel()" type="button"
+            title="Descargar Excel">
+      Excel
+    </button>
+  </div>
+</div>
+
 @if (cargando()) {
   <div class="text-center py-5 text-muted">
     <div class="spinner-border spinner-border-sm me-2" role="status"></div>

@@ -45,7 +45,6 @@
         <table class="table tabla-mantenedor mb-0">
           <thead>
             <tr>
-              <th>ID</th>
               <th>Estudiante</th>
               <th>Curso</th>
               <th>Año académico</th>
@@ -55,7 +54,6 @@
           <tbody>
             @for (m of matriculasFiltradas(); track m.idMatricula) {
               <tr>
-                <td class="text-muted small">{{ m.idMatricula }}</td>
                 <td class="fw-medium">{{ m.nombreEstudiante }}</td>
                 <td>{{ m.gradoCurso }} {{ m.seccionCurso }}</td>
                 <td>{{ m.anioAcademicoMatricula }}</td>
@@ -70,7 +68,7 @@
               </tr>
             } @empty {
               <tr>
-                <td colspan="5" class="text-center text-muted py-4">
+                <td colspan="4" class="text-center text-muted py-4">
                   @if (busqueda()) {
                     No se encontraron matrículas para "<strong>{{ busqueda() }}</strong>".
                   } @else {
@@ -145,7 +143,7 @@
   <div class="modal-overlay" (click)="cerrarEditar()">
     <div class="modal-caja modal-caja--sm" (click)="$event.stopPropagation()">
       <div class="modal-encabezado">
-        <h3 class="modal-titulo">Editar matrícula #{{ m.idMatricula }}</h3>
+        <h3 class="modal-titulo">Editar matrícula</h3>
         <button class="btn-cerrar" (click)="cerrarEditar()" type="button">✕</button>
       </div>
 

@@ -37,15 +37,21 @@ export class CalificacionesTab implements OnInit {
   readonly matriculasDisponibles = computed(() => {
     const curso = this.cursoDeEvaluacion();
     if (curso === null) return [];
-    return this.matriculas().filter(m => m.idCurso === curso);
+    return [...this.matriculas().filter(m => m.idCurso === curso)].sort((a, b) =>
+      a.nombreEstudiante.localeCompare(b.nombreEstudiante, 'es')
+    );
   });
 
   readonly calificacionesFiltradas = computed(() => {
     const q = this.busqueda().toLowerCase().trim();
-    if (!q) return this.calificaciones();
-    return this.calificaciones().filter(c =>
-      c.nombreEvaluacion.toLowerCase().includes(q) ||
-      this.etiquetaMatricula(c.idMatricula).toLowerCase().includes(q)
+    const lista = q
+      ? this.calificaciones().filter(c =>
+          c.nombreEvaluacion.toLowerCase().includes(q) ||
+          this.etiquetaMatricula(c.idMatricula).toLowerCase().includes(q)
+        )
+      : this.calificaciones();
+    return [...lista].sort((a, b) =>
+      a.nombreEvaluacion.localeCompare(b.nombreEvaluacion, 'es')
     );
   });
 
@@ -77,7 +83,11 @@ export class CalificacionesTab implements OnInit {
       next: ({ calificaciones, matriculas, evaluaciones }) => {
         this.calificaciones.set(calificaciones);
         this.matriculas.set(matriculas);
-        this.evaluaciones.set(evaluaciones);
+        this.evaluaciones.set([...evaluaciones].sort((a, b) => {
+          const keyA = `${a.nombreAsignatura} ${a.nombreEvaluacion}`.toLowerCase();
+          const keyB = `${b.nombreAsignatura} ${b.nombreEvaluacion}`.toLowerCase();
+          return keyA.localeCompare(keyB, 'es');
+        }));
         this.cargando.set(false);
       },
       error: () => {
