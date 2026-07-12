@@ -6,6 +6,7 @@ import { AsignaturasTab } from './tabs/asignaturas-tab.component';
 import { EvaluacionesTab } from './tabs/evaluaciones-tab.component';
 import { MatriculasTab } from './tabs/matriculas-tab.component';
 import { CalificacionesTab } from './tabs/calificaciones-tab.component';
+import { CampanitaNotificaciones } from '../../components/notificaciones/campanita-notificaciones.component';
 
 // Identificador de cada pestaña del mantenedor
 type Tab = 'cursos' | 'asignaturas' | 'evaluaciones'
@@ -14,7 +15,7 @@ type Tab = 'cursos' | 'asignaturas' | 'evaluaciones'
 @Component({
   selector: 'app-academico',
   standalone: true,
-  imports: [CursosTab, AsignaturasTab, EvaluacionesTab, MatriculasTab, CalificacionesTab],
+  imports: [CursosTab, AsignaturasTab, EvaluacionesTab, MatriculasTab, CalificacionesTab, CampanitaNotificaciones],
   templateUrl: './academico-page.component.html',
   styleUrl: './academico-page.component.scss'
 })

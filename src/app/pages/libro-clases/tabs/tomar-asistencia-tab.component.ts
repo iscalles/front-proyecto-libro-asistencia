@@ -1,4 +1,4 @@
-import { Component, OnInit, OnChanges, inject, signal, input } from '@angular/core';
+import { Component, OnInit, inject, signal, input, output } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, FormArray, FormGroup, Validators } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ServicioAsistencia } from '../../../services/asistencia.service';
@@ -21,8 +21,10 @@ function aFormatoBackend(fechaIso: string): string {
   templateUrl: './tomar-asistencia-tab.component.html',
   styleUrls: ['../libro-clases-shared.scss']
 })
-export class TomarAsistenciaTab implements OnInit, OnChanges {
-  readonly curso = input.required<CursoAsignatura>();
+export class TomarAsistenciaTab implements OnInit {
+  readonly curso         = input.required<CursoAsignatura>();
+  readonly fechaInicial  = input<string>('');
+  readonly asistenciaGuardada = output<void>();
 
   private servicio = inject(ServicioAsistencia);
   private fb = inject(FormBuilder);
@@ -45,17 +47,32 @@ export class TomarAsistenciaTab implements OnInit, OnChanges {
 
   readonly fecha = signal(new Date().toISOString().slice(0, 10));
 
+  // ── Inicializa la fecha desde el input del padre (viene de la modal) ────────
+  private get fechaActual(): string {
+    return this.fechaInicial() || new Date().toISOString().slice(0, 10);
+  }
+
+  // ── Control de fecha ────────────────────────────────────────────────────────
+  readonly validandoFecha = signal(false);
+  // null = sin verificar aún; true/false = resultado de la validación
+  readonly fechaEsValida = signal<boolean | null>(null);
+  readonly motivoInvalidez = signal<string | null>(null);
+
+  // ── Asistencia existente ────────────────────────────────────────────────────
+  readonly cargandoExistente = signal(false);
+  readonly tieneAsistenciaExistente = signal(false);
+
   filas!: FormArray<FormGroup>;
 
   onFechaChange(evento: Event): void {
     this.fecha.set((evento.target as HTMLInputElement).value);
+    if (this.roster().length > 0) {
+      this.verificarFechaYAsistencia();
+    }
   }
 
   ngOnInit(): void {
-    this.cargarRoster();
-  }
-
-  ngOnChanges(): void {
+    this.fecha.set(this.fechaActual);
     this.cargarRoster();
   }
 
@@ -63,6 +80,9 @@ export class TomarAsistenciaTab implements OnInit, OnChanges {
     this.cargando.set(true);
     this.errorRoster.set(null);
     this.exitoGuardar.set(false);
+    this.fechaEsValida.set(null);
+    this.tieneAsistenciaExistente.set(false);
+
     this.servicio.obtenerRosterCurso(this.curso().idCurso).subscribe({
       next: (alumnos) => {
         this.roster.set(alumnos);
@@ -74,11 +94,71 @@ export class TomarAsistenciaTab implements OnInit, OnChanges {
           }))
         );
         this.cargando.set(false);
+        // Una vez que el roster está listo, validar la fecha seleccionada
+        this.verificarFechaYAsistencia();
       },
       error: () => {
         this.errorRoster.set('No se pudo cargar la lista de alumnos del curso.');
         this.cargando.set(false);
       }
+    });
+  }
+
+  // Valida si la fecha es lectiva y, si lo es, carga la asistencia ya registrada.
+  verificarFechaYAsistencia(): void {
+    const fecha = this.fecha();
+    if (!fecha) return;
+
+    this.validandoFecha.set(true);
+    this.fechaEsValida.set(null);
+    this.tieneAsistenciaExistente.set(false);
+
+    this.servicio.validarFechaAsistencia(fecha, this.curso().idCursoAsignatura).subscribe({
+      next: (validacion) => {
+        this.fechaEsValida.set(validacion.valida);
+        this.motivoInvalidez.set(validacion.motivo ?? null);
+        this.validandoFecha.set(false);
+
+        if (validacion.valida) {
+          this.precargarAsistenciaExistente();
+        }
+      },
+      error: () => {
+        // Si la validación falla por error de red, no bloqueamos (best-effort)
+        this.fechaEsValida.set(true);
+        this.motivoInvalidez.set(null);
+        this.validandoFecha.set(false);
+        this.precargarAsistenciaExistente();
+      },
+    });
+  }
+
+  // Consulta si ya hay asistencia registrada para la fecha seleccionada
+  // y, si la hay, pre-puebla el formulario con esos valores.
+  precargarAsistenciaExistente(): void {
+    this.cargandoExistente.set(true);
+    this.servicio.reporteAsistenciaPorCursoYFecha(this.curso().idCurso, this.fecha()).subscribe({
+      next: (registros) => {
+        const conRegistro = registros.filter(r => r.estadoAsistencia !== 'sin registro');
+        this.tieneAsistenciaExistente.set(conRegistro.length > 0);
+
+        if (conRegistro.length > 0) {
+          this.filas.controls.forEach(fila => {
+            const idMatricula = fila.value.idMatricula as number;
+            const existente = registros.find(r => r.idMatricula === idMatricula);
+            if (existente && existente.estadoAsistencia !== 'sin registro') {
+              fila.patchValue({
+                estadoAsistencia: existente.estadoAsistencia as EstadoAsistencia,
+                justificacionAsistencia: existente.justificacionAsistencia ?? '',
+              });
+            }
+          });
+        }
+        this.cargandoExistente.set(false);
+      },
+      error: () => {
+        this.cargandoExistente.set(false);
+      },
     });
   }
 
@@ -135,7 +215,9 @@ export class TomarAsistenciaTab implements OnInit, OnChanges {
       next: () => {
         this.guardando.set(false);
         this.exitoGuardar.set(true);
+        this.tieneAsistenciaExistente.set(true);
         this.modalConfirmacion.set(false);
+        this.asistenciaGuardada.emit();
       },
       error: (e: HttpErrorResponse) => {
         this.guardando.set(false);

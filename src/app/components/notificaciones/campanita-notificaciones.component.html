@@ -1,0 +1,44 @@
+<div class="campanita-wrapper" (click)="$event.stopPropagation()">
+  <button type="button" class="rounded-circle d-flex align-items-center justify-content-center campanita-boton" (click)="toggle($event)" aria-label="Notificaciones">
+    <i class="bi bi-bell-fill"></i>
+    @if (noLeidas() > 0) {
+      <span class="badge rounded-pill bg-danger campanita-badge">{{ noLeidas() }}</span>
+    }
+  </button>
+
+  @if (abierto()) {
+    <div class="campanita-dropdown shadow-sm">
+      <div class="campanita-header">
+        <span class="fw-semibold">Notificaciones</span>
+        @if (notificaciones().length > 0) {
+          <button type="button" class="btn btn-sm btn-link p-0" (click)="marcarTodasLeidas($event)">
+            Marcar todas como leídas
+          </button>
+        }
+      </div>
+
+      <div class="campanita-lista">
+        @if (cargando()) {
+          <div class="campanita-vacio">Cargando...</div>
+        } @else if (notificaciones().length === 0) {
+          <div class="campanita-vacio">No tienes notificaciones</div>
+        } @else {
+          @for (n of notificaciones(); track n.id) {
+            <div class="campanita-item" [class.no-leida]="!n.leida" (click)="marcarLeida(n, $event)">
+              <div class="campanita-item-top">
+                <span class="badge bg-secondary">{{ ETIQUETAS_TIPO_NOTIFICACION[n.tipoNotificacion] }}</span>
+                <span class="campanita-fecha">{{ n.fechaEnvio }}</span>
+              </div>
+              <div class="campanita-asunto">{{ n.asunto }}</div>
+              <div class="campanita-mensaje">{{ n.mensaje }}</div>
+            </div>
+          }
+        }
+      </div>
+
+      <div class="campanita-footer">
+        <a routerLink="/notificaciones" class="btn btn-sm btn-link" (click)="abierto.set(false)">Ver todas</a>
+      </div>
+    </div>
+  }
+</div>

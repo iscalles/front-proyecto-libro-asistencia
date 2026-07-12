@@ -5,11 +5,12 @@ import { ServicioToken } from 'lib-auth';
 import { ServicioAcademico } from '../../services/academico.service';
 import { Matricula, Calificacion, CursoAsignatura } from '../../models/academico.models';
 import { ResumenCalificaciones } from '../../models/seguimiento.models';
+import { CampanitaNotificaciones } from '../../components/notificaciones/campanita-notificaciones.component';
 
 @Component({
   selector: 'app-mis-calificaciones',
   standalone: true,
-  imports: [],
+  imports: [CampanitaNotificaciones],
   templateUrl: './mis-calificaciones-page.component.html',
   styleUrl: './mis-calificaciones-shared.scss'
 })

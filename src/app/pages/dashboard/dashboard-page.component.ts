@@ -4,6 +4,7 @@ import { ReactiveFormsModule, FormBuilder, Validators, AbstractControl } from '@
 import { HttpErrorResponse } from '@angular/common/http';
 import { ServicioToken, ServicioAutenticacion } from 'lib-auth';
 import { ServicioUsuarioAdmin } from '../../services/usuario-admin.service';
+import { CampanitaNotificaciones } from '../../components/notificaciones/campanita-notificaciones.component';
 
 const CONFIG_ROLES: Record<string, { etiqueta: string; clase: string }> = {
   DOCENTE:        { etiqueta: 'Docente',        clase: 'bg-success' },
@@ -22,7 +23,7 @@ function passwordsCoinciden(group: AbstractControl) {
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [RouterLink, ReactiveFormsModule],
+  imports: [RouterLink, ReactiveFormsModule, CampanitaNotificaciones],
   templateUrl: './dashboard-page.component.html',
   styleUrl: './dashboard-page.component.scss'
 })
@@ -67,25 +68,16 @@ export class PáginaDashboard {
     return 'Buenas noches';
   });
 
-  //Dropdown de rol
-  readonly estaAbiertoDropdownRol   = signal(false);
-  readonly estaAbiertoMenuUsuario   = signal(false);
-
-  toggleDropdownRol(evento: MouseEvent): void {
-    evento.stopPropagation();
-    this.estaAbiertoDropdownRol.update(v => !v);
-    this.estaAbiertoMenuUsuario.set(false);
-  }
+  // Dropdown único de usuario (incluye selector de rol)
+  readonly estaAbiertoMenuUsuario = signal(false);
 
   toggleMenuUsuario(evento: MouseEvent): void {
     evento.stopPropagation();
     this.estaAbiertoMenuUsuario.update(v => !v);
-    this.estaAbiertoDropdownRol.set(false);
   }
 
   @HostListener('document:click')
   cerrarDropdowns(): void {
-    this.estaAbiertoDropdownRol.set(false);
     this.estaAbiertoMenuUsuario.set(false);
   }
 
@@ -93,7 +85,7 @@ export class PáginaDashboard {
     evento.stopPropagation();
     this._rolSeleccionado.set(rol.etiqueta);
     this.servicioToken.guardarRolActivo(rol.etiqueta);
-    this.estaAbiertoDropdownRol.set(false);
+    this.estaAbiertoMenuUsuario.set(false);
   }
 
   //Modal cambio de contraseña

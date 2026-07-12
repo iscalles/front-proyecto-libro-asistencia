@@ -4,6 +4,7 @@ import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angula
 import { HttpErrorResponse } from '@angular/common/http';
 import { ServicioToken, ServicioValidadorRut } from 'lib-auth';
 import { ServicioUsuarioAdmin } from '../../services/usuario-admin.service';
+import { CampanitaNotificaciones } from '../../components/notificaciones/campanita-notificaciones.component';
 import {
   UsuarioDTOInternal, UsuarioDTO,
   TipoRol, ROLES_DISPONIBLES, ETIQUETAS_ROL, CLASE_ROL
@@ -12,7 +13,7 @@ import {
 @Component({
   selector: 'app-admin',
   standalone: true,
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, CampanitaNotificaciones],
   templateUrl: './admin-page.component.html',
   styleUrl: './admin-page.component.scss'
 })

@@ -8,10 +8,12 @@ import {
   ApoderadoResponse, EstudianteResponse,
   RelacionApEst, UsuarioAnidado, OPCIONES_PARENTESCO
 } from '../../models/relaciones.models';
+import { CampanitaNotificaciones } from '../../components/notificaciones/campanita-notificaciones.component';
 
 @Component({
   selector: 'app-relaciones',
   standalone: true,
+  imports: [CampanitaNotificaciones],
   templateUrl: './relaciones-page.component.html',
   styleUrl: './relaciones-page.component.scss'
 })

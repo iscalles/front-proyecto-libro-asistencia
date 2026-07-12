@@ -9,6 +9,8 @@ import { PáginaLibroClases } from './pages/libro-clases/libro-clases-page.compo
 import { PáginaReportes } from './pages/reportes/reportes-page.component';
 import { PáginaCalificaciones } from './pages/calificaciones/calificaciones-page.component';
 import { PáginaMisCalificaciones } from './pages/mis-calificaciones/mis-calificaciones-page.component';
+import { PáginaNotificaciones } from './pages/notificaciones/notificaciones-page.component';
+import { PáginaConfiguracionEscolar } from './pages/configuracion-escolar/configuracion-escolar-page.component';
 import { authGuard } from './guards/auth.guard';
 import { apoderadoGuard } from './guards/apoderado.guard';
 import { adminGuard, docenteGuard, estudianteGuard } from './guards/role.guard';
@@ -62,6 +64,16 @@ export const routes: Routes = [
     path: 'mis-calificaciones',
     component: PáginaMisCalificaciones,
     canActivate: [authGuard, estudianteGuard]
+  },
+  {
+    path: 'notificaciones',
+    component: PáginaNotificaciones,
+    canActivate: [authGuard]
+  },
+  {
+    path: 'configuracion-escolar',
+    component: PáginaConfiguracionEscolar,
+    canActivate: [authGuard, adminGuard]
   },
   {
     path: '',

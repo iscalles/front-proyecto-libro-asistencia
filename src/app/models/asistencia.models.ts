@@ -1,5 +1,23 @@
 // Modelos del MS-Asistencia (vía BFF).
 
+export interface ValidacionFecha {
+  valida: boolean;
+  motivo: string | null;
+}
+
+export interface FechaExcluida {
+  id: number;
+  fecha: string;        // dd-MM-yyyy
+  descripcion: string;
+}
+
+export interface PeriodoEscolar {
+  id: number;
+  nombre: string;
+  fechaInicio: string;  // dd-MM-yyyy
+  fechaFin: string;
+}
+
 export interface RosterAlumno {
   idMatricula: number;
   estudianteIdUsuario: number;

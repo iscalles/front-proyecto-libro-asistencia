@@ -3,11 +3,38 @@
     <label class="form-label mb-0 fw-semibold">Fecha</label>
     <input type="date" class="form-control input-fecha-grande"
            [value]="fecha()" (change)="onFechaChange($event)">
+    @if (validandoFecha()) {
+      <span class="spinner-border spinner-border-sm text-secondary" role="status"></span>
+    }
   </div>
   <button class="btn btn-outline-secondary btn-sm" (click)="cargarRoster()" type="button">
     Actualizar
   </button>
 </div>
+
+<!-- ── Alerta: fecha no lectiva ───────────────────────────────────────────── -->
+@if (fechaEsValida() === false) {
+  <div class="alert alert-warning d-flex align-items-center gap-2 py-2 mb-3">
+    <span>⚠️</span>
+    <span>{{ motivoInvalidez() }} No es posible registrar asistencia para este día.</span>
+  </div>
+}
+
+<!-- ── Info: asistencia ya registrada ─────────────────────────────────────── -->
+@if (fechaEsValida() === true && tieneAsistenciaExistente()) {
+  <div class="alert alert-info d-flex align-items-center gap-2 py-2 mb-3">
+    <span>ℹ️</span>
+    <span>Ya existe asistencia registrada para esta fecha. Los valores fueron cargados — modifica solo lo que necesites y guarda.</span>
+  </div>
+}
+
+<!-- ── Cargando asistencia existente ──────────────────────────────────────── -->
+@if (cargandoExistente()) {
+  <div class="text-muted small mb-2">
+    <span class="spinner-border spinner-border-sm me-1" role="status"></span>
+    Buscando registros anteriores...
+  </div>
+}
 
 @if (errorRoster()) {
   <div class="alert alert-danger">{{ errorRoster() }}</div>
@@ -74,8 +101,11 @@
       @if (exitoGuardar()) {
         <span class="text-success small">Asistencia registrada correctamente.</span>
       }
-      <button class="btn btn-primary" (click)="abrirConfirmacion()" type="button">
-        Guardar asistencia
+      <button class="btn btn-primary"
+              (click)="abrirConfirmacion()"
+              [disabled]="fechaEsValida() === false || validandoFecha()"
+              type="button">
+        {{ tieneAsistenciaExistente() ? 'Actualizar asistencia' : 'Guardar asistencia' }}
       </button>
     </div>
   }
@@ -86,16 +116,24 @@
   <div class="modal-overlay" (click)="cerrarConfirmacion()">
     <div class="modal-caja modal-caja--sm" (click)="$event.stopPropagation()">
       <div class="modal-encabezado">
-        <h3 class="modal-titulo">Confirmar asistencia</h3>
+        <h3 class="modal-titulo">
+          {{ tieneAsistenciaExistente() ? 'Actualizar asistencia' : 'Confirmar asistencia' }}
+        </h3>
         <button class="btn-cerrar" (click)="cerrarConfirmacion()" type="button">✕</button>
       </div>
 
       <div class="modal-cuerpo">
-        <p class="mb-3">
-          Vas a registrar la asistencia del <strong>{{ fecha() }}</strong> para
-          <strong>{{ roster().length }}</strong> alumno(s). Si ya existía un registro para
-          esta fecha, será reemplazado.
-        </p>
+        @if (tieneAsistenciaExistente()) {
+          <p class="mb-3">
+            Estás <strong>modificando</strong> la asistencia ya registrada del
+            <strong>{{ fecha() }}</strong> para <strong>{{ roster().length }}</strong> alumno(s).
+          </p>
+        } @else {
+          <p class="mb-3">
+            Vas a registrar la asistencia del <strong>{{ fecha() }}</strong> para
+            <strong>{{ roster().length }}</strong> alumno(s).
+          </p>
+        }
         <ul class="list-unstyled mb-0 small">
           <li class="mb-1"><span class="badge bg-success me-2">{{ resumenConfirmacion().presentes }}</span> presente(s)</li>
           <li class="mb-1"><span class="badge bg-danger me-2">{{ resumenConfirmacion().ausentes }}</span> ausente(s)</li>
