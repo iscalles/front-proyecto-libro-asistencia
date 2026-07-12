@@ -63,8 +63,22 @@
 <!-- ═══ DETALLE POR DÍA ═══════════════════════════════════════════════════════ -->
 <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
   <h3 class="h6 fw-semibold mb-0">Detalle del día</h3>
-  <input type="date" class="form-control form-control-sm" style="width: auto"
-         [value]="fecha()" (change)="onFechaChange($event)">
+  <div class="d-flex align-items-center gap-2">
+    <input type="date" class="form-control form-control-sm" style="width: auto"
+           [value]="fecha()" (change)="onFechaChange($event)">
+    <button class="btn btn-sm btn-outline-danger"
+            [disabled]="cargandoDia() || reporteDia().length === 0"
+            (click)="exportarPdf()" type="button"
+            title="Descargar PDF">
+      PDF
+    </button>
+    <button class="btn btn-sm btn-outline-success"
+            [disabled]="cargandoDia() || reporteDia().length === 0"
+            (click)="exportarExcel()" type="button"
+            title="Descargar Excel">
+      Excel
+    </button>
+  </div>
 </div>
 
 @if (errorDia()) {

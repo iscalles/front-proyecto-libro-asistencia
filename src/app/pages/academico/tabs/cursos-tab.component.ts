@@ -24,12 +24,18 @@ export class CursosTab implements OnInit {
 
   readonly cursosFiltrados = computed(() => {
     const q = this.busqueda().toLowerCase().trim();
-    if (!q) return this.cursos();
-    return this.cursos().filter(c =>
-      c.gradoCurso.toLowerCase().includes(q) ||
-      c.seccionCurso.toLowerCase().includes(q) ||
-      String(c.anioCurso).includes(q)
-    );
+    const lista = q
+      ? this.cursos().filter(c =>
+          c.gradoCurso.toLowerCase().includes(q) ||
+          c.seccionCurso.toLowerCase().includes(q) ||
+          String(c.anioCurso).includes(q)
+        )
+      : this.cursos();
+    return [...lista].sort((a, b) => {
+      const keyA = `${a.gradoCurso} ${a.seccionCurso}`.toLowerCase();
+      const keyB = `${b.gradoCurso} ${b.seccionCurso}`.toLowerCase();
+      return keyA.localeCompare(keyB, 'es');
+    });
   });
 
   // ── Estado de modales ──────────────────────────────────────────────────────

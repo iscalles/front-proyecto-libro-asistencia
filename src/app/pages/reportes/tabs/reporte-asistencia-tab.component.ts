@@ -1,5 +1,6 @@
 import { Component, OnChanges, inject, signal, input } from '@angular/core';
 import { ServicioAsistencia } from '../../../services/asistencia.service';
+import { ExportarService } from '../../../services/exportar.service';
 import { Curso } from '../../../models/academico.models';
 import { ReporteAsistenciaDia, ReporteAsistenciaResumen, ETIQUETAS_ESTADO_ASISTENCIA } from '../../../models/asistencia.models';
 
@@ -24,6 +25,7 @@ export class ReporteAsistenciaTab implements OnChanges {
   readonly curso = input.required<Curso>();
 
   private servicio = inject(ServicioAsistencia);
+  private exportar = inject(ExportarService);
 
   readonly etiquetasEstado = ETIQUETAS_ESTADO_ASISTENCIA;
 
@@ -63,7 +65,9 @@ export class ReporteAsistenciaTab implements OnChanges {
     this.errorDia.set(null);
     this.servicio.reporteAsistenciaPorCursoYFecha(this.curso().id, this.fecha()).subscribe({
       next: (registros) => {
-        this.reporteDia.set(registros);
+        this.reporteDia.set([...registros].sort((a, b) =>
+          a.nombreEstudiante.localeCompare(b.nombreEstudiante, 'es')
+        ));
         this.cargandoDia.set(false);
       },
       error: () => {
@@ -90,5 +94,13 @@ export class ReporteAsistenciaTab implements OnChanges {
 
   etiquetaEstado(estado: string): string {
     return this.etiquetasEstado[estado as keyof typeof ETIQUETAS_ESTADO_ASISTENCIA] ?? estado;
+  }
+
+  exportarPdf(): void {
+    this.exportar.asistenciaPdf(this.reporteDia(), this.curso(), this.fecha());
+  }
+
+  exportarExcel(): void {
+    this.exportar.asistenciaExcel(this.reporteDia(), this.curso(), this.fecha());
   }
 }

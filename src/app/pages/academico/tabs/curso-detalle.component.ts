@@ -63,9 +63,20 @@ export class CursoDetalle implements OnInit {
     }).subscribe({
       next: ({ cursoAsignaturas, asignaturas, usuarios }) => {
         // Filtra solo los registros que pertenecen a este curso
-        this.registros.set(cursoAsignaturas.filter(ca => ca.idCurso === this.curso().id));
-        this.asignaturas.set(asignaturas);
-        this.docentes.set(usuarios.filter(u => u.roles.includes('DOCENTE')));
+        this.registros.set(
+          [...cursoAsignaturas.filter(ca => ca.idCurso === this.curso().id)].sort((a, b) =>
+            a.nombreAsignatura.localeCompare(b.nombreAsignatura, 'es')
+          )
+        );
+        this.asignaturas.set([...asignaturas].sort((a, b) =>
+          a.nombreAsignatura.localeCompare(b.nombreAsignatura, 'es')
+        ));
+        const docentesFiltrados = usuarios.filter(u => u.roles.includes('DOCENTE'));
+        this.docentes.set([...docentesFiltrados].sort((a, b) => {
+          const keyA = `${a.primerApellidoUsuario ?? ''} ${a.nombreUsuario ?? ''}`.toLowerCase();
+          const keyB = `${b.primerApellidoUsuario ?? ''} ${b.nombreUsuario ?? ''}`.toLowerCase();
+          return keyA.localeCompare(keyB, 'es');
+        }));
         this.cargando.set(false);
       },
       error: () => {

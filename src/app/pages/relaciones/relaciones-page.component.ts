@@ -42,11 +42,17 @@ export class PáginaRelaciones implements OnInit {
 
   readonly apoderadosFiltrados = computed(() => {
     const q = this.busquedaApoderado().toLowerCase().trim();
-    if (!q) return this.apoderados();
-    return this.apoderados().filter(a =>
-      this.nombreCompleto(a.usuario).toLowerCase().includes(q) ||
-      a.usuario.rutUsuario?.toLowerCase().includes(q)
-    );
+    const lista = q
+      ? this.apoderados().filter(a =>
+          this.nombreCompleto(a.usuario).toLowerCase().includes(q) ||
+          a.usuario.rutUsuario?.toLowerCase().includes(q)
+        )
+      : this.apoderados();
+    return [...lista].sort((a, b) => {
+      const keyA = `${a.usuario.primerApellidoUsuario ?? ''} ${a.usuario.nombreUsuario ?? ''}`.toLowerCase();
+      const keyB = `${b.usuario.primerApellidoUsuario ?? ''} ${b.usuario.nombreUsuario ?? ''}`.toLowerCase();
+      return keyA.localeCompare(keyB, 'es');
+    });
   });
 
   // ── Modal de asignación ───────────────────────────────────────────────────
@@ -69,12 +75,17 @@ export class PáginaRelaciones implements OnInit {
   // Estudiantes disponibles, filtrados por RUT o nombre dentro del modal
   readonly estudiantesDisponiblesFiltrados = computed(() => {
     const q = this.busquedaEstudianteModal().toLowerCase().trim();
-    const lista = this.estudiantesDisponibles();
-    if (!q) return lista;
-    return lista.filter(e =>
-      e.usuario.rutUsuario?.toLowerCase().includes(q) ||
-      this.nombreCompleto(e.usuario).toLowerCase().includes(q)
-    );
+    const lista = q
+      ? this.estudiantesDisponibles().filter(e =>
+          e.usuario.rutUsuario?.toLowerCase().includes(q) ||
+          this.nombreCompleto(e.usuario).toLowerCase().includes(q)
+        )
+      : this.estudiantesDisponibles();
+    return [...lista].sort((a, b) => {
+      const keyA = `${a.usuario.primerApellidoUsuario ?? ''} ${a.usuario.nombreUsuario ?? ''}`.toLowerCase();
+      const keyB = `${b.usuario.primerApellidoUsuario ?? ''} ${b.usuario.nombreUsuario ?? ''}`.toLowerCase();
+      return keyA.localeCompare(keyB, 'es');
+    });
   });
 
   ngOnInit(): void {
