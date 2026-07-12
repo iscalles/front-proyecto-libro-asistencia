@@ -7,6 +7,7 @@ import { PáginaAcademico } from './pages/academico/academico-page.component';
 import { PáginaSeguimiento } from './pages/seguimiento/seguimiento-page.component';
 import { PáginaLibroClases } from './pages/libro-clases/libro-clases-page.component';
 import { PáginaReportes } from './pages/reportes/reportes-page.component';
+import { PáginaReportesDocente } from './pages/reportes/reportes-docente-page.component';
 import { PáginaCalificaciones } from './pages/calificaciones/calificaciones-page.component';
 import { PáginaMisCalificaciones } from './pages/mis-calificaciones/mis-calificaciones-page.component';
 import { PáginaNotificaciones } from './pages/notificaciones/notificaciones-page.component';
@@ -56,6 +57,11 @@ export const routes: Routes = [
     path: 'reportes',
     component: PáginaReportes,
     canActivate: [authGuard, adminGuard]
+  },
+  {
+    path: 'reportes-docente',
+    component: PáginaReportesDocente,
+    canActivate: [authGuard, docenteGuard]
   },
   {
     path: 'calificaciones',

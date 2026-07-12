@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
-import { ReporteAsistenciaDia, ReporteConductaAlumno } from '../models/asistencia.models';
+import { ReporteAsistenciaDia, ReporteConductaAlumno, ReporteAlumnoCompleto } from '../models/asistencia.models';
 import { Curso } from '../models/academico.models';
 
 const COLEGIO = "Colegio Bernardo O'Higgins";
@@ -136,5 +136,72 @@ export class ExportarService {
     const libro = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(libro, hoja, 'Conducta');
     XLSX.writeFile(libro, `Conducta_${curso.gradoCurso}${curso.seccionCurso}.xlsx`);
+  }
+
+  // ── Alumnos (asistencia + conducta combinados) ──────────────────────────────
+
+  alumnosPdf(datos: ReporteAlumnoCompleto[], curso: Curso, desde: string, hasta: string): void {
+    const doc = new jsPDF({ orientation: 'landscape' });
+
+    doc.setFontSize(16);
+    doc.text('Estadísticas por Alumno', 14, 20);
+    doc.setFontSize(11);
+    doc.text(`${curso.gradoCurso} ${curso.seccionCurso} — Período: ${desde} al ${hasta}`, 14, 28);
+    doc.setFontSize(9);
+    doc.text(COLEGIO, 14, 34);
+
+    autoTable(doc, {
+      startY: 40,
+      head: [['N°', 'Alumno', 'RUT', 'Presentes', 'Ausentes', 'Justificados', '% Asistencia', 'Positivas', 'Negativas']],
+      body: datos.map((a, i) => [
+        i + 1,
+        a.nombreEstudiante,
+        a.rutEstudiante,
+        a.totalPresentes,
+        a.totalAusentes,
+        a.totalJustificados,
+        a.porcentajeAsistencia.toFixed(1) + '%',
+        a.totalPositivas,
+        a.totalNegativas
+      ]),
+      styles: { fontSize: 8 },
+      headStyles: { fillColor: [41, 128, 185] },
+      columnStyles: {
+        0: { cellWidth: 10 },
+        2: { cellWidth: 26 },
+        3: { cellWidth: 22, halign: 'center' },
+        4: { cellWidth: 22, halign: 'center' },
+        5: { cellWidth: 24, halign: 'center' },
+        6: { cellWidth: 26, halign: 'center' },
+        7: { cellWidth: 22, halign: 'center' },
+        8: { cellWidth: 22, halign: 'center' }
+      }
+    });
+
+    doc.save(`Alumnos_${curso.gradoCurso}${curso.seccionCurso}_${desde}_${hasta}.pdf`);
+  }
+
+  alumnosExcel(datos: ReporteAlumnoCompleto[], curso: Curso, desde: string, hasta: string): void {
+    const filas = datos.map((a, i) => ({
+      'N°': i + 1,
+      'Alumno': a.nombreEstudiante,
+      'RUT': a.rutEstudiante,
+      'Presentes': a.totalPresentes,
+      'Ausentes': a.totalAusentes,
+      'Justificados': a.totalJustificados,
+      '% Asistencia': parseFloat(a.porcentajeAsistencia.toFixed(1)),
+      'Positivas': a.totalPositivas,
+      'Negativas': a.totalNegativas
+    }));
+
+    const hoja = XLSX.utils.json_to_sheet(filas);
+    hoja['!cols'] = [
+      { wch: 5 }, { wch: 36 }, { wch: 14 }, { wch: 12 }, { wch: 12 },
+      { wch: 14 }, { wch: 16 }, { wch: 12 }, { wch: 12 }
+    ];
+
+    const libro = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(libro, hoja, 'Alumnos');
+    XLSX.writeFile(libro, `Alumnos_${curso.gradoCurso}${curso.seccionCurso}_${desde}_${hasta}.xlsx`);
   }
 }
