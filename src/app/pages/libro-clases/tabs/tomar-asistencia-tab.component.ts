@@ -113,7 +113,7 @@ export class TomarAsistenciaTab implements OnInit {
     this.fechaEsValida.set(null);
     this.tieneAsistenciaExistente.set(false);
 
-    this.servicio.validarFechaAsistencia(fecha).subscribe({
+    this.servicio.validarFechaAsistencia(fecha, this.curso().idCursoAsignatura).subscribe({
       next: (validacion) => {
         this.fechaEsValida.set(validacion.valida);
         this.motivoInvalidez.set(validacion.motivo ?? null);

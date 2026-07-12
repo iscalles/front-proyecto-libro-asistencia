@@ -128,7 +128,7 @@ export class PáginaLibroClases implements OnInit {
     this.validandoModal.set(true);
     this.errorValidacionModal.set(null);
 
-    this.servicioAsistencia.validarFechaAsistencia(fecha).subscribe({
+    this.servicioAsistencia.validarFechaAsistencia(fecha, curso.idCursoAsignatura).subscribe({
       next: (validacion) => {
         if (!validacion.valida) {
           this.errorValidacionModal.set(validacion.motivo);

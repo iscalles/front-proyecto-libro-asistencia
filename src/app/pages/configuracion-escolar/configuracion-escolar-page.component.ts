@@ -1,13 +1,15 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { Router } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ServicioToken } from 'lib-auth';
 import { ServicioAsistencia } from '../../services/asistencia.service';
+import { ServicioAcademico } from '../../services/academico.service';
 import { CampanitaNotificaciones } from '../../components/notificaciones/campanita-notificaciones.component';
 import { FechaExcluida, PeriodoEscolar } from '../../models/asistencia.models';
+import { CursoAsignatura, HorarioClase, DIAS_SEMANA } from '../../models/academico.models';
 
-type Tab = 'periodos' | 'feriados';
+type Tab = 'periodos' | 'feriados' | 'horarios';
 
 @Component({
   selector: 'app-configuracion-escolar',
@@ -17,10 +19,11 @@ type Tab = 'periodos' | 'feriados';
   styleUrl: './configuracion-escolar-page.component.scss'
 })
 export class PáginaConfiguracionEscolar implements OnInit {
-  private servicio      = inject(ServicioAsistencia);
-  private servicioToken = inject(ServicioToken);
-  private fb            = inject(FormBuilder);
-  private enrutador     = inject(Router);
+  private servicio         = inject(ServicioAsistencia);
+  private servicioAcademico = inject(ServicioAcademico);
+  private servicioToken    = inject(ServicioToken);
+  private fb               = inject(FormBuilder);
+  private enrutador        = inject(Router);
 
   readonly usuarioSesion = this.servicioToken.obtenerSeñalInfoUsuario();
 
@@ -44,12 +47,38 @@ export class PáginaConfiguracionEscolar implements OnInit {
   readonly errorGuardar = signal<string | null>(null);
   readonly exitoGuardar = signal(false);
 
-  // ── Modal de confirmación de eliminación ───────────────────────────────────
+  // ── Modal de confirmación de eliminación (períodos y feriados) ────────────
   readonly itemEliminar  = signal<{ tipo: 'periodo' | 'feriado'; id: number; nombre: string } | null>(null);
   readonly eliminando    = signal(false);
   readonly errorEliminar = signal<string | null>(null);
 
+  // ── Horarios de clases ─────────────────────────────────────────────────────
+  readonly DIAS_SEMANA = DIAS_SEMANA;
+
+  readonly cursoAsignaturas       = signal<CursoAsignatura[]>([]);
+  readonly cargandoCursoAs        = signal(false);
+  readonly errorCursoAs           = signal<string | null>(null);
+  readonly cursoAsignaturaActivo  = signal<CursoAsignatura | null>(null);
+  readonly busquedaHorario        = signal('');
+
+  readonly cursoAsignaturasFiltradas = computed(() => {
+    const q = this.busquedaHorario().toLowerCase().trim();
+    if (!q) return this.cursoAsignaturas();
+    return this.cursoAsignaturas().filter(ca =>
+      ca.gradoCurso.toLowerCase().includes(q) ||
+      ca.seccionCurso.toLowerCase().includes(q) ||
+      ca.nombreAsignatura.toLowerCase().includes(q) ||
+      (ca.gradoCurso + ' ' + ca.seccionCurso).toLowerCase().includes(q)
+    );
+  });
+
+  readonly horarios               = signal<HorarioClase[]>([]);
+  readonly cargandoHorarios       = signal(false);
+  readonly errorHorarios          = signal<string | null>(null);
+  readonly togglando              = signal<string | null>(null); // diaSemana en proceso
+
   ngOnInit(): void {
+    this.cargarCursoAsignaturas();
     this.formPeriodo = this.fb.group({
       nombre:      ['', [Validators.required, Validators.maxLength(100)]],
       fechaInicio: ['', Validators.required],
@@ -167,6 +196,65 @@ export class PáginaConfiguracionEscolar implements OnInit {
         this.errorEliminar.set(this.mensajeError(e, 'No se pudo eliminar el registro.'));
       }
     });
+  }
+
+  // ── Horarios ───────────────────────────────────────────────────────────────
+
+  cargarCursoAsignaturas(): void {
+    this.cargandoCursoAs.set(true);
+    this.errorCursoAs.set(null);
+    this.servicioAcademico.listarCursoAsignaturas().subscribe({
+      next: lista => { this.cursoAsignaturas.set(lista); this.cargandoCursoAs.set(false); },
+      error: () => {
+        this.errorCursoAs.set('No se pudo cargar la lista de cursos-asignaturas.');
+        this.cargandoCursoAs.set(false);
+      }
+    });
+  }
+
+  seleccionarCursoAsignatura(ca: CursoAsignatura): void {
+    this.cursoAsignaturaActivo.set(ca);
+    this.cargarHorarios(ca.idCursoAsignatura);
+  }
+
+  cargarHorarios(idCursoAsignatura: number): void {
+    this.cargandoHorarios.set(true);
+    this.errorHorarios.set(null);
+    this.servicioAcademico.listarHorarioCursoAsignatura(idCursoAsignatura).subscribe({
+      next: lista => { this.horarios.set(lista); this.cargandoHorarios.set(false); },
+      error: () => {
+        this.errorHorarios.set('No se pudo cargar el horario.');
+        this.cargandoHorarios.set(false);
+      }
+    });
+  }
+
+  tieneDia(diaSemana: string): boolean {
+    return this.horarios().some(h => h.diaSemana === diaSemana);
+  }
+
+  horarioIdParaDia(diaSemana: string): number | undefined {
+    return this.horarios().find(h => h.diaSemana === diaSemana)?.id;
+  }
+
+  toggleDia(diaSemana: string): void {
+    const ca = this.cursoAsignaturaActivo();
+    if (!ca || this.togglando() === diaSemana) return;
+
+    this.togglando.set(diaSemana);
+
+    if (this.tieneDia(diaSemana)) {
+      const id = this.horarioIdParaDia(diaSemana)!;
+      this.servicioAcademico.eliminarHorarioClase(id).subscribe({
+        next: () => { this.togglando.set(null); this.cargarHorarios(ca.idCursoAsignatura); },
+        error: () => { this.togglando.set(null); }
+      });
+    } else {
+      this.servicioAcademico.agregarHorarioClase({ idCursoAsignatura: ca.idCursoAsignatura, diaSemana }).subscribe({
+        next: () => { this.togglando.set(null); this.cargarHorarios(ca.idCursoAsignatura); },
+        error: () => { this.togglando.set(null); }
+      });
+    }
   }
 
   // ── Helpers ────────────────────────────────────────────────────────────────

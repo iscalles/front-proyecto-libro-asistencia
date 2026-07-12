@@ -35,8 +35,11 @@ export class ServicioAsistencia {
     return this.http.post<Asistencia[]>(`${this.api}/asistencia/lote`, dto);
   }
 
-  validarFechaAsistencia(fechaIso: string): Observable<ValidacionFecha> {
-    const params = new HttpParams().set('fecha', aFormatoBackend(fechaIso));
+  validarFechaAsistencia(fechaIso: string, idCursoAsignatura?: number): Observable<ValidacionFecha> {
+    let params = new HttpParams().set('fecha', aFormatoBackend(fechaIso));
+    if (idCursoAsignatura != null) {
+      params = params.set('idCursoAsignatura', idCursoAsignatura.toString());
+    }
     return this.http.get<ValidacionFecha>(`${this.api}/asistencia/validar-fecha`, { params });
   }
 

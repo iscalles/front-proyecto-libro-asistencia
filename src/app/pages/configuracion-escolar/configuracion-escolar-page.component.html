@@ -32,6 +32,10 @@
             (click)="tabActiva.set('feriados')" type="button">
       Feriados y Días No Lectivos
     </button>
+    <button class="tab-boton" [class.activo]="tabActiva() === 'horarios'"
+            (click)="tabActiva.set('horarios')" type="button">
+      Horarios de Clases
+    </button>
   </nav>
 
   <!-- ═══ TAB: PERÍODOS ═══════════════════════════════════════════════════════ -->
@@ -250,6 +254,128 @@
         </div>
       </div>
     }
+  }
+
+  <!-- ═══ TAB: HORARIOS ═══════════════════════════════════════════════════════ -->
+  @if (tabActiva() === 'horarios') {
+
+    <p class="text-muted small mb-4">
+      Define qué días de la semana tiene clases cada asignatura. El sistema bloqueará el registro de asistencia los días que no estén en el horario configurado.
+    </p>
+
+    <div class="row g-4">
+
+      <!-- Panel izquierdo: lista de CursoAsignaturas -->
+      <div class="col-12 col-md-5">
+        <div class="card h-100">
+          <div class="card-header fw-semibold">Curso · Asignatura</div>
+
+          <!-- Buscador -->
+          <div class="px-3 pt-3 pb-2">
+            <div class="input-busqueda">
+              <svg class="icono-busqueda" xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
+              </svg>
+              <input class="form-control form-control-sm input-busqueda__campo"
+                     type="text"
+                     placeholder="Buscar por grado, sección o asignatura..."
+                     [value]="busquedaHorario()"
+                     (input)="busquedaHorario.set(($any($event.target)).value)">
+            </div>
+          </div>
+
+          <div class="card-body p-0">
+            @if (errorCursoAs()) {
+              <div class="alert alert-danger m-3 py-2 small mb-0">{{ errorCursoAs() }}</div>
+            }
+            @if (cargandoCursoAs()) {
+              <div class="text-center py-4 text-muted">
+                <div class="spinner-border spinner-border-sm me-1" role="status"></div>
+                Cargando...
+              </div>
+            } @else {
+              <ul class="lista-ca">
+                @for (ca of cursoAsignaturasFiltradas(); track ca.idCursoAsignatura) {
+                  <li class="lista-ca__item"
+                      [class.activo]="cursoAsignaturaActivo()?.idCursoAsignatura === ca.idCursoAsignatura"
+                      (click)="seleccionarCursoAsignatura(ca)">
+                    <span class="fw-medium">{{ ca.gradoCurso }} {{ ca.seccionCurso }}</span>
+                    <span class="text-muted small ms-2">· {{ ca.nombreAsignatura }}</span>
+                  </li>
+                } @empty {
+                  <li class="text-center text-muted py-4 small">
+                    {{ cursoAsignaturas().length === 0 ? 'No hay asignaciones registradas.' : 'Sin resultados para la búsqueda.' }}
+                  </li>
+                }
+              </ul>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- Panel derecho: días de la semana -->
+      <div class="col-12 col-md-7">
+        <div class="card h-100">
+          <div class="card-header fw-semibold">
+            @if (cursoAsignaturaActivo(); as ca) {
+              Horario de <strong>{{ ca.gradoCurso }} {{ ca.seccionCurso }} · {{ ca.nombreAsignatura }}</strong>
+            } @else {
+              Selecciona un curso-asignatura
+            }
+          </div>
+          <div class="card-body">
+            @if (!cursoAsignaturaActivo()) {
+              <p class="text-muted small mt-2">
+                Selecciona un curso-asignatura de la lista para ver y editar sus días de clase.
+              </p>
+            } @else if (cargandoHorarios()) {
+              <div class="text-center py-4 text-muted">
+                <div class="spinner-border spinner-border-sm me-1" role="status"></div>
+                Cargando horario...
+              </div>
+            } @else {
+              @if (errorHorarios()) {
+                <div class="alert alert-danger py-2 small mb-3">{{ errorHorarios() }}</div>
+              }
+
+              <p class="text-muted small mb-4">
+                Activa los días en que se dicta esta asignatura. Solo podrá tomarse asistencia en los días marcados.
+              </p>
+
+              <div class="dias-grid">
+                @for (dia of DIAS_SEMANA; track dia.value) {
+                  <button class="dia-btn"
+                          [class.activo]="tieneDia(dia.value)"
+                          [disabled]="togglando() === dia.value"
+                          (click)="toggleDia(dia.value)"
+                          type="button">
+                    @if (togglando() === dia.value) {
+                      <span class="spinner-border spinner-border-sm" role="status"></span>
+                    } @else if (tieneDia(dia.value)) {
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425a.247.247 0 0 1 .02-.022Z"/>
+                      </svg>
+                    } @else {
+                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
+                      </svg>
+                    }
+                    {{ dia.label }}
+                  </button>
+                }
+              </div>
+
+              @if (horarios().length === 0) {
+                <p class="text-muted small mt-3 mb-0">
+                  Sin días configurados — el sistema no restringirá los días para esta asignatura hasta que agregues al menos uno.
+                </p>
+              }
+            }
+          </div>
+        </div>
+      </div>
+
+    </div>
   }
 
 </main>
