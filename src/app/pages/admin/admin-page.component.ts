@@ -48,7 +48,11 @@ export class PáginaAdmin implements OnInit {
         this.nombreCompleto(u).toLowerCase().includes(q)
       );
     }
-    return lista;
+    return [...lista].sort((a, b) => {
+      const keyA = `${a.primerApellidoUsuario ?? ''} ${a.nombreUsuario ?? ''}`.toLowerCase();
+      const keyB = `${b.primerApellidoUsuario ?? ''} ${b.nombreUsuario ?? ''}`.toLowerCase();
+      return keyA.localeCompare(keyB, 'es');
+    });
   });
 
   // ── Estado de modales ──────────────────────────────────────────────────────

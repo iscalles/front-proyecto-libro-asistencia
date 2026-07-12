@@ -25,12 +25,18 @@ export class EvaluacionesTab implements OnInit {
 
   readonly evaluacionesFiltradas = computed(() => {
     const q = this.busqueda().toLowerCase().trim();
-    if (!q) return this.evaluaciones();
-    return this.evaluaciones().filter(e =>
-      e.nombreEvaluacion.toLowerCase().includes(q) ||
-      e.fechaEvaluacion.includes(q) ||
-      e.nombreAsignatura.toLowerCase().includes(q)
-    );
+    const lista = q
+      ? this.evaluaciones().filter(e =>
+          e.nombreEvaluacion.toLowerCase().includes(q) ||
+          e.fechaEvaluacion.includes(q) ||
+          e.nombreAsignatura.toLowerCase().includes(q)
+        )
+      : this.evaluaciones();
+    return [...lista].sort((a, b) => {
+      const keyA = `${a.nombreAsignatura} ${a.nombreEvaluacion}`.toLowerCase();
+      const keyB = `${b.nombreAsignatura} ${b.nombreEvaluacion}`.toLowerCase();
+      return keyA.localeCompare(keyB, 'es');
+    });
   });
 
   readonly guardando          = signal(false);
@@ -73,7 +79,11 @@ export class EvaluacionesTab implements OnInit {
     }).subscribe({
       next: ({ evaluaciones, cursoAsignaturas }) => {
         this.evaluaciones.set(evaluaciones);
-        this.cursoAsignaturas.set(cursoAsignaturas);
+        this.cursoAsignaturas.set([...cursoAsignaturas].sort((a, b) => {
+          const keyA = `${a.gradoCurso} ${a.seccionCurso} ${a.nombreAsignatura}`.toLowerCase();
+          const keyB = `${b.gradoCurso} ${b.seccionCurso} ${b.nombreAsignatura}`.toLowerCase();
+          return keyA.localeCompare(keyB, 'es');
+        }));
         this.cargando.set(false);
       },
       error: () => {

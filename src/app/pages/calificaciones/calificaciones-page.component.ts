@@ -32,12 +32,18 @@ export class PáginaCalificaciones implements OnInit {
 
   readonly misCursosFiltrados = computed(() => {
     const q = this.busquedaCurso().toLowerCase().trim();
-    if (!q) return this.misCursos();
-    return this.misCursos().filter(c =>
-      c.nombreAsignatura.toLowerCase().includes(q) ||
-      c.gradoCurso.toLowerCase().includes(q) ||
-      c.seccionCurso.toLowerCase().includes(q)
-    );
+    const lista = q
+      ? this.misCursos().filter(c =>
+          c.nombreAsignatura.toLowerCase().includes(q) ||
+          c.gradoCurso.toLowerCase().includes(q) ||
+          c.seccionCurso.toLowerCase().includes(q)
+        )
+      : this.misCursos();
+    return [...lista].sort((a, b) => {
+      const keyA = `${a.gradoCurso} ${a.seccionCurso} ${a.nombreAsignatura}`.toLowerCase();
+      const keyB = `${b.gradoCurso} ${b.seccionCurso} ${b.nombreAsignatura}`.toLowerCase();
+      return keyA.localeCompare(keyB, 'es');
+    });
   });
 
   readonly cursoSeleccionado = signal<CursoAsignatura | null>(null);
@@ -101,7 +107,9 @@ export class PáginaCalificaciones implements OnInit {
     this.errorEvaluaciones.set(null);
     this.servicioAcademico.listarEvaluacionesPorCursoAsignatura(curso.idCursoAsignatura).subscribe({
       next: (registros) => {
-        this.evaluaciones.set(registros);
+        this.evaluaciones.set([...registros].sort((a, b) =>
+          a.nombreEvaluacion.localeCompare(b.nombreEvaluacion, 'es')
+        ));
         this.cargandoEvaluaciones.set(false);
       },
       error: () => {

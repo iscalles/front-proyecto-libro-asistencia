@@ -63,13 +63,20 @@ export class PáginaConfiguracionEscolar implements OnInit {
 
   readonly cursoAsignaturasFiltradas = computed(() => {
     const q = this.busquedaHorario().toLowerCase().trim();
-    if (!q) return this.cursoAsignaturas();
-    return this.cursoAsignaturas().filter(ca =>
-      ca.gradoCurso.toLowerCase().includes(q) ||
-      ca.seccionCurso.toLowerCase().includes(q) ||
-      ca.nombreAsignatura.toLowerCase().includes(q) ||
-      (ca.gradoCurso + ' ' + ca.seccionCurso).toLowerCase().includes(q)
-    );
+    const lista = q
+      ? this.cursoAsignaturas().filter(ca =>
+          ca.gradoCurso.toLowerCase().includes(q) ||
+          ca.seccionCurso.toLowerCase().includes(q) ||
+          ca.nombreAsignatura.toLowerCase().includes(q) ||
+          (ca.gradoCurso + ' ' + ca.seccionCurso).toLowerCase().includes(q)
+        )
+      : this.cursoAsignaturas();
+
+    return [...lista].sort((a, b) => {
+      const keyA = `${a.gradoCurso} ${a.seccionCurso} ${a.nombreAsignatura}`.toLowerCase();
+      const keyB = `${b.gradoCurso} ${b.seccionCurso} ${b.nombreAsignatura}`.toLowerCase();
+      return keyA.localeCompare(keyB, 'es');
+    });
   });
 
   readonly horarios               = signal<HorarioClase[]>([]);
