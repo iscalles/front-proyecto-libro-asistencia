@@ -5,6 +5,7 @@ import { provideClientHydration, withEventReplay } from '@angular/platform-brows
 
 import { routes } from './app.routes';
 import { environment } from '../environments/environment';
+import { connectionErrorInterceptor } from './interceptors/connection-error.interceptor';
 
 import { jwtInterceptor, authErrorInterceptor, AUTH_API_URL } from 'lib-auth';
 
@@ -14,7 +15,7 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes),
     provideClientHydration(withEventReplay()),
     provideHttpClient(
-      withInterceptors([jwtInterceptor, authErrorInterceptor])
+      withInterceptors([jwtInterceptor, authErrorInterceptor, connectionErrorInterceptor])
     ),
     { provide: AUTH_API_URL, useValue: environment.apiUrl }
   ]
