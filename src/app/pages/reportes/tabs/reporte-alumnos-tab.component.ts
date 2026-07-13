@@ -4,16 +4,7 @@ import { ServicioAsistencia } from '../../../services/asistencia.service';
 import { ExportarService } from '../../../services/exportar.service';
 import { Curso } from '../../../models/academico.models';
 import { ReporteAlumnoCompleto } from '../../../models/asistencia.models';
-
-function haceUnMesIso(): string {
-  const fecha = new Date();
-  fecha.setMonth(fecha.getMonth() - 1);
-  return fecha.toISOString().slice(0, 10);
-}
-
-function hoyIso(): string {
-  return new Date().toISOString().slice(0, 10);
-}
+import { periodoSemestreActual, primerSemestre, segundoSemestre, TipoPeriodo } from '../reportes-fechas.util';
 
 @Component({
   selector: 'app-reporte-alumnos-tab',
@@ -28,8 +19,10 @@ export class ReporteAlumnosTab implements OnChanges {
   private servicio = inject(ServicioAsistencia);
   private exportar = inject(ExportarService);
 
-  readonly desde = signal(haceUnMesIso());
-  readonly hasta = signal(hoyIso());
+  private readonly periodoPorDefecto = periodoSemestreActual();
+  readonly tipoPeriodo = signal<TipoPeriodo | 'personalizado'>(this.periodoPorDefecto.tipo);
+  readonly desde = signal(this.periodoPorDefecto.desde);
+  readonly hasta = signal(this.periodoPorDefecto.hasta);
 
   readonly alumnos = signal<ReporteAlumnoCompleto[]>([]);
   readonly cargando = signal(false);
@@ -39,12 +32,27 @@ export class ReporteAlumnosTab implements OnChanges {
     this.cargar();
   }
 
+  onTipoPeriodoChange(evento: Event): void {
+    const valor = (evento.target as HTMLSelectElement).value as TipoPeriodo | 'personalizado';
+    this.tipoPeriodo.set(valor);
+    if (valor === 'personalizado') {
+      return;
+    }
+    const anio = new Date().getFullYear();
+    const { desde, hasta } = valor === '1' ? primerSemestre(anio) : segundoSemestre(anio);
+    this.desde.set(desde);
+    this.hasta.set(hasta);
+    this.cargar();
+  }
+
   onDesdeChange(evento: Event): void {
     this.desde.set((evento.target as HTMLInputElement).value);
+    this.tipoPeriodo.set('personalizado');
   }
 
   onHastaChange(evento: Event): void {
     this.hasta.set((evento.target as HTMLInputElement).value);
+    this.tipoPeriodo.set('personalizado');
   }
 
   cargar(): void {

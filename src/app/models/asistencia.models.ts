@@ -91,6 +91,10 @@ export interface ReporteAsistenciaDia {
   justificacionAsistencia: string | null;
 }
 
+export interface ReporteAsistenciaDetalle extends ReporteAsistenciaDia {
+  fecha: string; // yyyy-MM-dd
+}
+
 export interface ReporteAsistenciaResumen {
   idCurso: number;
   desde: string;
