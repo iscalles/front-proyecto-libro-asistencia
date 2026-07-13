@@ -1,0 +1,101 @@
+<div class="d-flex flex-wrap justify-content-between align-items-end gap-3 mb-4">
+  <h3 class="h6 fw-semibold mb-0">Estadísticas por alumno</h3>
+  <div class="d-flex flex-wrap align-items-center gap-2">
+    <label class="form-label mb-0 small">Periodo</label>
+    <select class="form-select form-select-sm" style="width: auto"
+            [value]="tipoPeriodo()" (change)="onTipoPeriodoChange($event)">
+      <option value="1">1er semestre</option>
+      <option value="2">2do semestre</option>
+      <option value="personalizado">Personalizado</option>
+    </select>
+    <label class="form-label mb-0 small">Desde</label>
+    <input type="date" class="form-control form-control-sm" style="width: auto"
+           [value]="desde()" [disabled]="tipoPeriodo() !== 'personalizado'" (change)="onDesdeChange($event)">
+    <label class="form-label mb-0 small">Hasta</label>
+    <input type="date" class="form-control form-control-sm" style="width: auto"
+           [value]="hasta()" [disabled]="tipoPeriodo() !== 'personalizado'" (change)="onHastaChange($event)">
+    <button class="btn btn-outline-secondary btn-sm" (click)="cargar()" type="button">
+      Calcular
+    </button>
+    <button class="btn btn-sm btn-danger"
+            [disabled]="cargando() || alumnos().length === 0"
+            (click)="exportarPdf()" type="button"
+            title="Descargar PDF">
+      PDF
+    </button>
+    <button class="btn btn-sm btn-success"
+            [disabled]="cargando() || alumnos().length === 0"
+            (click)="exportarExcel()" type="button"
+            title="Descargar Excel">
+      Excel
+    </button>
+  </div>
+</div>
+
+@if (error()) {
+  <div class="alert alert-danger">{{ error() }}</div>
+}
+
+@if (cargando()) {
+  <div class="text-center py-5 text-muted">
+    <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+    Cargando...
+  </div>
+} @else {
+  <div class="card">
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table tabla-mantenedor mb-0">
+          <thead>
+            <tr>
+              <th>Alumno</th>
+              <th>RUT</th>
+              <th class="text-center">Presentes</th>
+              <th class="text-center">Ausentes</th>
+              <th class="text-center">Justificados</th>
+              <th class="text-center">% Asistencia</th>
+              <th class="text-center">Positivas</th>
+              <th class="text-center">Negativas</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (a of alumnos(); track a.idMatricula) {
+              <tr>
+                <td class="fw-medium">{{ a.nombreEstudiante }}</td>
+                <td>{{ a.rutEstudiante }}</td>
+                <td class="text-center">
+                  <span class="badge bg-success">{{ a.totalPresentes }}</span>
+                </td>
+                <td class="text-center">
+                  <span class="badge bg-danger">{{ a.totalAusentes }}</span>
+                </td>
+                <td class="text-center">
+                  <span class="badge bg-warning text-dark">{{ a.totalJustificados }}</span>
+                </td>
+                <td class="text-center">
+                  <span class="fw-semibold"
+                        [class.text-danger]="a.porcentajeAsistencia < 75"
+                        [class.text-success]="a.porcentajeAsistencia >= 75">
+                    {{ a.porcentajeAsistencia.toFixed(1) }}%
+                  </span>
+                </td>
+                <td class="text-center">
+                  <span class="badge bg-success">{{ a.totalPositivas }}</span>
+                </td>
+                <td class="text-center">
+                  <span class="badge bg-danger">{{ a.totalNegativas }}</span>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="8" class="text-center text-muted py-4">
+                  Este curso no tiene alumnos matriculados.
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+}

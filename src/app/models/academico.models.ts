@@ -118,3 +118,23 @@ export interface CalificacionLoteRequest {
   creadoPorIdUsuario: number;
   detalles: DetalleCalificacionRequest[];
 }
+
+// ── Horario de Clases ─────────────────────────────────────────────────────────
+export interface HorarioClase {
+  id: number;
+  idCursoAsignatura: number;
+  diaSemana: string; // "MONDAY" | "TUESDAY" | "WEDNESDAY" | "THURSDAY" | "FRIDAY"
+}
+
+export interface HorarioClaseRequest {
+  idCursoAsignatura: number;
+  diaSemana: string;
+}
+
+export const DIAS_SEMANA: { value: string; label: string }[] = [
+  { value: 'MONDAY',    label: 'Lunes' },
+  { value: 'TUESDAY',   label: 'Martes' },
+  { value: 'WEDNESDAY', label: 'Miércoles' },
+  { value: 'THURSDAY',  label: 'Jueves' },
+  { value: 'FRIDAY',    label: 'Viernes' },
+];

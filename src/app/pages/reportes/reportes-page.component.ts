@@ -5,13 +5,16 @@ import { ServicioAcademico } from '../../services/academico.service';
 import { Curso } from '../../models/academico.models';
 import { ReporteAsistenciaTab } from './tabs/reporte-asistencia-tab.component';
 import { ReporteConductaTab } from './tabs/reporte-conducta-tab.component';
+import { ReporteAlumnosTab } from './tabs/reporte-alumnos-tab.component';
+import { CampanitaNotificaciones } from '../../components/notificaciones/campanita-notificaciones.component';
+import { CampanitaMensajes } from '../../components/mensajes/campanita-mensajes.component';
 
-type Tab = 'asistencia' | 'conducta';
+type Tab = 'asistencia' | 'conducta' | 'alumnos';
 
 @Component({
   selector: 'app-reportes',
   standalone: true,
-  imports: [ReporteAsistenciaTab, ReporteConductaTab],
+  imports: [ReporteAsistenciaTab, ReporteConductaTab, ReporteAlumnosTab, CampanitaNotificaciones, CampanitaMensajes],
   templateUrl: './reportes-page.component.html',
   styleUrl: './reportes-shared.scss'
 })

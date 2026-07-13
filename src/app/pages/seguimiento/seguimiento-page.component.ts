@@ -10,6 +10,8 @@ import { ServicioSeguimiento } from '../../services/seguimiento.service';
 import { EstudianteResponse, RelacionApEst } from '../../models/relaciones.models';
 import { Matricula, Calificacion } from '../../models/academico.models';
 import { Asistencia, Conducta, ResumenCalificaciones, ResumenAsistencia } from '../../models/seguimiento.models';
+import { CampanitaNotificaciones } from '../../components/notificaciones/campanita-notificaciones.component';
+import { CampanitaMensajes } from '../../components/mensajes/campanita-mensajes.component';
 
 interface AlumnoConParentesco {
   estudiante: EstudianteResponse;
@@ -19,7 +21,7 @@ interface AlumnoConParentesco {
 @Component({
   selector: 'app-seguimiento-page',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, CampanitaNotificaciones, CampanitaMensajes],
   templateUrl: './seguimiento-page.component.html',
   styleUrl: './seguimiento-shared.scss'
 })

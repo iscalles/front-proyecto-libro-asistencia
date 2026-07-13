@@ -1,18 +1,25 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
 import { environment } from '../../environments/environment';
 import {
   RosterAlumno,
   Asistencia, AsistenciaLoteRequest,
   Conducta, ConductaRequest,
-  ReporteAsistenciaDia, ReporteAsistenciaResumen, ReporteConductaAlumno,
+  ReporteAsistenciaDia, ReporteAsistenciaDetalle, ReporteAsistenciaResumen, ReporteConductaAlumno, ReporteAlumnoAsistencia,
+  ValidacionFecha, FechaExcluida, PeriodoEscolar,
 } from '../models/asistencia.models';
 
 // Convierte un Date a dd-MM-yyyy (formato que espera el backend)
 function aFormatoBackend(fecha: string): string {
   const [anio, mes, dia] = fecha.split('-');
   return `${dia}-${mes}-${anio}`;
+}
+
+// Convierte dd-MM-yyyy (formato del backend) a yyyy-MM-dd (formato ISO usado en el frontend)
+function aFormatoIso(fecha: string): string {
+  const [dia, mes, anio] = fecha.split('-');
+  return `${anio}-${mes}-${dia}`;
 }
 
 // Todas las llamadas pasan por el BFF (puerto 8080), que reenvía a MS-Asistencia.
@@ -32,6 +39,42 @@ export class ServicioAsistencia {
 
   registrarAsistenciaLote(dto: AsistenciaLoteRequest): Observable<Asistencia[]> {
     return this.http.post<Asistencia[]>(`${this.api}/asistencia/lote`, dto);
+  }
+
+  validarFechaAsistencia(fechaIso: string, idCursoAsignatura?: number): Observable<ValidacionFecha> {
+    let params = new HttpParams().set('fecha', aFormatoBackend(fechaIso));
+    if (idCursoAsignatura != null) {
+      params = params.set('idCursoAsignatura', idCursoAsignatura.toString());
+    }
+    return this.http.get<ValidacionFecha>(`${this.api}/asistencia/validar-fecha`, { params });
+  }
+
+  // ── Fechas excluidas (feriados / días no lectivos) ─────────────────────────
+  listarFechasExcluidas(): Observable<FechaExcluida[]> {
+    return this.http.get<FechaExcluida[]>(`${this.api}/fechas-excluidas`);
+  }
+
+  agregarFechaExcluida(dto: Omit<FechaExcluida, 'id'>): Observable<FechaExcluida> {
+    const payload = { ...dto, fecha: aFormatoBackend(dto.fecha) };
+    return this.http.post<FechaExcluida>(`${this.api}/fechas-excluidas`, payload);
+  }
+
+  eliminarFechaExcluida(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.api}/fechas-excluidas/${id}`);
+  }
+
+  // ── Períodos escolares ─────────────────────────────────────────────────────
+  listarPeriodosEscolares(): Observable<PeriodoEscolar[]> {
+    return this.http.get<PeriodoEscolar[]>(`${this.api}/periodos-escolares`);
+  }
+
+  agregarPeriodoEscolar(dto: Omit<PeriodoEscolar, 'id'>): Observable<PeriodoEscolar> {
+    const payload = { ...dto, fechaInicio: aFormatoBackend(dto.fechaInicio), fechaFin: aFormatoBackend(dto.fechaFin) };
+    return this.http.post<PeriodoEscolar>(`${this.api}/periodos-escolares`, payload);
+  }
+
+  eliminarPeriodoEscolar(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.api}/periodos-escolares/${id}`);
   }
 
   // ── Conducta ────────────────────────────────────────────────────────────────
@@ -60,5 +103,21 @@ export class ServicioAsistencia {
 
   reporteConductaPorCurso(idCurso: number): Observable<ReporteConductaAlumno[]> {
     return this.http.get<ReporteConductaAlumno[]>(`${this.api}/conducta/curso/${idCurso}/reporte-resumen`);
+  }
+
+  reporteAlumnoPorCurso(idCurso: number, desdeIso: string, hastaIso: string): Observable<ReporteAlumnoAsistencia[]> {
+    const params = new HttpParams()
+      .set('desde', aFormatoBackend(desdeIso))
+      .set('hasta', aFormatoBackend(hastaIso));
+    return this.http.get<ReporteAlumnoAsistencia[]>(`${this.api}/asistencia/curso/${idCurso}/reporte-por-alumno`, { params });
+  }
+
+  reporteDetallePeriodoPorCurso(idCurso: number, desdeIso: string, hastaIso: string): Observable<ReporteAsistenciaDetalle[]> {
+    const params = new HttpParams()
+      .set('desde', aFormatoBackend(desdeIso))
+      .set('hasta', aFormatoBackend(hastaIso));
+    return this.http.get<ReporteAsistenciaDetalle[]>(`${this.api}/asistencia/curso/${idCurso}/reporte-detalle`, { params }).pipe(
+      map((registros) => registros.map((r) => ({ ...r, fecha: aFormatoIso(r.fecha) })))
+    );
   }
 }

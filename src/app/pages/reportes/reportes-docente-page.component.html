@@ -1,0 +1,114 @@
+<!-- ═══ HEADER ══════════════════════════════════════════════════════════════ -->
+<header class="admin-header shadow-sm">
+  <div class="container-fluid px-4 d-flex align-items-center gap-3">
+    <button class="btn btn-link btn-volver p-0" (click)="irAlDashboard()" type="button">
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16">
+        <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8z"/>
+      </svg>
+      Dashboard
+    </button>
+    <div class="separador-vertical"></div>
+    <h1 class="admin-titulo mb-0">Reportes de Asistencia y Conducta</h1>
+
+    <div class="ms-auto d-flex align-items-center gap-2">
+      <app-campanita-mensajes />
+      <app-campanita-notificaciones />
+      @if (usuarioSesion(); as u) {
+        <span class="texto-sesion d-none d-sm-inline">{{ u.nombre }}</span>
+      }
+      <span class="badge bg-success">Docente</span>
+    </div>
+  </div>
+</header>
+
+<main class="container py-4">
+
+  @if (!cursoSeleccionado()) {
+    <!-- ═══ SELECCIÓN DE CURSO ══════════════════════════════════════════════════ -->
+    <h2 class="h5 fw-semibold mb-3">Selecciona uno de tus cursos para ver sus reportes</h2>
+
+    <div class="row g-3 align-items-center mb-4">
+      <div class="col-12 col-md-8">
+        <div class="input-busqueda input-busqueda--grande w-100">
+          <svg class="icono-busqueda" xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16">
+            <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
+          </svg>
+          <input class="form-control input-busqueda__campo w-100" type="text"
+                 placeholder="Buscar por grado o sección..."
+                 [value]="busquedaCurso()" (input)="busquedaCurso.set(($any($event.target)).value)">
+        </div>
+      </div>
+    </div>
+
+    @if (errorCursos()) {
+      <div class="alert alert-danger">{{ errorCursos() }}</div>
+    }
+
+    @if (cargandoCursos()) {
+      <div class="text-center py-5 text-muted">
+        <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+        Cargando cursos...
+      </div>
+    } @else {
+      <div class="row g-3">
+        @for (c of cursosFiltrados(); track c.id; let i = $index) {
+          <div class="col-12 col-md-4 col-lg-3">
+            <div class="card tarjeta-curso h-100" [class]="colorTarjeta(i)" (click)="seleccionarCurso(c)">
+              <div class="card-body">
+                <div class="icono-curso mb-2">📚</div>
+                <h5 class="card-title mb-1">{{ c.gradoCurso }} {{ c.seccionCurso }}</h5>
+                <p class="card-text text-muted small mb-0">Año {{ c.anioCurso }}</p>
+              </div>
+            </div>
+          </div>
+        } @empty {
+          <div class="col-12">
+            <p class="text-muted">
+              {{ cursos().length === 0 ? 'No tienes cursos asignados.' : 'Sin resultados para esa búsqueda.' }}
+            </p>
+          </div>
+        }
+      </div>
+    }
+  } @else {
+    <!-- ═══ CURSO SELECCIONADO: TABS ═════════════════════════════════════════════ -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
+      <div>
+        <button class="btn btn-link p-0 text-decoration-none mb-1" (click)="volverASeleccion()" type="button">
+          ← Cambiar curso
+        </button>
+        <h2 class="h5 fw-semibold mb-0">
+          {{ cursoSeleccionado()!.gradoCurso }} {{ cursoSeleccionado()!.seccionCurso }} · Año {{ cursoSeleccionado()!.anioCurso }}
+        </h2>
+      </div>
+    </div>
+
+    <nav class="tab-bar mb-3">
+      <button class="tab-boton" [class.activo]="tabActiva() === 'asistencia'"
+              (click)="tabActiva.set('asistencia')" type="button">
+        Asistencia
+      </button>
+      <button class="tab-boton" [class.activo]="tabActiva() === 'conducta'"
+              (click)="tabActiva.set('conducta')" type="button">
+        Conducta
+      </button>
+      <button class="tab-boton" [class.activo]="tabActiva() === 'alumnos'"
+              (click)="tabActiva.set('alumnos')" type="button">
+        Por alumno
+      </button>
+    </nav>
+
+    @switch (tabActiva()) {
+      @case ('asistencia') {
+        <app-reporte-asistencia-tab [curso]="cursoSeleccionado()!" />
+      }
+      @case ('conducta') {
+        <app-reporte-conducta-tab [curso]="cursoSeleccionado()!" />
+      }
+      @case ('alumnos') {
+        <app-reporte-alumnos-tab [curso]="cursoSeleccionado()!" />
+      }
+    }
+  }
+
+</main>

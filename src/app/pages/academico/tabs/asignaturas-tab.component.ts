@@ -22,9 +22,11 @@ export class AsignaturasTab implements OnInit {
 
   readonly asignaturasFiltradas = computed(() => {
     const q = this.busqueda().toLowerCase().trim();
-    if (!q) return this.asignaturas();
-    return this.asignaturas().filter(a =>
-      a.nombreAsignatura.toLowerCase().includes(q)
+    const lista = q
+      ? this.asignaturas().filter(a => a.nombreAsignatura.toLowerCase().includes(q))
+      : this.asignaturas();
+    return [...lista].sort((a, b) =>
+      a.nombreAsignatura.localeCompare(b.nombreAsignatura, 'es')
     );
   });
 

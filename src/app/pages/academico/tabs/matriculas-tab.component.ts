@@ -33,12 +33,16 @@ export class MatriculasTab implements OnInit {
 
   readonly matriculasFiltradas = computed(() => {
     const q = this.busqueda().toLowerCase().trim();
-    if (!q) return this.matriculas();
-    return this.matriculas().filter(m =>
-      m.nombreEstudiante.toLowerCase().includes(q) ||
-      m.gradoCurso.toLowerCase().includes(q) ||
-      m.seccionCurso.toLowerCase().includes(q) ||
-      String(m.anioAcademicoMatricula).includes(q)
+    const lista = q
+      ? this.matriculas().filter(m =>
+          m.nombreEstudiante.toLowerCase().includes(q) ||
+          m.gradoCurso.toLowerCase().includes(q) ||
+          m.seccionCurso.toLowerCase().includes(q) ||
+          String(m.anioAcademicoMatricula).includes(q)
+        )
+      : this.matriculas();
+    return [...lista].sort((a, b) =>
+      a.nombreEstudiante.localeCompare(b.nombreEstudiante, 'es')
     );
   });
 
@@ -68,8 +72,17 @@ export class MatriculasTab implements OnInit {
     }).subscribe({
       next: ({ matriculas, cursos, usuarios }) => {
         this.matriculas.set(matriculas);
-        this.cursos.set(cursos);
-        this.estudiantes.set(usuarios.filter(u => u.roles.includes('ESTUDIANTE')));
+        this.cursos.set([...cursos].sort((a, b) => {
+          const keyA = `${a.gradoCurso} ${a.seccionCurso}`.toLowerCase();
+          const keyB = `${b.gradoCurso} ${b.seccionCurso}`.toLowerCase();
+          return keyA.localeCompare(keyB, 'es');
+        }));
+        const estFiltrados = usuarios.filter(u => u.roles.includes('ESTUDIANTE'));
+        this.estudiantes.set([...estFiltrados].sort((a, b) => {
+          const keyA = `${a.primerApellidoUsuario ?? ''} ${a.nombreUsuario ?? ''}`.toLowerCase();
+          const keyB = `${b.primerApellidoUsuario ?? ''} ${b.nombreUsuario ?? ''}`.toLowerCase();
+          return keyA.localeCompare(keyB, 'es');
+        }));
         this.cargando.set(false);
       },
       error: () => {

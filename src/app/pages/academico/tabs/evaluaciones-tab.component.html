@@ -45,7 +45,6 @@
         <table class="table tabla-mantenedor mb-0">
           <thead>
             <tr>
-              <th>ID</th>
               <th>Nombre</th>
               <th>Asignatura</th>
               <th>Curso</th>
@@ -56,7 +55,6 @@
           <tbody>
             @for (e of evaluacionesFiltradas(); track e.idEvaluacion) {
               <tr>
-                <td class="text-muted small">{{ e.idEvaluacion }}</td>
                 <td class="fw-medium">{{ e.nombreEvaluacion }}</td>
                 <td>{{ e.nombreAsignatura }}</td>
                 <td>{{ e.gradoCurso }} {{ e.seccionCurso }}</td>
@@ -72,7 +70,7 @@
               </tr>
             } @empty {
               <tr>
-                <td colspan="6" class="text-center text-muted py-4">
+                <td colspan="5" class="text-center text-muted py-4">
                   @if (busqueda()) {
                     No se encontraron evaluaciones para "<strong>{{ busqueda() }}</strong>".
                   } @else {
@@ -145,7 +143,7 @@
   <div class="modal-overlay" (click)="cerrarEditar()">
     <div class="modal-caja modal-caja--sm" (click)="$event.stopPropagation()">
       <div class="modal-encabezado">
-        <h3 class="modal-titulo">Editar evaluación #{{ e.idEvaluacion }}</h3>
+        <h3 class="modal-titulo">Editar evaluación</h3>
         <button class="btn-cerrar" (click)="cerrarEditar()" type="button">✕</button>
       </div>
 

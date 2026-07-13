@@ -7,56 +7,48 @@
       Colegio Bernardo O'Higgins
     </span>
 
-    <!-- Zona derecha: menú usuario + selector de rol -->
+    <!-- Zona derecha: campana + menú de usuario (incluye rol) -->
     <div class="d-flex align-items-center gap-3">
+
+      <app-campanita-mensajes />
+      <app-campanita-notificaciones />
 
       @if (usuario(); as u) {
 
-        <!-- Dropdown de ROL (solo si tiene más de uno) -->
-        @if (rolesFormateados().length > 1) {
-          <div class="dropdown">
-            <button class="btn btn-sm dropdown-toggle-custom d-flex align-items-center gap-2"
-                    (click)="toggleDropdownRol($event)" type="button">
-              <span class="badge {{ rolActivo().clase }}">{{ rolActivo().etiqueta }}</span>
-              <svg class="icono-chevron" [class.rotado]="estaAbiertoDropdownRol()"
-                   xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 16 16">
-                <path d="M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z"/>
-              </svg>
-            </button>
-            <ul class="dropdown-menu dropdown-menu-end" [class.show]="estaAbiertoDropdownRol()">
-              <li class="dropdown-header text-muted small px-3 py-1">Cambiar vista</li>
-              @for (rol of rolesFormateados(); track rol.etiqueta) {
-                <li>
-                  <button class="dropdown-item d-flex align-items-center gap-2"
-                          [class.activo]="rol.etiqueta === rolActivo().etiqueta"
-                          (click)="cambiarRol(rol, $event)" type="button">
-                    <span class="badge {{ rol.clase }}">{{ rol.etiqueta }}</span>
-                    {{ rol.etiqueta }}
-                  </button>
-                </li>
-              }
-            </ul>
-          </div>
-        } @else {
-          <span class="badge {{ rolActivo().clase }}">{{ rolActivo().etiqueta }}</span>
-        }
+        <div class="divisor-vertical"></div>
 
-        <!-- Dropdown MENÚ DE USUARIO (avatar + nombre → contraseña + cerrar sesión) -->
+        <!-- Dropdown único: avatar + nombre + rol actual → cambiar vista / contraseña / cerrar sesión -->
         <div class="dropdown">
           <button class="menu-usuario-btn d-flex align-items-center gap-2"
                   (click)="toggleMenuUsuario($event)" type="button">
             <div class="avatar-circulo">{{ u.nombre.charAt(0).toUpperCase() }}</div>
-            <span class="texto-usuario d-none d-sm-inline">{{ u.nombre }}</span>
-            <svg class="icono-chevron" [class.rotado]="estaAbiertoMenuUsuario()"
-                 xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 16 16">
-              <path d="M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z"/>
-            </svg>
+            <span class="d-none d-sm-flex flex-column texto-usuario-grupo">
+              <span class="texto-usuario">{{ u.nombre }}</span>
+              <span class="texto-rol-actual">{{ rolActivo().etiqueta }}</span>
+            </span>
+            <i class="bi bi-chevron-down icono-chevron" [class.rotado]="estaAbiertoMenuUsuario()"></i>
           </button>
           <ul class="dropdown-menu dropdown-menu-end" [class.show]="estaAbiertoMenuUsuario()">
             <li class="dropdown-header px-3 py-2">
               <div class="fw-semibold small">{{ u.nombre }}</div>
               <div class="text-muted" style="font-size:.75rem">{{ u.correo }}</div>
             </li>
+
+            @if (rolesFormateados().length > 1) {
+              <li><hr class="dropdown-divider my-1"></li>
+              <li class="dropdown-header text-muted small px-3 py-1">Cambiar vista</li>
+              @for (rol of rolesFormateados(); track rol.etiqueta) {
+                <li>
+                  <button class="dropdown-item d-flex align-items-center gap-2"
+                          [class.activo]="rol.etiqueta === rolActivo().etiqueta"
+                          (click)="cambiarRol(rol, $event)" type="button">
+                    <span class="punto-rol {{ rol.clase }}"></span>
+                    {{ rol.etiqueta }}
+                  </button>
+                </li>
+              }
+            }
+
             <li><hr class="dropdown-divider my-1"></li>
             <li>
               <button class="dropdown-item d-flex align-items-center gap-2"
@@ -140,6 +132,36 @@
             </div>
           </div>
         </div>
+
+        <div class="col-12 col-md-4">
+          <div class="card tarjeta-modulo h-100">
+            <div class="card-body">
+              <div class="icono-modulo bg-success-subtle text-success mb-3">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
+                  <path d="M4 11H2v3h2v-3zm5-4H7v7h2V7zm5-5v12h-2V2h2zm-2-1a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1h-2zM6 7a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v7a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V7zm-5 4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1v-3z"/>
+                </svg>
+              </div>
+              <h5 class="card-title">Reportes</h5>
+              <p class="card-text text-muted small">Consulta estadísticas de asistencia y conducta de tus cursos.</p>
+              <a routerLink="/reportes-docente" class="btn btn-success btn-sm">Abrir Reportes</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-12 col-md-4">
+          <div class="card tarjeta-modulo h-100">
+            <div class="card-body">
+              <div class="icono-modulo bg-success-subtle text-success mb-3">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
+                  <path d="M1.5 1a.5.5 0 0 0-.5-.5H3.5a.5.5 0 0 1 0 1H1v9.586l1.293-1.293A.5.5 0 0 1 2.5 10H14a.5.5 0 0 0 .5-.5V2a.5.5 0 0 0-.5-.5H1.5zM14 12H2.914l-1.5 1.5A.5.5 0 0 1 0 13.5v-11A1.5 1.5 0 0 1 1.5 1h13A1.5 1.5 0 0 1 16 2.5v8a1.5 1.5 0 0 1-1.5 1.5z"/>
+                </svg>
+              </div>
+              <h5 class="card-title">Mensajes</h5>
+              <p class="card-text text-muted small">Comunícate directamente con los apoderados de tus alumnos.</p>
+              <a routerLink="/mensajes" class="btn btn-success btn-sm">Abrir Mensajes</a>
+            </div>
+          </div>
+        </div>
       }
 
       @if (rolActivo().etiqueta === 'Apoderado') {
@@ -166,9 +188,9 @@
                   <path d="M1.5 1a.5.5 0 0 0-.5.5v3a.5.5 0 0 1-1 0v-3A1.5 1.5 0 0 1 1.5 0h3a.5.5 0 0 1 0 1h-3zM11 .5a.5.5 0 0 1 .5-.5h3A1.5 1.5 0 0 1 16 1.5v3a.5.5 0 0 1-1 0v-3a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 1-.5-.5zM.5 11a.5.5 0 0 1 .5.5v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 1 0 1h-3A1.5 1.5 0 0 1 0 14.5v-3a.5.5 0 0 1 .5-.5zm15 0a.5.5 0 0 1 .5.5v3a1.5 1.5 0 0 1-1.5 1.5h-3a.5.5 0 0 1 0-1h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 1 .5-.5z"/>
                 </svg>
               </div>
-              <h5 class="card-title">Comunicaciones</h5>
-              <p class="card-text text-muted small">Revisa circulares y comunicados del colegio.</p>
-              <button class="btn btn-primary btn-sm" disabled>Próximamente</button>
+              <h5 class="card-title">Mensajes</h5>
+              <p class="card-text text-muted small">Comunícate directamente con los profesores de tu pupilo.</p>
+              <a routerLink="/mensajes" class="btn btn-primary btn-sm">Abrir Mensajes</a>
             </div>
           </div>
         </div>
@@ -236,6 +258,22 @@
             </div>
           </div>
         </div>
+
+        <div class="col-12 col-md-4">
+          <div class="card tarjeta-modulo h-100">
+            <div class="card-body">
+              <div class="icono-modulo bg-danger-subtle text-danger mb-3">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
+                  <path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4H1z"/>
+                  <path d="M11 6.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1zm-3 0a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1zm-5 3a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1zm3 0a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1z"/>
+                </svg>
+              </div>
+              <h5 class="card-title">Configuración Escolar</h5>
+              <p class="card-text text-muted small">Gestiona períodos lectivos, feriados y días no hábiles.</p>
+              <a routerLink="/configuracion-escolar" class="btn btn-danger btn-sm">Abrir módulo</a>
+            </div>
+          </div>
+        </div>
       }
 
       @if (rolActivo().etiqueta === 'Estudiante') {
@@ -250,6 +288,21 @@
               <h5 class="card-title">Mis Calificaciones</h5>
               <p class="card-text text-muted small">Consulta tus notas y las asignaturas que cursas.</p>
               <a routerLink="/mis-calificaciones" class="btn btn-warning btn-sm">Abrir módulo</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-12 col-md-4">
+          <div class="card tarjeta-modulo h-100">
+            <div class="card-body">
+              <div class="icono-modulo bg-warning-subtle text-warning-emphasis mb-3">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
+                  <path d="M1.5 1a.5.5 0 0 0-.5-.5H3.5a.5.5 0 0 1 0 1H1v9.586l1.293-1.293A.5.5 0 0 1 2.5 10H14a.5.5 0 0 0 .5-.5V2a.5.5 0 0 0-.5-.5H1.5zM14 12H2.914l-1.5 1.5A.5.5 0 0 1 0 13.5v-11A1.5 1.5 0 0 1 1.5 1h13A1.5 1.5 0 0 1 16 2.5v8a1.5 1.5 0 0 1-1.5 1.5z"/>
+                </svg>
+              </div>
+              <h5 class="card-title">Mensajes</h5>
+              <p class="card-text text-muted small">Comunícate directamente con tus profesores.</p>
+              <a routerLink="/mensajes" class="btn btn-warning btn-sm">Abrir Mensajes</a>
             </div>
           </div>
         </div>

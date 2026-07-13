@@ -11,6 +11,8 @@
     <h1 class="admin-titulo mb-0">Reportes de Asistencia y Conducta</h1>
 
     <div class="ms-auto d-flex align-items-center gap-2">
+      <app-campanita-mensajes />
+      <app-campanita-notificaciones />
       @if (usuarioSesion(); as u) {
         <span class="texto-sesion d-none d-sm-inline">{{ u.nombre }}</span>
       }
@@ -99,6 +101,10 @@
               (click)="tabActiva.set('conducta')" type="button">
         Conducta
       </button>
+      <button class="tab-boton" [class.activo]="tabActiva() === 'alumnos'"
+              (click)="tabActiva.set('alumnos')" type="button">
+        Por alumno
+      </button>
     </nav>
 
     @switch (tabActiva()) {
@@ -107,6 +113,9 @@
       }
       @case ('conducta') {
         <app-reporte-conducta-tab [curso]="cursoSeleccionado()!" />
+      }
+      @case ('alumnos') {
+        <app-reporte-alumnos-tab [curso]="cursoSeleccionado()!" />
       }
     }
   }

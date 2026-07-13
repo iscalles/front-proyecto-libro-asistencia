@@ -9,6 +9,7 @@ import {
   Matricula, MatriculaRequest,
   CursoAsignatura, CursoAsignaturaRequest,
   Calificacion, CalificacionRequest, CalificacionLoteRequest,
+  HorarioClase, HorarioClaseRequest,
 } from '../models/academico.models';
 
 // Todas las llamadas pasan por el BFF (puerto 8080), que reenvía a MS-Academico.
@@ -91,6 +92,17 @@ export class ServicioAcademico {
   }
   eliminarCursoAsignatura(id: number): Observable<void> {
     return this.http.delete<void>(`${this.api}/curso-asignatura/${id}`);
+  }
+
+  // ── Horario de Clases ───────────────────────────────────────────────────────
+  listarHorarioCursoAsignatura(idCursoAsignatura: number): Observable<HorarioClase[]> {
+    return this.http.get<HorarioClase[]>(`${this.api}/horario-clase/curso-asignatura/${idCursoAsignatura}`);
+  }
+  agregarHorarioClase(dto: HorarioClaseRequest): Observable<HorarioClase> {
+    return this.http.post<HorarioClase>(`${this.api}/horario-clase`, dto);
+  }
+  eliminarHorarioClase(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.api}/horario-clase/${id}`);
   }
 
   // ── Calificaciones ──────────────────────────────────────────────────────────

@@ -1,0 +1,133 @@
+<!-- ═══ HEADER ══════════════════════════════════════════════════════════════ -->
+<header class="admin-header shadow-sm">
+  <div class="container-fluid px-4 d-flex align-items-center gap-3">
+    <button class="btn btn-link btn-volver p-0" (click)="irAlDashboard()" type="button">
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16">
+        <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8z"/>
+      </svg>
+      Dashboard
+    </button>
+    <div class="separador-vertical"></div>
+    <h1 class="admin-titulo mb-0">Mensajes</h1>
+
+    <div class="ms-auto d-flex align-items-center gap-2">
+      <app-campanita-notificaciones />
+      @if (usuarioSesion(); as u) {
+        <span class="texto-sesion d-none d-sm-inline">{{ u.nombre }}</span>
+      }
+    </div>
+  </div>
+</header>
+
+<main class="container-fluid py-4 px-4">
+
+  @if (cargandoContactos()) {
+    <div class="text-center py-5">
+      <div class="spinner-border text-primary mb-3" role="status"></div>
+      <p class="text-muted">Cargando contactos...</p>
+    </div>
+  } @else if (errorContactos()) {
+    <div class="alert alert-danger">{{ errorContactos() }}</div>
+  } @else {
+
+    <div class="row g-0 panel-chat">
+
+      <!-- ═══ LISTA DE CONTACTOS ═══════════════════════════════════════════════ -->
+      <div class="col-12 col-md-4 lista-contactos-col" [class.d-none]="contactoSeleccionado()">
+        <div class="lista-contactos-header">
+          <h6 class="fw-semibold mb-0">Conversaciones</h6>
+        </div>
+
+        @if (contactos().length === 0) {
+          <div class="p-4 text-center text-muted small">
+            No tienes contactos disponibles para mensajería todavía.
+          </div>
+        } @else {
+          <div class="lista-contactos-body">
+            @for (contacto of contactos(); track contacto.idUsuario) {
+              <button type="button" class="item-contacto"
+                      [class.activo]="contactoSeleccionado()?.idUsuario === contacto.idUsuario"
+                      (click)="seleccionarContacto(contacto)">
+                <div class="avatar-contacto">{{ contacto.nombre.charAt(0).toUpperCase() }}</div>
+                <div class="info-contacto">
+                  <div class="nombre-contacto">{{ contacto.nombre }}</div>
+                  <div class="detalle-contacto">{{ contacto.detalle }}</div>
+                </div>
+                @if ((noLeidosPorContacto().get(contacto.idUsuario) ?? 0) > 0) {
+                  <span class="badge rounded-pill bg-danger badge-no-leidos">
+                    {{ noLeidosPorContacto().get(contacto.idUsuario) }}
+                  </span>
+                }
+              </button>
+            }
+          </div>
+        }
+      </div>
+
+      <!-- ═══ CONVERSACIÓN ═════════════════════════════════════════════════════ -->
+      <div class="col-12 col-md-8 conversacion-col" [class.d-none]="!contactoSeleccionado()">
+
+        @if (!contactoSeleccionado()) {
+          <div class="conversacion-vacia">
+            <p class="text-muted">Selecciona una conversación para empezar a chatear.</p>
+          </div>
+        } @else {
+
+          <div class="conversacion-header">
+            <button class="btn btn-link btn-volver-movil d-md-none p-0 me-2" (click)="volverALista()" type="button">
+              ←
+            </button>
+            <div class="avatar-contacto">{{ contactoSeleccionado()!.nombre.charAt(0).toUpperCase() }}</div>
+            <div>
+              <div class="nombre-contacto">{{ contactoSeleccionado()!.nombre }}</div>
+              <div class="detalle-contacto">{{ contactoSeleccionado()!.detalle }}</div>
+            </div>
+          </div>
+
+          <div class="conversacion-cuerpo">
+            @if (cargandoMensajes()) {
+              <div class="text-center py-5">
+                <div class="spinner-border text-primary" role="status"></div>
+              </div>
+            } @else if (errorMensajes()) {
+              <div class="alert alert-danger m-3">{{ errorMensajes() }}</div>
+            } @else if (mensajes().length === 0) {
+              <div class="conversacion-vacia">
+                <p class="text-muted">Aún no hay mensajes. Escribe el primero.</p>
+              </div>
+            } @else {
+              @for (m of mensajes(); track m.idMensaje) {
+                <div class="fila-burbuja" [class.fila-burbuja--mia]="esMio(m)">
+                  <div class="burbuja" [class.burbuja--mia]="esMio(m)">
+                    @if (m.asuntoMensaje) {
+                      <div class="burbuja-asunto">{{ m.asuntoMensaje }}</div>
+                    }
+                    <div class="burbuja-cuerpo">{{ m.cuerpoMensaje }}</div>
+                    <div class="burbuja-fecha">{{ m.fechaEnvioMensaje }}</div>
+                  </div>
+                </div>
+              }
+            }
+          </div>
+
+          <form class="conversacion-input" (ngSubmit)="enviarMensaje()">
+            <input class="form-control"
+                   type="text"
+                   placeholder="Escribe un mensaje..."
+                   [value]="textoNuevoMensaje()"
+                   (input)="textoNuevoMensaje.set($any($event.target).value)"
+                   [disabled]="enviando()">
+            <button class="btn btn-primary" type="submit" [disabled]="enviando() || !textoNuevoMensaje().trim()">
+              @if (enviando()) {
+                <span class="spinner-border spinner-border-sm"></span>
+              } @else {
+                Enviar
+              }
+            </button>
+          </form>
+        }
+      </div>
+    </div>
+  }
+
+</main>

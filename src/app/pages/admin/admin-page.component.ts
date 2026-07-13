@@ -4,6 +4,8 @@ import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angula
 import { HttpErrorResponse } from '@angular/common/http';
 import { ServicioToken, ServicioValidadorRut } from 'lib-auth';
 import { ServicioUsuarioAdmin } from '../../services/usuario-admin.service';
+import { CampanitaNotificaciones } from '../../components/notificaciones/campanita-notificaciones.component';
+import { CampanitaMensajes } from '../../components/mensajes/campanita-mensajes.component';
 import {
   UsuarioDTOInternal, UsuarioDTO,
   TipoRol, ROLES_DISPONIBLES, ETIQUETAS_ROL, CLASE_ROL
@@ -12,7 +14,7 @@ import {
 @Component({
   selector: 'app-admin',
   standalone: true,
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, CampanitaNotificaciones, CampanitaMensajes],
   templateUrl: './admin-page.component.html',
   styleUrl: './admin-page.component.scss'
 })
@@ -47,7 +49,11 @@ export class PáginaAdmin implements OnInit {
         this.nombreCompleto(u).toLowerCase().includes(q)
       );
     }
-    return lista;
+    return [...lista].sort((a, b) => {
+      const keyA = `${a.primerApellidoUsuario ?? ''} ${a.nombreUsuario ?? ''}`.toLowerCase();
+      const keyB = `${b.primerApellidoUsuario ?? ''} ${b.nombreUsuario ?? ''}`.toLowerCase();
+      return keyA.localeCompare(keyB, 'es');
+    });
   });
 
   // ── Estado de modales ──────────────────────────────────────────────────────

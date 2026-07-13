@@ -145,11 +145,11 @@ describe('PáginaDashboard', () => {
     servicioToken.guardarInfoUsuario(usuarioMultiRol);
     fixture.detectChanges();
 
-    componente.estaAbiertoDropdownRol.set(true);
+    componente.estaAbiertoMenuUsuario.set(true);
     const rol = componente.rolesFormateados()[0];
     componente.cambiarRol(rol, new MouseEvent('click'));
 
-    expect(componente.estaAbiertoDropdownRol()).toBeFalse();
+    expect(componente.estaAbiertoMenuUsuario()).toBeFalse();
   });
 
   // ── saludo (computed) ──────────────────────────────────────────────────────
