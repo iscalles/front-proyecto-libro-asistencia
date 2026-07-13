@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
-import { ReporteAsistenciaDia, ReporteConductaAlumno, ReporteAlumnoCompleto } from '../models/asistencia.models';
+import { ReporteAsistenciaDia, ReporteAsistenciaDetalle, ReporteAsistenciaResumen, ReporteConductaAlumno, ReporteAlumnoCompleto } from '../models/asistencia.models';
 import { Curso } from '../models/academico.models';
 
 const COLEGIO = "Colegio Bernardo O'Higgins";
@@ -59,6 +59,80 @@ export class ExportarService {
     const libro = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(libro, hoja, 'Asistencia');
     XLSX.writeFile(libro, `Asistencia_${curso.gradoCurso}${curso.seccionCurso}_${fecha}.xlsx`);
+  }
+
+  resumenAsistenciaPdf(resumen: ReporteAsistenciaResumen, detalle: ReporteAsistenciaDetalle[], curso: Curso): void {
+    const doc = new jsPDF();
+
+    doc.setFontSize(16);
+    doc.text('Resumen de Asistencia por Periodo', 14, 20);
+    doc.setFontSize(11);
+    doc.text(`${curso.gradoCurso} ${curso.seccionCurso} — Período: ${resumen.desde} al ${resumen.hasta}`, 14, 28);
+    doc.setFontSize(9);
+    doc.text(COLEGIO, 14, 34);
+
+    autoTable(doc, {
+      startY: 40,
+      head: [['Total registros', 'Presentes', 'Ausentes', 'Justificados', '% Asistencia']],
+      body: [[
+        resumen.totalRegistros,
+        resumen.totalPresentes,
+        resumen.totalAusentes,
+        resumen.totalJustificados,
+        resumen.porcentajeAsistencia.toFixed(1) + '%'
+      ]],
+      styles: { fontSize: 10, halign: 'center' },
+      headStyles: { fillColor: [41, 128, 185] }
+    });
+
+    const finY = (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY;
+    doc.setFontSize(12);
+    doc.text('Detalle por alumno y día', 14, finY + 10);
+
+    autoTable(doc, {
+      startY: finY + 14,
+      head: [['Fecha', 'Alumno', 'RUT', 'Estado', 'Justificación']],
+      body: detalle.map((d) => [d.fecha, d.nombreEstudiante, d.rutEstudiante, d.estadoAsistencia, d.justificacionAsistencia ?? '—']),
+      styles: { fontSize: 8 },
+      headStyles: { fillColor: [41, 128, 185] },
+      columnStyles: {
+        0: { cellWidth: 24 },
+        2: { cellWidth: 26 },
+        3: { cellWidth: 26 }
+      }
+    });
+
+    doc.save(`ResumenAsistencia_${curso.gradoCurso}${curso.seccionCurso}_${resumen.desde}_${resumen.hasta}.pdf`);
+  }
+
+  resumenAsistenciaExcel(resumen: ReporteAsistenciaResumen, detalle: ReporteAsistenciaDetalle[], curso: Curso): void {
+    const filasResumen = [{
+      'Período': `${resumen.desde} al ${resumen.hasta}`,
+      'Total registros': resumen.totalRegistros,
+      'Presentes': resumen.totalPresentes,
+      'Ausentes': resumen.totalAusentes,
+      'Justificados': resumen.totalJustificados,
+      '% Asistencia': parseFloat(resumen.porcentajeAsistencia.toFixed(1))
+    }];
+
+    const hojaResumen = XLSX.utils.json_to_sheet(filasResumen);
+    hojaResumen['!cols'] = [{ wch: 24 }, { wch: 16 }, { wch: 12 }, { wch: 12 }, { wch: 14 }, { wch: 14 }];
+
+    const filasDetalle = detalle.map((d) => ({
+      'Fecha': d.fecha,
+      'Alumno': d.nombreEstudiante,
+      'RUT': d.rutEstudiante,
+      'Estado': d.estadoAsistencia,
+      'Justificación': d.justificacionAsistencia ?? ''
+    }));
+
+    const hojaDetalle = XLSX.utils.json_to_sheet(filasDetalle);
+    hojaDetalle['!cols'] = [{ wch: 14 }, { wch: 36 }, { wch: 14 }, { wch: 14 }, { wch: 40 }];
+
+    const libro = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(libro, hojaResumen, 'Resumen');
+    XLSX.utils.book_append_sheet(libro, hojaDetalle, 'Detalle');
+    XLSX.writeFile(libro, `ResumenAsistencia_${curso.gradoCurso}${curso.seccionCurso}_${resumen.desde}_${resumen.hasta}.xlsx`);
   }
 
   // ── Conducta ────────────────────────────────────────────────────────────────

@@ -1,17 +1,13 @@
 import { Component, OnChanges, inject, signal, input } from '@angular/core';
+import { Observable } from 'rxjs';
 import { ServicioAsistencia } from '../../../services/asistencia.service';
 import { ExportarService } from '../../../services/exportar.service';
 import { Curso } from '../../../models/academico.models';
-import { ReporteAsistenciaDia, ReporteAsistenciaResumen, ETIQUETAS_ESTADO_ASISTENCIA } from '../../../models/asistencia.models';
+import { ReporteAsistenciaDia, ReporteAsistenciaDetalle, ReporteAsistenciaResumen, ETIQUETAS_ESTADO_ASISTENCIA } from '../../../models/asistencia.models';
+import { periodoSemestreActual, primerSemestre, segundoSemestre, TipoPeriodo } from '../reportes-fechas.util';
 
 function hoyIso(): string {
   return new Date().toISOString().slice(0, 10);
-}
-
-function haceUnaSemanaIso(): string {
-  const fecha = new Date();
-  fecha.setDate(fecha.getDate() - 7);
-  return fecha.toISOString().slice(0, 10);
 }
 
 @Component({
@@ -36,11 +32,15 @@ export class ReporteAsistenciaTab implements OnChanges {
   readonly errorDia = signal<string | null>(null);
 
   // ── Resumen / % asistencia ──────────────────────────────────────────────────
-  readonly desde = signal(haceUnaSemanaIso());
-  readonly hasta = signal(hoyIso());
+  private readonly periodoPorDefecto = periodoSemestreActual();
+  readonly tipoPeriodo = signal<TipoPeriodo | 'personalizado'>(this.periodoPorDefecto.tipo);
+  readonly desde = signal(this.periodoPorDefecto.desde);
+  readonly hasta = signal(this.periodoPorDefecto.hasta);
   readonly resumen = signal<ReporteAsistenciaResumen | null>(null);
   readonly cargandoResumen = signal(false);
   readonly errorResumen = signal<string | null>(null);
+
+  readonly exportandoResumen = signal(false);
 
   ngOnChanges(): void {
     this.cargarDia();
@@ -52,12 +52,27 @@ export class ReporteAsistenciaTab implements OnChanges {
     this.cargarDia();
   }
 
+  onTipoPeriodoChange(evento: Event): void {
+    const valor = (evento.target as HTMLSelectElement).value as TipoPeriodo | 'personalizado';
+    this.tipoPeriodo.set(valor);
+    if (valor === 'personalizado') {
+      return;
+    }
+    const anio = new Date().getFullYear();
+    const { desde, hasta } = valor === '1' ? primerSemestre(anio) : segundoSemestre(anio);
+    this.desde.set(desde);
+    this.hasta.set(hasta);
+    this.cargarResumen();
+  }
+
   onDesdeChange(evento: Event): void {
     this.desde.set((evento.target as HTMLInputElement).value);
+    this.tipoPeriodo.set('personalizado');
   }
 
   onHastaChange(evento: Event): void {
     this.hasta.set((evento.target as HTMLInputElement).value);
+    this.tipoPeriodo.set('personalizado');
   }
 
   cargarDia(): void {
@@ -92,6 +107,10 @@ export class ReporteAsistenciaTab implements OnChanges {
     });
   }
 
+  private obtenerDetallePeriodo(): Observable<ReporteAsistenciaDetalle[]> {
+    return this.servicio.reporteDetallePeriodoPorCurso(this.curso().id, this.desde(), this.hasta());
+  }
+
   etiquetaEstado(estado: string): string {
     return this.etiquetasEstado[estado as keyof typeof ETIQUETAS_ESTADO_ASISTENCIA] ?? estado;
   }
@@ -102,5 +121,37 @@ export class ReporteAsistenciaTab implements OnChanges {
 
   exportarExcel(): void {
     this.exportar.asistenciaExcel(this.reporteDia(), this.curso(), this.fecha());
+  }
+
+  exportarResumenPdf(): void {
+    const resumen = this.resumen();
+    if (!resumen) return;
+    this.exportandoResumen.set(true);
+    this.obtenerDetallePeriodo().subscribe({
+      next: (detalle) => {
+        this.exportar.resumenAsistenciaPdf(resumen, detalle, this.curso());
+        this.exportandoResumen.set(false);
+      },
+      error: () => {
+        this.errorResumen.set('No se pudo generar el detalle para exportar.');
+        this.exportandoResumen.set(false);
+      }
+    });
+  }
+
+  exportarResumenExcel(): void {
+    const resumen = this.resumen();
+    if (!resumen) return;
+    this.exportandoResumen.set(true);
+    this.obtenerDetallePeriodo().subscribe({
+      next: (detalle) => {
+        this.exportar.resumenAsistenciaExcel(resumen, detalle, this.curso());
+        this.exportandoResumen.set(false);
+      },
+      error: () => {
+        this.errorResumen.set('No se pudo generar el detalle para exportar.');
+        this.exportandoResumen.set(false);
+      }
+    });
   }
 }
